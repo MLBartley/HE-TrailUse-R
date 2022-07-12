@@ -1,0 +1,220 @@
+---
+title: "Overview of Data Sources"
+author: "Meridith L. Bartley"
+date: July 7, 2022
+header-includes:
+  - \usepackage{booktabs}
+  - \usepackage{caption}
+  - \usepackage{longtable}
+  - \usepackage{tabu}
+  - \usepackage{floatrow}
+  - \usepackage{subfig}
+  - \usepackage{lineno}
+  - \floatsetup[table]{capposition=top}
+  - \usepackage{pdflscape}
+  - \newcommand{\blandscape}{\begin{landscape}}
+  - \newcommand{\elandscape}{\end{landscape}}
+output:
+  bookdown::pdf_document2: default  # fig_caption: yes
+  bookdown::html_document2: default
+# extra_dependencies: "subfig"
+---
+
+```{r, echo=FALSE, message = F}
+library(ggplot2) #plots
+library(here) #relative file paths
+library(raster) #plotting counter location maps
+library(magrittr)
+
+# load packages
+
+#helps to format this document 
+#by default the included code chunks do not appear in the report view
+knitr::opts_chunk$set(echo = F, 
+                      eval = F,
+                      message = F, 
+                      cache=TRUE, 
+                      warning=FALSE, 
+                      error=FALSE, 
+                      root.dir = normalizePath(".."))
+
+`%notin%` <- Negate(`%in%`) #useful for exploring data
+
+source(here::here("scripts/00.01-LoadData.R")) #loads + cleans data
+
+
+```
+
+\linenumbers
+
+The goal of this consulting project is to develop a predictive model of trail use. The aim is to inform policy/methods adopted by land management agencies (Forest Service); also good for local decision makers.
+
+```{r}
+## number of trails (by trailname) for each source of data
+length(unique(trail_count$trailname))
+length(unique(strava_day$trailname))
+length(unique(trail_char$trailname))
+length(unique(c(strava_day$trailname, 
+                trail_count$trailname, 
+                trail_char$trailname)))
+
+# which trails have counter deployed?
+#note that some trails have multiple counter locations as indicated by 
+#subseciton name (e.g. Bridger Ridge has M to Baldy AND steep way)
+unique(trail_count$trailname)
+unique(trail_count$countername)
+
+##how many trails (by trailname) in Stava data but not Counter data?
+table(unique(strava_day$trailname) %notin% unique(trail_count$trailname))
+
+##hour many trails in Counter data not in Stava data?
+table(unique(trail_count$trailname) %notin% unique(strava_day$trailname))
+
+#which trails are only in Stava data?
+unique(strava_day$trailname)[which(unique(strava_day$trailname) %notin% unique(trail_count$trailname))]
+
+#which trails are only in Counter data?
+unique(trail_count$trailname)[which(unique(trail_count$trailname) %notin% unique(strava_day$trailname))]
+
+#all trail names combined 
+unique(c(strava_day$trailname, trail_count$trailname, 
+         trail_char$trailname))
+```
+
+For our analysis, we will use count data obtained from trail counters deployed at a subset (`r length(unique(trail_count$counterid))`) of all trails (`r length(unique(c(strava_day$trailname, trail_count$trailname, trail_char$trailname)))`) in the Bridger Mountains outside of Bozeman, MT. These data will be used to create a predictive model for trail use over time for all trails in the Bridger Mountain range. 
+
+# Sources of Data
+
+1.  Headwaters Economics Counter Data
+2.  Strava Data (aggregated)
+3.  Weather covariate
+4.  Trail characteristics
+
+## Counter Data
+
+From Headwaters Economics website:
+
+> These data were collected using infrared counters rotated across 20 trails throughout the Bridgers.  The counters record a use each time the beam is broken and were installed to minimize inaccurate counts from dogs or vegetation. Because this method measures total traffic, on a trail where use predominately is out-and-back the number of users will be approixmately half of the total traffic. Counters were installed for anywhere from 13 to 61 days, with an average of 29 days at each site. To ensure sufficient data were collected, counters were installed longest on trails that were more remote or had relatively low use. 
+
+In Figure \@ref(fig:counter-byid)
+
+
+See Figure \@ref(fig:counter-locations) for locations of trail cameras. 
+
+```{r counter table, eval = T}
+trail_table <- trail_count %>% 
+  dplyr::group_by(counterid, trailname, 
+                  subsectionname
+                  ) %>% 
+  dplyr::mutate( "start" = min(date),
+                   "end" = max(date)) %>%
+  dplyr::summarise(count = sum(count),
+                   start = format(min(start), "%m-%d"), #the min function here is just pulling off one of multiple values of the same date
+                   end = format(min(end), "%m-%d"))
+
+knitr::kable(trail_table, 
+             caption = "Total Number of Trail Camera Counts (2021)")
+
+```
+
+```{r counter-byid, eval = T, fig.cap= "Timeseries plots of daily trail camera counts over time in the Bridger Mountains."}
+
+knitr::include_graphics(path = here("output/figures/Counter_byID_TS.pdf"))
+
+```
+
+```{r counter-locations, eval=T, fig.cap="Trail Camera Locations in Bridgers"}
+
+states    <- c('Montana')
+us <- raster::getData("GADM",country="USA",level=1)
+us.states <- us[us$NAME_1 %in% states,]
+ xlim <- c(-111.25, -110.75)
+ ylim <- c(45.7,46)
+
+ggplot2::ggplot(us.states, aes(x=long, y=lat,group=group))+
+    geom_path()+
+    labs(title='Bridgers Trail Counter Camera Locations') +
+    coord_map(xlim=xlim, ylim=ylim, project='mercator') +
+    geom_point(aes(x=counter_long,y=counter_lat, 
+                   color = trailname
+                   # shape = as.factor(Forest)
+                   ),
+               # color='black',fill='gray',
+               data=trail_count, 
+               shape=21,
+               alpha=1, group = 1) + 
+    labs(x = "Longitude", y = "Latitude", size = 20) +
+    theme(axis.text = element_text(size = rel(1.25)),
+          axis.title = element_text(size = rel(1.25)),
+          plot.title = element_text(size = rel(2))) +
+    theme_bw()
+
+ggsave(filename = here::here("output/figures/CounterLocationMap.pdf"))
+ggsave(filename = here::here("output/figures/CounterLocationMap.png"))
+```
+
+
+## Strava Data
+
+Strava count data are made available through Strava Metro. Data are binned (intervals of 5 with ceiling rounding) and aggregated on multiple scales (daily, monthly, annual). Counts are available as "total trips" and "total people". Total trips should always be larger than the total people count as people sometimes make multiple passes of a single trail (e.g. M laps). Strava trails are subdivided into "edges". Edge IDs (for the trailhead edge?) are available in the Counter data. Strava count data are available for the entire year of 2021 (not just summer monitoring as in the counter data). These data also include the overarching trail name and number (e.g. 511 - Bridger Foothills) that also correspond to the counter data provided by HE. 
+
+It is important to note that when considering Strava data at the Trail scale (rather than edge scale) you are propagating rounding errors for each segment forward (+_ 1-4 for each edge?). Similarly, aggregating the data in the daily dataframe to a monthly timescale will likely not match the information provided in the monthly dataframe.  
+
+### Join IDs
+
+```{r strava table, eval = T}
+strava_table <- strava_day %>% 
+  dplyr::group_by(trailname
+                  ) %>% 
+  dplyr::mutate( "start" = min(timeframe),
+                   "end" = max(timeframe)) %>%
+  dplyr::summarise(count = sum(totaltrips),
+                   start = format(min(start), "%m-%d"), #the min function here is just pulling off one of multiple values of the same date
+                   end = format(min(end), "%m-%d"))
+
+knitr::kable(strava_table, 
+             caption = "Total Number of Strava Counts (2021)")
+
+```
+
+## Weather Covariates
+
+The following weather covariates are available on a daily basis:
+
+  1. Precipitation (in.)
+  2. Temperature Max (degrees Fahrenheit)
+  3. Temperature Min (degrees Fahrenheit)
+  4. Mean Air Quality (AQI) 
+  5. Mean PM_25 Concentration (micrograms per cubic meter)
+
+These data do not vary spatially only temporally (i.e. the resolution is not fine enough to parse out different weather between trails on a given day).
+
+Missing data (days):
+ 
+ * Precipitation: `r length(which(is.na(weather$precipitation_in) ==T))`
+ * Max Temp: `r length(which(is.na(weather$temp_max_f) ==T))`
+ * Min Temp: `r length(which(is.na(weather$temp_min_f) ==T))`
+ * AQI: `r length(which(is.na(weather$temp_min_f) ==T))`
+ * Particulate Matter: `r length(which(is.na(weather$temp_min_f) ==T))`
+
+```{r covariate plots, eval = T}
+
+knitr::include_graphics(here::here("output/figures/weatherplots.pdf"))
+
+```
+
+
+# Questions
+
+1.  At what resolution is prediction desired? (e.g. at trail segment level or at entire trail level. The latter is more likely with available data.)
+2. To confirm: some trail/subsections have multiple cameras deployed?
+3. Have the count numbers for the deployed cameras already been halved for out-and-back trails? Are there any loop trails?
+4. To confirm: no outlier counter data in this dataset have been altered? 
+5. Is there data for trail length (or trail segment/edge length for Strava)?
+6. Is there hourly information for the trail counter data? Also information for total elevation change? 
+7. Do the edge IDs in trail_count correspond to the trailhead edge segments?
+8. Shapefile with (coarse scale - full trail no edges) full trail location?
+9. If a trail use camera was deployed through the end of 2021
+
+Future: how many people double track hikes with Strava and AllTrails. (likely more often for long, technical trails that require navigation)
+
