@@ -165,6 +165,10 @@ strava_day_TSplot_trips <- strava_day %>%
 
 strava_day_TSplot_trips
 
+ggsave(filename = here::here("output/figures/Strava_day_TS_bytrip.pdf"), 
+       plot = strava_day_TSplot_trips
+)
+
 strava_day_TSplot_people <- strava_day %>% 
   dplyr::group_by(timeframe, trailname) %>% 
   dplyr::summarise(total_count = max(totalpeople)) %>%
