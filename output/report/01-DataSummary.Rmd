@@ -251,14 +251,40 @@ To request: total trail distance and elevation (gain/change?)
 # Questions
 
 1. At what resolution is prediction desired? (e.g. at trail segment level or at entire trail level. The latter is more likely with available data.)
+
+> We want to aim for prediction at the "subsection" level. There might be multiple subsections along a trail and multiple Strava "edges" within a subsection. 
+
 2. Have the count numbers for the deployed cameras already been halved for out-and-back trails? Are there any loop trails?
+
+> Counts have not been halved or adjusted in any way. Shouldn't be any loop trails (and thus no out and back double counts). There is a subset of trail counters that have directional information. The main adjustment is that the days when the trail cameras were deployed/removed are not included as they do not represent an entire day's count. 
+
 3. To confirm: no outlier counter data in this dataset have been altered? 
+
+> Correct. 
+
 4. Is there data for trail length (or trail segment/edge length for Strava)?  Also information for total elevation change? 
+
+> This information will be included/available in the shapefile data to be sent by Tara. 
+
 5. Is there hourly information for the trail counter data?
+
+> Yes, at a subsection of trail cameras. Megan sent this data after Week 1 chat. 
+
 6. Do the edge IDs in trail_count correspond to the trailhead edge segments?
+
+> No, they correspond to the edge segment where the trail camera is located. 
+
 7. Shapefile with (coarse scale - full trail no edges) full trail location?
-8. Need to think about time scales for different trails and counter data vs strava data. 
-9.  
+
+> Tara will send shapefile. 
+
+8. Need to think about time scales for different trails and counter data vs strava data.
+
+New Questions
+
+9. If Strava data has a missing date, does that imply that the trail count is zero (i.e. nobody used Strava to track an activity on that trail/edges for a given day)?
+
+
 
 Future: how many people double track hikes with Strava and AllTrails. (likely more often for long, technical trails that require navigation)
 

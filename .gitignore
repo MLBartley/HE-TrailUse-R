@@ -8,3 +8,6 @@
 # knitr and R markdown default cache directories
 *_cache/
 /cache/
+
+# R package: bookdown caching files
+/*_files/
