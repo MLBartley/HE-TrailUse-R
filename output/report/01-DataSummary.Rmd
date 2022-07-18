@@ -20,7 +20,8 @@ output:
 # extra_dependencies: "subfig"
 ---
 
-```{r, echo=FALSE, message = F}
+```{r, echo=FALSE, message = F, warning = F}
+
 library(ggplot2) #plots
 library(here) #relative file paths
 library(knitr) #nicer formated tables in report (pdf)
@@ -42,7 +43,7 @@ knitr::opts_chunk$set(echo = F,
 
 `%notin%` <- Negate(`%in%`) #useful for exploring data
 
-source(here::here("scripts/00.01-LoadData.R")) #loads + cleans data
+source(here::here("scripts/01-LoadData.R")) #loads + cleans data
 
 
 ```
@@ -107,6 +108,17 @@ Notable:
   * Two counters (ID #s 26 and 27) are located along the Corbly Gulch trail for nearly non-overlapping time periods. 
   * Counter ID 25 seems to only have been deployed for a single day (South Fork Flathead Creek)
   * Counter ID 24 was only deployed for 3 days (Shafthouse Hill - Upper Shafthouse). 
+  
+Outcome:
+
+After discussion with Megan Lawson, we have decided to remove the following trails (numbers refer to counter IDs) from this analysis due to low deployment times and possibly unreliable camera recordings:
+
+  * #1 - Fairy Lakeshore
+  * #16 - Felix Canyon
+  * #24 - Shafthouse Hill (Upper Shafthouse)
+  * #25 - South Fork Flathead Creek.
+  
+I have removed these locations/counters from the following plots to allow for better viewing of 
 
 See Figure \@ref(fig:counter-locations) for locations of trail cameras. 
 

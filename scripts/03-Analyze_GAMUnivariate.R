@@ -17,15 +17,20 @@
 
 # load packages -----------------------------------------------------------
 library(dplyr)
+library(here)
+library(itsadug)
+library(lubridate)
+library(ggplot2)
+library(magrittr)
 library(mgcv)
 
 
 # Load Data ---------------------------------------------------------------
-source("scripts/01-LoadData.R")
+source(here("scripts/01-LoadData.R"))
 
 ## Focusing on Middle Cottenwood Trail (Trail # 586, Counter ID # 31)
 
-singleTrail <- trail_count %>%
+singleCount <- trail_count %>%
   dplyr::filter(counterid == 31)
 
 singleStrava <- strava_day %>%
@@ -43,7 +48,7 @@ singleStrava <- strava_day %>%
 
 ## Combine Camera Counts, Strava Counts, Weather, Trail Characteristics
 
-singleTrail_CountsCovariates <- singleTrail %>%
+singleTrail <- singleCount %>%
   dplyr::left_join(
     singleStrava,
     by = c(
@@ -56,16 +61,16 @@ singleTrail_CountsCovariates <- singleTrail %>%
   dplyr::left_join(weather, by = c("date" = "date"))
 
 ## Add in a Time variable
-# singleTrail_CountsCovariates <- transform(singleTrail_CountsCovariates, 
+# singleTrail <- transform(singleTrail, 
 #                                           Time = as.numeric(date) / 1000)
 
-singleTrail_CountsCovariates$yday <- lubridate::yday(singleTrail_CountsCovariates$date)
+singleTrail$yday <- lubridate::yday(singleTrail$date)
 
 # Note: Strava is missing several days of data. What does this mean?
 
 # visualize single trail counts -------------------------------------------
 
-MidCotton_TS <- singleTrail_CountsCovariates %>% 
+MidCotton_TS <- singleTrail %>% 
   dplyr::group_by(date, trailname) %>%
   dplyr::summarise(total_count = max(count), 
                    total_trips = max.count) %>%
@@ -93,23 +98,55 @@ ggsave(
 
 gamm_uncorr <- gamm(count ~ s(yday) + 
                       s(as.integer(week), bs = 'cc', k = 8) +
-                      s(as.integer(wday), bs = "cc", k = 7) +
+                      s(as.integer(wday), bs = "ps", k = 7) +
                       s(daily_aqi_value) + 
+                      s(temp_max_f) +
                       max.count
                     ,
-                data = singleTrail_CountsCovariates, 
+                data = singleTrail, 
                 family = poisson)
 
 summary(gamm_uncorr$gam)
 
 layout(matrix(1:6, ncol = 2))
-plot(gamm_uncorr$gam, scale = 0)
+plot(gamm_uncorr$gam, scale = 0, shade = T)
 layout(1)
 
+# check for autocorrelation
 layout(matrix(1:2, ncol = 2))
 acf(resid(gamm_uncorr$lme), lag.max = 36, main = "ACF")
 pacf(resid(gamm_uncorr$lme), lag.max = 36, main = "pACF")
 layout(1)
+
+#check distribution and autocorrelation structure of the residuals
+
+gam.check(gamm_uncorr$gam)
+
+# acf(resid(gamm_uncorr$gam), plot = F)
+
+# plot fitted values
+
+  ## note there are no fitted values where strava max.count = NA
+real.vs.fitted <- data.frame(matrix(ncol = 3, 
+                                    nrow = (length(singleTrail$count) + 
+                                      length(gamm_uncorr$gam$fitted.values))))
+colnames(real.vs.fitted) <- c("count", "date", "type")
+real.vs.fitted$count <- c(singleTrail$count, 
+                              gamm_uncorr$gam$fitted.values)
+real.vs.fitted$date <- c(singleTrail$date,
+                         singleTrail[-(c(which(is.na(singleTrail$max.count)), 
+                                       which(is.na(singleTrail$temp_max_f)))), ]$date)
+  
+real.vs.fitted$type <- c(rep("Real", nrow(singleTrail)),
+                         rep("Fitted", length(gamm_uncorr$gam$fitted.values)))
+  
+  ggplot(data = real.vs.fitted, aes(date, 
+                           count, group = type, 
+                           colour = type)) +
+  geom_line(size = 0.8) +
+  theme_bw() +
+  labs(x = "Time", y = "Trail Use",
+       title = "Fit from GAM n.1")
 
 
 # gamm with correlated errors ---------------------------------------------
@@ -119,39 +156,44 @@ layout(1)
               optimMethod="L-BFGS-B")
  
  ## AR(1)
- m.AR1 <- gamm(count ~ 
-              # s(yday) +
-              s(as.integer(week), bs = 'cc', k = 8) +
-              s(as.integer(wday), bs = "cc", k = 7) +
-              s(daily_aqi_value) + 
-              max.count,
-            data = singleTrail_CountsCovariates, 
-            family = poisson,
-            # correlation = corARMA(p = 1, q = 0),
-            correlation = corAR1(form = ~ yday),
-            control = ctrl)
+  m.AR1 <- gamm(count ~ 
+                  # s(yday) +
+                  s(as.integer(week), bs = 'cc', k = 8) +
+                  s(as.integer(wday), bs = "ps", k = 7) +
+                  s(daily_aqi_value) + 
+                  s(temp_max_f) +
+                  max.count,
+                data = singleTrail, 
+                family = poisson,
+                # correlation = corARMA(p = 1, q = 0),
+                correlation = corAR1(form = ~ yday),
+                control = ctrl)
  
- ## AR(1)
- m1 <- gamm(count ~
-              # s(yday) + 
-              s(as.integer(week), bs = 'cc', k = 8) +
-              s(as.integer(wday), bs = "cc", k = 7) +
-              s(daily_aqi_value) + 
-              max.count,
-            data = singleTrail_CountsCovariates, 
-            family = poisson,
-            correlation = corARMA(form = ~ 1|yday, p = 1, q = 0),
-            # correlation = corAR1(),
-            control = ctrl)
+
+ 
+ ## ARMA(1)
+  m1 <- gamm(count ~
+               # s(yday) + 
+               s(as.integer(week), bs = 'cc', k = 8) +
+               s(as.integer(wday), bs = "ps", k = 7) +
+               s(daily_aqi_value) + 
+               s(temp_max_f) +
+               max.count,
+             data = singleTrail, 
+             family = poisson,
+             correlation = corARMA(form = ~ 1|yday, p = 1, q = 0),
+             # correlation = corAR1(),
+             control = ctrl)
  
  ## AR(2)
  m2 <- gamm(count ~
               # s(yday) + 
               s(as.integer(week), bs = 'cc', k = 8) +
-              s(as.integer(wday), bs = "cc", k = 7) +
-              s(daily_aqi_value) + 
+              s(as.integer(wday), bs = "ps", k = 7) +
+              s(daily_aqi_value) +
+              s(temp_max_f) +
               max.count,
-            data = singleTrail_CountsCovariates, 
+            data = singleTrail, 
             family = poisson,
             correlation = corARMA(form = ~ 1|yday, p = 2, q = 0),
             # correlation = corAR1(),
@@ -163,8 +205,9 @@ m3 <- gamm(count ~
              s(as.integer(week), bs = 'cc', k = 8) +
              s(as.integer(wday), bs = "cc", k = 7) +
              s(daily_aqi_value) + 
+             s(temp_max_f) +
              max.count,
-           data = singleTrail_CountsCovariates, 
+           data = singleTrail, 
            family = poisson,
            correlation = corARMA(form = ~ 1|yday, p = 3, q = 0),
            control = ctrl)
@@ -178,9 +221,9 @@ summary.gam(m2$gam)
 summary.gam(m3$gam)
 
 layout(matrix(1:2, ncol = 2))
-res <- resid(m1$lme, type = "normalized")
-acf(res, lag.max = 36, main = "ACF - AR(3) errors")
-pacf(res, lag.max = 36, main = "pACF- AR(3) errors")
+res <- resid(m.AR1$lme, type = "normalized")
+acf(res, lag.max = 36, main = "ACF - AR(1) errors")
+pacf(res, lag.max = 36, main = "pACF- AR(1) errors")
 layout(1)
 
 

@@ -14,9 +14,10 @@
 ##      each subsequent segment count is included in previous ones. 
 ## ---------------------------
 
-source("scripts/00.01-LoadData.R") #loads and cleans data
+source("scripts/01-LoadData.R") #loads and cleans data
 
 # load packages -----------------------------------------------------------
+library(devtools) #useful for installing packages from github
 library(dplyr) #lots of great data manipulation functions
 library(ggplot2) #needed for plots
 library(gridExtra) #arrange multiple plots in single panel
@@ -25,8 +26,8 @@ library(scales)   # to access breaks/formatting functions
 library(tabplot) # super cool table visualization
 
 ## needed to install tabplot from Github (workaround)
-#devtools::install_github("edwindj/ffbase", subdir="pkg")
-#devtools::install_github("mtennekes/tabplot")
+# devtools::install_github("edwindj/ffbase", subdir="pkg")
+# devtools::install_github("mtennekes/tabplot")
 
 
 # plot tabplot for each datasource ----------------------------------------
@@ -40,8 +41,6 @@ tabplot::tableplot(trail_char[, 1:10])
 tabplot::tableplot(trail_char[, 11:20])
 
 tabplot::tableplot(weather[, -1])
-
-
 
 # count histograms --------------------------------------------------------
 
@@ -237,6 +236,8 @@ count_ID_TSplot <- trail_count %>%
        subtitle = "2021",
        fill = "Trail Name")
 
+count_ID_TSplot
+
 ggsave(filename = here("output/figures/Counter_byID_TS.pdf"))
 
 # plot Counter timeseries by trail -------------------------------------------------
@@ -360,7 +361,26 @@ strava_count_join %>%
 
 # Counter day of week ----------------------------------------
 
-
+trail_hourly %>% 
+  group_by(hour, wday, trailname) %>%
+  summarise(total_count = sum(count, na.rm = TRUE)) %>%
+  group_by(trailname) %>%
+  mutate(pct = total_count/sum(total_count)) %>%
+  ggplot(aes(x = hour, y = pct, 
+             color = trailname,
+             fill = trailname)) +
+  geom_line() +
+  geom_area(alpha = 0.25) +
+  facet_grid(wday ~ trailname) +
+  scale_x_continuous(name = "Hour of Day", 
+                     breaks = c(0, 6, 12, 18)) +
+  scale_y_continuous(name = "Percentage of Trail Use
+                     ", labels = scales::percent_format(accuracy=0.1)) + 
+  # scale_fill_manual(values=seattlePalette) +
+  # scale_color_manual(values=seattlePalette) +
+  guides(color='none', fill = 'none') + 
+  labs(title = "Bridgers Trail Traffic Patterns by Hour and Weekday",
+       subtitle = "Data: 2021") 
 
 # Counters vs covariates ------------------------------------------
 
@@ -413,7 +433,7 @@ trail_count_weather %>%
   scale_x_continuous(name = "Max Temperature (Degrees Fahrenheit)") +
   scale_y_continuous(name = "Count") + 
   geom_jitter(alpha = 0.5) + 
-  labs(title = "Comparison of Daily Bridger Trail Traffic to Daily Precipitation (in)",
+  labs(title = "Comparison of Daily Bridger Trail Traffic to Max Temperature",
        color = "Day of Week is Weekend") 
 
 ## trail use
@@ -442,6 +462,10 @@ trail_count_char %>%
   geom_jitter(alpha = 0.5) + 
   labs(title = "Comparison of Daily Bridger Trail Traffic to Travel Time",
        color = "Parking Lot Size") 
+
+
+
+# counter vs strava correlation -------------------------------------------
 
 
 
