@@ -382,6 +382,8 @@ trail_hourly %>%
   labs(title = "Bridgers Trail Traffic Patterns by Hour and Weekday",
        subtitle = "Data: 2021") 
 
+ggsave(filename = here("output/figures/hourly_bydayofweek.pdf"))
+
 # Counters vs covariates ------------------------------------------
 
 ## weather - all trails combined

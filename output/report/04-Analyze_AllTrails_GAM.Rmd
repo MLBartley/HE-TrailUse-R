@@ -1,0 +1,22 @@
+---
+title: "Analysing All Bridger Trails"
+author: "Meridith L. Bartley, PhD"
+date: "`r Sys.Date()`"
+header-includes:
+  - \usepackage{booktabs}
+  - \usepackage{caption}
+  - \usepackage{longtable}
+  - \usepackage{tabu}
+  - \usepackage{floatrow}
+  - \usepackage{subfig}
+  - \usepackage{lineno}
+  - \floatsetup[table]{capposition=top}
+  - \usepackage{pdflscape}
+  - \newcommand{\blandscape}{\begin{landscape}}
+  - \newcommand{\elandscape}{\end{landscape}}
+output:
+  bookdown::pdf_document2: default  # fig_caption: yes
+  bookdown::html_document2: default
+always_allow_html: yes
+---
+

@@ -118,9 +118,9 @@ After discussion with Megan Lawson, we have decided to remove the following trai
   * #24 - Shafthouse Hill (Upper Shafthouse)
   * #25 - South Fork Flathead Creek.
   
-I have removed these locations/counters from the following plots to allow for better viewing of 
+I have removed these locations/counters from the following plots and table.
 
-See Figure \@ref(fig:counter-locations) for locations of trail cameras. 
+<!-- See Figure \@ref(fig:counter-locations) for locations of trail cameras.  -->
 
 ```{r counter-summary, eval = T}
 trail_table <- trail_count %>% 
@@ -151,7 +151,7 @@ knitr::include_graphics(path = here("output/figures/Counter_byID_TS.pdf"))
 
 ```
 
-```{r counter-locations, eval=T, fig.cap="Trail Camera Locations in Bridgers"}
+```{r counter-locations, eval=F, fig.cap="Trail Camera Locations in Bridgers"}
 
 states    <- c('Montana')
 us <- raster::getData("GADM",country="USA",level=1)
@@ -179,6 +179,16 @@ ggplot2::ggplot(us.states, aes(x=long, y=lat,group=group))+
 
 ggsave(filename = here::here("output/figures/CounterLocationMap.pdf"))
 ggsave(filename = here::here("output/figures/CounterLocationMap.png"))
+```
+
+### Hourly Data
+
+For each trail counter camera deployed data is provided on a daily scale. Finer resolution data (i.e. hourly counts rather than daily) are available for 17 trails. Note that some of the trails have distinct subsection in 'trail_count' but not in 'trail_hourly'. I'm not sure that we'll need this information. 
+
+The most likely use for these days is a quick look at how daily activity trends look (i.e. are there more hikers in mornings vs afternoon?). However since Strava data is not available on this resolutions it would not be easy to model this trend without a lot of data (i.e. counters deployed for longer amounts of time) to provide information on this trend in any model used. 
+
+```{r hourly, eval= TRUE}
+knitr::include_graphics(path = here("output/figures/hourly_bydayofweek.pdf"))
 ```
 
 ## Strava Data
@@ -299,6 +309,14 @@ New Questions
 
 
 Future: how many people double track hikes with Strava and AllTrails. (likely more often for long, technical trails that require navigation)
+
+
+# Next Steps
+
+1. Pertinent information/plots/tables from this Data Summary will be provided in the final report along with any major decisions about data inclusion. 
+2. Explore model options (namely classic time series approach vs Generalized Additive (Mixture) Model (GAMM) that incorporates temporal autocorrelation.)
+3. Write up general overview of proposed model. What does it do? What did we choose it? What are its limitations and advantages?
+4. Apply proposed model to a single trail's worth of data. 
 
 <!-- # Code Appendix -->
 
