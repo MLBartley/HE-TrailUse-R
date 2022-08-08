@@ -1,26 +1,6 @@
----
-title: "Overview of Data Sources"
-author: "Meridith L. Bartley"
-date: July 7, 2022
-header-includes:
-  - \usepackage{booktabs}
-  - \usepackage{caption}
-  - \usepackage{longtable}
-  - \usepackage{tabu}
-  - \usepackage{floatrow}
-  - \usepackage{subfig}
-  - \usepackage{lineno}
-  - \floatsetup[table]{capposition=top}
-  - \usepackage{pdflscape}
-  - \newcommand{\blandscape}{\begin{landscape}}
-  - \newcommand{\elandscape}{\end{landscape}}
-output:
-  bookdown::pdf_document2: default  # fig_caption: yes
-  bookdown::html_document2: default
-# extra_dependencies: "subfig"
----
+#  Data Overview
 
-```{r, echo=FALSE, message = F, warning = F}
+```{r, echo=FALSE, message = F, warning = F, eval = T}
 
 library(ggplot2) #plots
 library(here) #relative file paths
@@ -48,11 +28,9 @@ source(here::here("scripts/01-LoadData.R")) #loads + cleans data
 
 ```
 
-\linenumbers
+<!-- \linenumbers -->
 
-The goal of this consulting project is to develop a predictive model of trail use. The aim is to inform policy/methods adopted by land management agencies (Forest Service); also good for local decision makers.
-
-```{r}
+```{r, eval = T}
 ## number of trails (by trailname) for each source of data
 length(unique(trail_count$trailname))
 length(unique(strava_day$trailname))
@@ -84,22 +62,27 @@ unique(c(strava_day$trailname, trail_count$trailname,
          trail_char$trailname))
 ```
 
-For our analysis, we will use count data obtained from trail counters deployed at a subset (`r length(unique(trail_count$counterid))`) of all trails (`r length(unique(c(strava_day$trailname, trail_count$trailname, trail_char$trailname)))`) in the Bridger Mountains outside of Bozeman, MT. These data will be used to create a predictive model for trail use over time for all trails in the Bridger Mountain range. 
+For our analysis, we used trail use count data obtained from trail counters deployed along select multi-use recreational trails in the Bridger Mountains outside of Bozeman, MT. These data will be used to create a predictive model for trail use over time for all trails in the Bridger Mountain range. 
 
-# Sources of Data
+## Sources of Data
+
+We predict trail use from trail counters, weather, trail
+characteristics, and novel data sources provided by Headwaters Economics. The provided data sources are as follows:
 
 1.  Headwaters Economics Counter Data
 2.  Strava Data (aggregated)
 3.  Weather covariates
 4.  Trail characteristics
 
-## Counter Data
+### Counter Data
+
+Trail use camera counters were deployed at a subset (`r length(unique(trail_count$counterid))`) of all trails (`r length(unique(c(strava_day$trailname, trail_count$trailname, trail_char$trailname)))`) in the Bridger Mountains for [MIN DEPLOYMENT] to [MAX DEPLOYMENT] days. Metadata on trail camera hardware inclues the counter owner. Metadata on trail camera location includes latitude and longitude. [See FIGURE for locations of trail counters in the Bridger Mountains].
 
 From Headwaters Economics website:
 
 > These data were collected using infrared counters rotated across 20 trails throughout the Bridgers.  The counters record a use each time the beam is broken and were installed to minimize inaccurate counts from dogs or vegetation. Because this method measures total traffic, on a trail where use predominately is out-and-back the number of users will be approixmately half of the total traffic. Counters were installed for anywhere from 13 to 61 days, with an average of 29 days at each site. To ensure sufficient data were collected, counters were installed longest on trails that were more remote or had relatively low use. 
 
-In Figure \@ref(fig:counter-byid) we have time series plots for daily trail use counts separated by deployed counter IDs (fill color by trail names). Several counters seem to be placed on the same trails and capturing similar trail use information. For example, counter IDs 4, 5, 6, 7, and 9 are all located on Bridger Ridge and while the total counts for each counters are different (see Table \@ref(tab:counter-summary)) the time series plots show very similar patterns of use of time indicating non-independent counts. We need to be very clear about the scale of interest, the delineation between trails and trail segments, and how we use the different counters in any model. Should just the max value for a trail be used per day (assuming other counters pick up a subset of those total people/trips further down a trail)?
+In Figure \@ref(fig:counter-byid) we have time series plots for daily trail use counts separated by deployed counter IDs (fill color by trail names). Several counters are placed along a single trails resulting in the capture of similar (i.e. non-independent) trail use information. For example, counter IDs 4, 5, 6, 7, and 9 are all located on Bridger Ridge and while the total counts for each counters are different (see Table \@ref(tab:counter-summary)) the time series plots show very similar patterns of use of time indicating non-independent counts. We need to be very clear about the scale of interest, the delineation between trails and trail segments, and how we use the different counters in any model. Should just the max value for a trail be used per day (assuming other counters pick up a subset of those total people/trips further down a trail)?
 
 In Table \@ref(tab:counter-summary) we provide a summary of trail use recorded for each counter deployed along trails in the Bridger Mountains. In addition to total counts for each counter, the deployment dates and duration of each trail counter camera (as determined by the first and last date of data provided) and average daily trail use over this deployment duration is reported. 
 
@@ -181,7 +164,7 @@ ggsave(filename = here::here("output/figures/CounterLocationMap.pdf"))
 ggsave(filename = here::here("output/figures/CounterLocationMap.png"))
 ```
 
-### Hourly Data
+#### Hourly Data
 
 For each trail counter camera deployed data is provided on a daily scale. Finer resolution data (i.e. hourly counts rather than daily) are available for 17 trails. Note that some of the trails have distinct subsection in 'trail_count' but not in 'trail_hourly'. I'm not sure that we'll need this information. 
 
@@ -191,7 +174,7 @@ The most likely use for these days is a quick look at how daily activity trends 
 knitr::include_graphics(path = here("output/figures/hourly_bydayofweek.pdf"))
 ```
 
-## Strava Data
+#### Strava Data
 
 Strava count data are made available through Strava Metro. Data are binned (intervals of 5 with ceiling rounding) and aggregated on multiple scales (daily, monthly, annual). Counts are available as "total trips" and "total people". Total trips should always be larger than the total people count as people sometimes make multiple passes of a single trail (e.g. M laps). Strava trails are subdivided into "edges". Edge IDs (for the counter locations which often aligns with the trailhead edge) are available in the Counter data. Strava count data are available for the entire year of 2021 (not just summer monitoring as in the counter data). These data also include the overarching trail name and number (e.g. 511 - Bridger Foothills) that also correspond to the counter data provided by HE. 
 
@@ -226,7 +209,7 @@ knitr::include_graphics(path = here("output/figures/Strava_day_TS_bytrip.pdf"))
 
 
 
-## Weather Covariates
+### Weather Covariates
 
 The following weather covariates are available on a daily basis:
 
@@ -252,7 +235,7 @@ knitr::include_graphics(here::here("output/figures/weatherplots.pdf"))
 
 ```
 
-## Trail Characteristics
+### Trail Characteristics
 
 The following characteristics are provided at the trail level. 
 
@@ -270,7 +253,9 @@ The following characteristics are provided at the trail level.
 
 To request: total trail distance and elevation (gain/change?)
 
-# Questions
+
+
+## Questions
 
 1. At what resolution is prediction desired? (e.g. at trail segment level or at entire trail level. The latter is more likely with available data.)
 
@@ -311,7 +296,7 @@ New Questions
 Future: how many people double track hikes with Strava and AllTrails. (likely more often for long, technical trails that require navigation)
 
 
-# Next Steps
+## Next Steps
 
 1. Pertinent information/plots/tables from this Data Summary will be provided in the final report along with any major decisions about data inclusion. 
 2. Explore model options (namely classic time series approach vs Generalized Additive (Mixture) Model (GAMM) that incorporates temporal autocorrelation.)

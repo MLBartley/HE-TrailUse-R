@@ -1,24 +1,5 @@
----
-title: "Application of GAMM to Middle Cottonwood Trail"
-author: "Meridith L. Bartley, PhD"
-date: "`r Sys.Date()`"
-header-includes:
-  - \usepackage{booktabs}
-  - \usepackage{caption}
-  - \usepackage{longtable}
-  - \usepackage{tabu}
-  - \usepackage{floatrow}
-  - \usepackage{subfig}
-  - \usepackage{lineno}
-  - \floatsetup[table]{capposition=top}
-  - \usepackage{pdflscape}
-  - \newcommand{\blandscape}{\begin{landscape}}
-  - \newcommand{\elandscape}{\end{landscape}}
-output:
-  bookdown::pdf_document2: default  # fig_caption: yes
-  bookdown::html_document2: default
-always_allow_html: yes
----
+
+# Model Choice Explained with Application to Middle Cottonwood Trail
 
 ```{r, echo=FALSE, message=F, warning=F}
 library(dplyr)
@@ -46,7 +27,7 @@ knitr::opts_chunk$set(echo = F,
 
 ```
 
-```{r}
+```{r, eval = T}
 ## Model Checking function
 tsDiagGamm <- function(x, timevar, observed, f = 0.3, type = "normalized") {
   resi <- resid(x$lme, type = type)
@@ -74,7 +55,6 @@ tsDiagGamm <- function(x, timevar, observed, f = 0.3, type = "normalized") {
 }
 ```
 
-# Application to Middle Cottonwood Trail
 
 The aim of this project is to understand and predict the pattern of trail use recorded at multiple multi-use trails in the Bridger Mountains. We want to be able to predict trail use over a full calendar year and in locations where no trail counter data exist, within the Bridgers and nearby trails. In this report we start off with a simple `gam` model and explore gradually more complicated versions which we apply to a single trail (rather than then entire network of trails) so we can focus on understanding the modelling aspect for now.
 
@@ -124,14 +104,17 @@ singleTrail$max.count[which(is.na(singleTrail$max.count))] <- 0
 ## remove unecessary columns
 singleTrail <- singleTrail %>% 
   dplyr::select(-c("counterid",
-                                "trailnumber",
-                                "subsectionname", 
-                                "counterowner",
-                                "th_lat",
-                                "th_long",
-                                "counter_lat", 
-                                "counter_long",
-                                "stravaedgeid2022"))
+                   "trailnumber",
+                   # "subsectionname", 
+                   "counterowner",
+                   "th_lat",
+                   "th_long",
+                   "counter_lat", 
+                   "counter_long",
+                   "stravaedgeid2022", 
+                  "Segment with trail counter"                   
+  )) %>% 
+  dplyr::distinct()
 
 #convert week and wday to integers now
 singleTrail$wday <- as.integer(singleTrail$wday)
@@ -139,7 +122,7 @@ singleTrail$week <- as.integer(singleTrail$week)
 
 
 ## remove rows with NA in temp_min_F (only NA in covariates used in model fitting)
-singleTrail <- singleTrail[-49, ]
+# singleTrail <- singleTrail[-49, ]
 
 
 ## gather strava+covariate data w/out camera counter data for predicting
@@ -181,6 +164,7 @@ The data look like this:
 ```{r data structure, eval = T, echo=T}
 head(singleTrail)
 str(singleTrail)
+summary(singleTrail)
 ```
 
 The times series plot of counter and Strava counts looks like this:
@@ -273,6 +257,13 @@ Here, the parametric $b$ coefficients have been replaced with smooth functions, 
 
 Spline Fun Fact: The term spline comes from the flexible devices used by shipbuilders and draftspersons to draw smooth shapes. Thanks, Wikipedia.
 
+To model a potentially nonlinear smooth or surface, three different smooth functions are available:
+
+ * s() : for modeling a 1-dimensional smooth, or
+for modeling isotropic interactions (variables are measured in same units and on same scale)
+ * te(): for modeling 2- or n-dimensional interaction surfaces of variables that are not isotropic (but see info about d parameter below). Includes ‘main’ effects.
+ * ti(): for modeling 2- or n-dimensional interaction surfaces that do not include the ‘main effects’.
+
 In the above code we fit a `gam` which is non-linear in `yday`, `wday`, and `month` but we also include `max.count` as a linear term. Note that this variable does not have the `s` prefix indicating a (spline based) smoothing term. 
 
 We specified a single basis function for the day of week variable (`wday`). The code `bs="cc"` indicates that we are selecting a cyclic cubic regression spline, which is a penalized cubic regression spine whose ends match up. In the context of day of week we know that Sunday/Saturday would be the 'ends' that 'match' together. If we do not specify any, the default basis function is thin plate splines. They are the default smooth for `s` terms because there is a defined sense in which they are the optimal smoother of any given basis dimension/rank (Wood, 2003). One key advantage of this approach is that it avoids the knot placement problems of conventional regression spline modelling.
@@ -352,6 +343,31 @@ gamm_mod2 <- gamm(count ~ s(yday) +
 
 ```
 
+```{r}
+gamm_mod2_nb <- gamm(count ~ s(yday) + 
+                    s(month, k = 3) +
+                    s(wday, 
+                      bs = "cc", k = 7) +
+                    s(daily_aqi_value) +
+                    s(temp_min_f) +
+                    s(precipitation_in, k = 9) +
+                    max.count,
+                  data = singleTrail, 
+                  family = negbin(1))
+
+
+gamm_mod2_gaus <- gamm(count ~ s(yday) + 
+                    s(month, k = 3) +
+                    s(wday, 
+                      bs = "cc", k = 7) +
+                    s(daily_aqi_value) +
+                    s(temp_min_f) +
+                    s(precipitation_in, k = 9) +
+                    max.count,
+                  data = singleTrail)
+```
+
+
 ### GAMM with additional temporal autocorrelation specification
 
 If we model temporal autocorrelation through temporal terms in the model (as we did in `gamm_mod2`), then the smooth functions of temporal variables (such as `yday`, `wday`, etc) could be already accounting for the temporal structure in the data such that once we consider the model, the observations are independent. Note that it's also possible that the temporal autocorrelation is **not** captured through the terms in the model and additional complexity would be beneficial.
@@ -402,28 +418,114 @@ While both times series regression and GAM's can both be applied to temporal dat
 
 ## Diagnostic Practices
 
-```{r}
-summary(lm_mod)
-summary(glm_mod)
-summary(gam_mod)
-summary(gam_mod2)
-summary(gamm_mod$gam)
-summary(gamm_mod2$gam)
-summary(m.AR1$gam)
+Once a model (or a suite of models) is fit, we need to take a more detailed look at model outputs to learn how to interpret the results of our model-fitting and better understand the relationships between variables.
 
+### Summarize
+
+We start with the `summary()` function which may be applied to a `gam` object in R. Below we have the summary output for our `GAMM` model with explanatory variables.
+
+```{r, summary(), eval = T}
+# summary(lm_mod)
+# summary(glm_mod)
+# summary(gam_mod)
+# summary(gam_mod2)
+# summary(gamm_mod$gam)
+summary(gamm_mod2$gam)
+# summary(m.AR1$gam)
+```
+The first part of the summary describes the model we fit. The "Family" component tells us the model assumes a Poisson distribution of our response, and the "Link" of "log" shows that the model transforms the predictions. 
+
+The next section describes the parametric terms of our model, referring to the linear terms in the model. This section may be familiar from linear modeling. It shows the coefficients for the linear terms in the model, their values, errors, test statistics, and p-values. Asterisks next to the p-values indicate statistical significance. In this case, the model intercept is significant, and the fixed effect of max.count (the number of aggregated/binned Strava trip counts) is also significant at the 0 level.
+
+The next section covers smooth terms. For these smooths the summary for coefficients is not printed. This is because each smooth has coefficients for each basis function. Instead, the first column reads edf, which stands for effective degrees of freedom. This value represents the complexity of the smooth. An edf of 1 is equivalent to a straight line. An edf of 2 is equivalent to a quadratic curve, and so on, with higher edfs describing more wiggly curves. In our summary, all included smooth terms are significant at the 0.001 level. Note that the 'month' term has an edf of 1, indicating the smooth is equivalent to a straight line. The day of year term ('yday') has the highest edf (8.338) and thus highest wiggliness. [COMPARE TO PARTIAL EFFECT PLOTS]
+
+The terms to the right of the EDF column have to do with significance testing for smooths. The Ref.df and F columns are test statistics used in an ANOVA test to test overall significance of the smooth. The result of this test is the p-value to the right. It's important to note that these values are approximate, and it's important to visualize your model to check them.
+
+The R-sq(adj.) does not a straight-forward interpretation of a measure of "proportion of variance explained" in nonlinear regression, and thus can not be employed as an absolute measure of model performance. Deviance explained should be a more generalized measurement of goodness of fit especially for non-gaussian models (such as we have here).
+
+The scale estimate is $\hat{\phi}$ , i.e. this is the value of $\phi$ estimated during model fitting. For the Poisson and Binomial families/distributions, by definition $\phi$=1, but for other distributions this is not the case, including the Gaussian. In the Gaussian case, $\hat{\phi}$  is the residual standard error squared.
+
+### Visualize
+
+After examining the summary, we should visualize our results. This may be accomplished using the `plot()` function, however we choose to use the `gratia` package and it's `draw()` function to produce these plots in ggplot2 rather than base R. 
+
+```{r draw(), eval=T, echo=T}
+# plot(gamm_mod2$gam)
+
+# gratia::draw(gam_mod, residuals = T)
+# gratia::draw(gam_mod2, residuals = T)
+# gratia::draw(gamm_mod, residuals = T)
+gratia::draw(gamm_mod2, residuals = T)
+```
+
+The plots generated by gratias draw()  (or mgcv's plot()) function are partial effect plots. That is, they show the component effect of each of the smooth or linear terms in the model, which add up to the overall prediction. We often want to show data alongside model predictions. These plots aid in this by (1) including covariate values along the bottom axis of the plots and (2) plotting partial residuals (here in light blue) on the plots. Partial residuals are the difference between the partial effect and the data, after all other partial effects have been accounted for. These plots also include shading representing 95% confidence interval for the mean shape of the effect.
+
+### GAM Check
+
+[add lots of GAMM caveats]
+
+Running gam.check() on a model provides several outputs, in both the console and as plots. We'll start with the console output.
+
+First, gam.check() reports on model convergence. Here, it reports full convergence. R has found a best solution. If the model has not converged, results are likely not correct. This can happen when there are too many parameters in the model for not enough data.
+
+Below, we see a table of basis checking results. This shows a statistical test for patterns in model residuals, which should be random. Each line reports the test results for one smooth. It shows the k value or number of basis functions, the effective degrees of freedom, a test statistic, and p-value.
+
+Here, small p-values indicate that residuals are not randomly distributed. This often means there are not enough basis functions.
+
+This is an approximate test. Always visualize your results too, and compare the k and edf values in addition to looking at the p-value.
+
+```{r, eval = T, echo = T}
 # gam.check(gam_mod)
 # gam.check(gam_mod2)
+gam.check(gamm_mod2$gam,)
+```
 
-gratia::draw(gam_mod, residuals = T)
-gratia::draw(gam_mod2, residuals = T)
-gratia::draw(gamm_mod, residuals = T)
-gratia::draw(gamm_mod2, residuals = T)
+Each of these gives a different way of looking at your model residuals. These plots show the results from the original, poorly fit model. On the top-left is a Q-Q plot, which compares the model residuals to a normal distribution. A well-fit model's residuals will be close to a straight line. On bottom left is a histogram of residuals. We would expect this to have a symmetrical bell shape. On top-right is a plot of residual values. These should be evenly distributed around zero. Finally, on the bottom-right is plot of response against fitted values. A perfect model would form a straight line. We don't expect a perfect model, but we do expect the pattern to cluster around the 1-to-1 line.
 
-
-gratia::appraise(gam_mod)
-gratia::appraise(gam_mod2)
-gratia::appraise(gamm_mod$gam)
+```{r, echo = T, eval = T}
+# gratia::appraise(gam_mod)
+# gratia::appraise(gam_mod2)
+# gratia::appraise(gamm_mod$gam)
 gratia::appraise(gamm_mod2$gam)
+```
+
+Fitted vs. response plots are generally less useful for non-normally distributed data as it can be difficult to visually assess if the observed data shows more heteroskedasticity than expected.
+
+```{r tsDiagGAMM, eval = T, echo= T}
+
+singleTrail_dropna <- singleTrail %>% 
+  tidyr::drop_na('daily_aqi_value')
+
+with(singleTrail_dropna, 
+     tsDiagGamm(gamm_mod2, 
+                timevar = yday,
+                observed = count))
+```
+
+
+### Rootogram
+
+A good way to check how well the model compares with the observed data (and hence check for over-dispersion in the data relative to the conditional distribution implied by the model) is via a rootogram. A rootogram is a model diagnostic tool that assesses the goodness of fit of a statistical model. The observed values of the response are compared with those expected from the fitted model. For discrete, count responses, the frequency of each count (0, 1, 2, etc) in the observed data and expected from the conditional distribution of the response implied by the model are compared.
+
+```{r, echo = T, eval = T}
+rg <- gratia::rootogram(gamm_mod2$gam)
+draw(rg)
+```
+
+Looking at [FIGURE] we see the main features of the rootogram:
+
+* expected counts, given the model, are shown by the thick blue line,
+* observed counts are shown as bars, which in a hanging rootogram are show hanging from the blue line of expected counts,
+* on the x-axis we have the count bin, 0 count, 1 count, 2 count, etc,
+* on the y-axis we have the square root of the observed or expected count — the square root transformation allows for departures from expectations to be seen even at small frequencies,
+* a reference line is drawn at a height of 0,
+* and     
+
+Because this is a hanging rootogram, we can think of the rootogram as relating to the fitted counts — if a bar doesn’t reach the zero line then the model over predicts a particular count bin, and if the bar exceeds the zero line it under predicts.
+
+```{r}
+sum(residuals(gamm_mod2$gam, type = "pearson")^2) / df.residual(gamm_mod2$gam)
+
 
 ```
 
@@ -474,7 +576,8 @@ summary.table$model <- c("lm_mod",
                           # "gam_mod2",
                           "gamm_mod", 
                          "gamm_mod2", 
-                         "gamm_AR1")
+                         "gamm_AR1"
+                         )
 #lm
 summary.table[1, 2:3] <- c(AIC(lm_mod),
                            summary(lm_mod)$adj.r.squared)
@@ -548,77 +651,77 @@ lines(fitted(m.AR1$gam) ~ singleTrail$yday, lty = "solid" , col = "darkolivegree
 
 **Final Choice: Generalized Additive Mixture Model with Explanatory Variables**
 
-## Visualization of Model
+<!-- ## Visualization of Model -->
 
-```{r, eval = T}
-gratia::draw(gamm_mod2, residuals = T)
-```
+<!-- ```{r, eval = T} -->
+<!-- gratia::draw(gamm_mod2, residuals = T) -->
+<!-- ``` -->
 
-```{r, eval = T}
-gratia::appraise(gamm_mod2$gam)
+<!-- ```{r, eval = T} -->
+<!-- gratia::appraise(gamm_mod2$gam) -->
 
-```
+<!-- ``` -->
 
-```{r, eval = T}
+<!-- ```{r, eval = T} -->
 
-layout(matrix(1:2, ncol = 2))
-acf(resid(gamm_mod2$lme, type = "normalized"), 
-    lag.max = 36, main = "ACF")
-pacf(resid(gamm_mod2$lme, type = "normalized"),
-     lag.max = 36, main = "pACF")
-
-
-layout(1)
-```
-
-```{r}
- with(singleTrail, tsDiagGamm(gamm_mod2, 
-                              timevar = yday, observed = count))
-
-```
-
-```{r, eval = F, result = "asis", message=F, warning=F}
-itsadug::gamtabs(gamm_mod2$gam, 
-                 caption="Summary of Explanatory GAMM", 
-                 comment=F,
-                 type='latex')
+<!-- layout(matrix(1:2, ncol = 2)) -->
+<!-- acf(resid(gamm_mod2$lme, type = "normalized"),  -->
+<!--     lag.max = 36, main = "ACF") -->
+<!-- pacf(resid(gamm_mod2$lme, type = "normalized"), -->
+<!--      lag.max = 36, main = "pACF") -->
 
 
-```
+<!-- layout(1) -->
+<!-- ``` -->
 
-```{=latex}
-    \begin{table}[ht]
-\centering
-\begin{tabular}{lrrrr}
-   \hline
-A. parametric coefficients & Estimate & Std. Error & t-value & p-value \\ 
-  (Intercept) & 4.9790 & 0.0337 & 147.6956 & $<$ 0.0001 \\ 
-  max.count & 0.0096 & 0.0023 & 4.1454 & 0.0005 \\ 
-   \hline
-B. smooth terms & edf & Ref.df & F-value & p-value \\ 
-  s(yday) & 8.4169 & 8.4169 & 13.9495 & $<$ 0.0001 \\ 
-  s(month) & 1.0000 & 1.0000 & 18.8885 & 0.0003 \\ 
-  s(wday) & 4.8314 & 5.0000 & 25.7923 & $<$ 0.0001 \\ 
-  s(daily\_aqi\_value) & 4.6698 & 4.6698 & 10.4663 & $<$ 0.0001 \\ 
-  s(temp\_min\_f) & 4.2163 & 4.2163 & 14.4487 & $<$ 0.0001 \\ 
-  s(precipitation\_in) & 3.7374 & 3.7374 & 42.5743 & $<$ 0.0001 \\ 
-   \hline
-\end{tabular}
-\caption{Summary of Explanatory GAMM} 
-\label{tab.gam}
-\end{table}
-```
-```{r}
-mgcv::vis.gam(gamm_mod2$gam, 
-                 view=c("precipitation_in", "temp_min_f"),
-                 select=2,
-                 main='Explanatory GAMM', labcex=.8,
-                print.summary=FALSE)
-```
+<!-- ```{r} -->
+<!--  with(singleTrail, tsDiagGamm(gamm_mod2,  -->
+<!--                               timevar = yday, observed = count)) -->
 
-<https://stats.stackexchange.com/questions/425194/visreg-visualization-of-mgcv-results-gam>
+<!-- ``` -->
 
-<https://cran.r-project.org/web/packages/itsadug/vignettes/inspect.html>
+<!-- ```{r, eval = F, result = "asis", message=F, warning=F} -->
+<!-- itsadug::gamtabs(gamm_mod2$gam,  -->
+<!--                  caption="Summary of Explanatory GAMM",  -->
+<!--                  comment=F, -->
+<!--                  type='latex') -->
+
+
+<!-- ``` -->
+
+<!-- ```{=latex} -->
+<!--     \begin{table}[ht] -->
+<!-- \centering -->
+<!-- \begin{tabular}{lrrrr} -->
+<!--    \hline -->
+<!-- A. parametric coefficients & Estimate & Std. Error & t-value & p-value \\  -->
+<!--   (Intercept) & 4.9790 & 0.0337 & 147.6956 & $<$ 0.0001 \\  -->
+<!--   max.count & 0.0096 & 0.0023 & 4.1454 & 0.0005 \\  -->
+<!--    \hline -->
+<!-- B. smooth terms & edf & Ref.df & F-value & p-value \\  -->
+<!--   s(yday) & 8.4169 & 8.4169 & 13.9495 & $<$ 0.0001 \\  -->
+<!--   s(month) & 1.0000 & 1.0000 & 18.8885 & 0.0003 \\  -->
+<!--   s(wday) & 4.8314 & 5.0000 & 25.7923 & $<$ 0.0001 \\  -->
+<!--   s(daily\_aqi\_value) & 4.6698 & 4.6698 & 10.4663 & $<$ 0.0001 \\  -->
+<!--   s(temp\_min\_f) & 4.2163 & 4.2163 & 14.4487 & $<$ 0.0001 \\  -->
+<!--   s(precipitation\_in) & 3.7374 & 3.7374 & 42.5743 & $<$ 0.0001 \\  -->
+<!--    \hline -->
+<!-- \end{tabular} -->
+<!-- \caption{Summary of Explanatory GAMM}  -->
+<!-- \label{tab.gam} -->
+<!-- \end{table} -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- mgcv::vis.gam(gamm_mod2$gam,  -->
+<!--                  view=c("precipitation_in", "temp_min_f"), -->
+<!--                  select=2, -->
+<!--                  main='Explanatory GAMM', labcex=.8, -->
+<!--                 print.summary=FALSE) -->
+<!-- ``` -->
+
+<!-- <https://stats.stackexchange.com/questions/425194/visreg-visualization-of-mgcv-results-gam> -->
+
+<!-- <https://cran.r-project.org/web/packages/itsadug/vignettes/inspect.html> -->
 
 ## Prediction and Forecasting Trail Use
 
@@ -660,12 +763,12 @@ marginaleffects::plot_cap(gamm_mod2$gam, condition = "wday")
 
 <!-- # Speculations on Applying <CHOSEN> Model to All Trails -->
 
-# Useful links
+<!-- ## Useful links -->
 
-<!-- overview of multiple models leading up to gamm -->
+<!-- <!-- overview of multiple models leading up to gamm --> -->
 
-<https://m-clark.github.io/generalized-additive-models/application.html>
+<!-- <https://m-clark.github.io/generalized-additive-models/application.html> -->
 
-<!-- simple overview of splines and basis functions -->
+<!-- <!-- simple overview of splines and basis functions --> -->
 
-<https://asbates.rbind.io/2019/02/04/what-are-splines/>
+<!-- <https://asbates.rbind.io/2019/02/04/what-are-splines/> -->

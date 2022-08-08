@@ -1,0 +1,7 @@
+#Introduction 
+
+
+
+We conduct a statistical analysis for multi-use recreational trails in the Bridger Mountains to estimate the volume and location of recreation. 
+
+The goals of this analysis is to (1) develop a predictive model of recreational trail use using data from trail counters, weather, trail characteristics, and novel data sources provided by Headwaters Economics and (2) Apply the statistical model to demonstrate trade offs in predictive accuracy for different applications. The aim is to inform policy/methods adopted by land management agencies (Forest Service); also good for local decision makers. We used a Generalized Additive Model approach which allows for [GAM DETAILS]. 
