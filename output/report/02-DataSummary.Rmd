@@ -1,6 +1,6 @@
 #  Data Overview
 
-```{r, echo=FALSE, message = F, warning = F, eval = T}
+```{r, echo=FALSE, message = F, warning = F}
 
 library(ggplot2) #plots
 library(here) #relative file paths

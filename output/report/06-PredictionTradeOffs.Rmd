@@ -1,0 +1,37 @@
+
+# Trade-Offs in Prediction Accuracy
+
+1. Places with high use versus low use;
+
+* How do we delineate between "high"/"low" use?
+
+  * Fit Models G/GS/GI to all trails with explanatory covariates
+  * Predict with in-sample trails
+  * Predict on out-of-sample-trails
+  * Designate some delineation for high vs low
+  * Compare prediction variance 
+
+2. Places with different types of use (e.g., do motorized trails differ in important ways from non-
+motorized trails?); and
+
+ * Do we need to include this in our model in order to test this? Or can we just look at prediction variance between these two groups afterwards?
+ 
+ * Compare for in-sample trails and out-of-sample trails.
+ 
+ * 
+
+3. An analysis of the change in predictive accuracy as the number of trail counters used
+changes.
+
+* The GAMM model applied does not allow for multiple measures per unit time. In an ideal world trail counters would be deployed at as many different trails for as long as possible. Longer deployment times would help to model season and annual trends. It is possible that with more temporal data coverage we could use simpler models (i.e. a gam or gamm approach without the need for temporal autocorrelation structure) that would save on computation time).
+  
+* Need to talk about forecasting (or temporal extrapolation). If we want to forecast in the future for a specific date or time frame we really need prior observations on those intervals (i.e. previous years). This is not unique to GAM models, predicting beyond the range of observed samples is tough. 
+
+*Can we identify trails that are "closest" to global smooth trend as ideal condidates for year-round cameras?
+
+4. Trade off between single trail fitting vs all trails fit with global smoother for Middle Cottonwood. Do predictions 1 month before/after the time frame of available data for MidCot improve with allTrails model GS or GI compared to singleTrail model?
+
+* Compare by visual inspection
+* Compare standard
+* Cannot validate using subset of in-sample data (bc time series)
+  

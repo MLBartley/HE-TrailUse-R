@@ -11,7 +11,7 @@
 ##   - Data updated (trail_count and weather) on July 11, 2022
 ##   - Data updated (trailheads/edgeID file) on July 14, 2022
 ##   - Data updated (weather - temp min/max) on August 1, 2022 
-##
+##   - Data updated (AllTrails search data) on August 8, 2022
 ## ---------------------------
 
 
@@ -59,6 +59,11 @@ weather_updateTemps <- read.csv(here("data/raw/NOAA_Weather_MSU_20210101_2021123
 
 #load spatial shapefile data
 trail_spatial <- sf::st_read(dsn = here("data/raw/Bridgers_Trails_Shp_Strava_Crosswalk/"))
+
+#load allTrails search views
+allTrails_search <- readxl::read_excel(here("data/raw/alltrails_pageviews.xlsx"), 
+                                       col_types = c("numeric", "text", "date", 
+                                                     "numeric", "numeric", "numeric", "numeric"))
 
 # process data ------------------------------------------------------------
 

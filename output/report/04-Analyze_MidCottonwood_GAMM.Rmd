@@ -1,7 +1,9 @@
 
 # Model Choice Explained with Application to Middle Cottonwood Trail
 
-```{r, echo=FALSE, message=F, warning=F}
+```{r, echo=FALSE, message=F, warning=F, include = F}
+# remotes::install_github("clauswilke/colorblindr")
+library('colorblindr')
 library(dplyr)
 library(here)
 library(ggplot2)
@@ -11,6 +13,8 @@ library(lubridate)
 library(magrittr)
 library(marginaleffects)
 library(mgcv)
+# remotes::install_github("clauswilke/relayer")
+library(relayer)
 library(xtable)
 
 source(here("scripts/01-LoadData.R"))
@@ -73,7 +77,7 @@ singleStrava <- strava_day %>%
   # we want a single representation count value for multiple edges per day
   dplyr::group_by(timeframe) %>% 
   dplyr::mutate(max.count = max(totaltrips)) %>% 
-  dplyr::select(-c(totaltrips, totalpeople, edge_uid)) %>% 
+  dplyr::select(-c(totaltrips, totalpeople, edge_uid, "Segment with trail counter" )) %>% 
   dplyr::distinct()
 # trail characteristics not pertinent for single trail analysis
 # no variation within trail information
@@ -111,8 +115,8 @@ singleTrail <- singleTrail %>%
                    "th_long",
                    "counter_lat", 
                    "counter_long",
-                   "stravaedgeid2022", 
-                  "Segment with trail counter"                   
+                   "stravaedgeid2022" 
+                  # "Segment with trail counter"                   
   )) %>% 
   dplyr::distinct()
 
@@ -127,17 +131,33 @@ singleTrail$week <- as.integer(singleTrail$week)
 
 ## gather strava+covariate data w/out camera counter data for predicting
 
+# add zeros into missing STRAVA days
+
+singleStrava_zeros <- singleStrava %>% 
+  dplyr::mutate(yday = lubridate::yday(timeframe))
+
+zeros_df <- as.data.frame(which(1:365 %notin%  singleStrava_zeros$yday))
+colnames(zeros_df) <- "yday"
+zeros_df <- zeros_df %>% 
+  mutate(timeframe = lubridate::as_date(yday, origin = "2020-12-31"), 
+         trailname = unique(singleStrava$trailname), 
+         trailnumber = unique(singleStrava$trailnumber), 
+         wday = lubridate::wday(timeframe, label = T), 
+         max.count = 0) %>% 
+  dplyr::left_join(weather, by = c("timeframe" = "date"))
+
 predict.data <- singleStrava %>% 
   dplyr::left_join(weather, by = c("timeframe" = "date")) %>% 
-  dplyr::filter(timeframe %notin% singleCount$date) %>% 
+  # dplyr::filter(timeframe %notin% singleCount$date) %>% 
   dplyr::mutate(yday = lubridate::yday(timeframe)) %>% 
   dplyr::ungroup() %>% 
+   dplyr::bind_rows(zeros_df) %>% 
   dplyr::select(c("yday", 
                   "wday", 
                   "max.count", 
                   "month", 
                   "precipitation_in", 
-                  "temp_min_f", 
+                  "temp_max_f", 
                   "daily_aqi_value"))
 
 #convert week and wday to integers now
@@ -216,7 +236,7 @@ Translated in to `R` syntax, this model would look like:
 lm_mod <- lm(count ~ max.count + 
                daily_aqi_value + 
                precipitation_in + 
-               temp_min_f, 
+               temp_max_f, 
              data = singleTrail)
 ```
 
@@ -230,7 +250,7 @@ To address the issue of violated normality assumption in the previous model we c
 glm_mod <- glm(count ~ max.count + 
                  daily_aqi_value + 
                  precipitation_in + 
-                 temp_min_f, 
+                 temp_max_f, 
                data = singleTrail, 
                family = poisson)
 ```
@@ -294,19 +314,19 @@ For a more in depth description of smooth terms as specified within a `gam` form
 
 <!-- https://stats.stackexchange.com/questions/174936/gamm-choice-of-k-basis-dimension-with-temporal-correlation -->
 
-```{r, eval = F, echo =F}
+```{r, eval = T, echo =F}
 # we know that the assumptions for temporal independance aren't met so adding in more variables later. This model does well (i.e. high R-squared value) but I want to make sure we're checking our model assumptions carefully. 
 
-# gam_mod2 <- gam(count ~  s(yday) + 
-#                       s(week, k = 8) +
-#                       s(wday, 
-#                         bs = "cc", k = 7) +
-#                       s(daily_aqi_value) +
-#                    s(temp_min_f, k = 5) +
-#                    s(precipitation_in, k = 5) +
-#                       max.count,
-#                 data = singleTrail, 
-#                 family = poisson)
+gam_mod2 <- gam(count ~  s(yday) +
+                      s(month, k = 3) +
+                      s(wday,
+                        bs = "cc", k = 7) +
+                      s(daily_aqi_value) +
+                   s(temp_max_f, k = 5) +
+                   s(precipitation_in, k = 5) +
+                      max.count,
+                data = singleTrail,
+                family = poisson)
 
 ```
 
@@ -335,21 +355,34 @@ gamm_mod2 <- gamm(count ~ s(yday) +
                     s(wday, 
                       bs = "cc", k = 7) +
                     s(daily_aqi_value) +
-                    s(temp_min_f) +
+                    s(temp_max_f) +
                     s(precipitation_in, k = 9) +
                     max.count,
                   data = singleTrail, 
+                  method = "REML", 
                   family = poisson)
 
 ```
 
 ```{r}
+
+gamm_mod_qp <- gamm(count ~ s(yday) + 
+                    s(month, k = 3) +
+                    s(wday, 
+                      bs = "cc", k = 7) +
+                    s(daily_aqi_value) +
+                    s(temp_max_f) +
+                    s(precipitation_in, k = 9) +
+                    max.count,
+                  data = singleTrail, 
+                  family = quasipoisson)
+
 gamm_mod2_nb <- gamm(count ~ s(yday) + 
                     s(month, k = 3) +
                     s(wday, 
                       bs = "cc", k = 7) +
                     s(daily_aqi_value) +
-                    s(temp_min_f) +
+                    s(temp_max_f) +
                     s(precipitation_in, k = 9) +
                     max.count,
                   data = singleTrail, 
@@ -361,7 +394,7 @@ gamm_mod2_gaus <- gamm(count ~ s(yday) +
                     s(wday, 
                       bs = "cc", k = 7) +
                     s(daily_aqi_value) +
-                    s(temp_min_f) +
+                    s(temp_max_f) +
                     s(precipitation_in, k = 9) +
                     max.count,
                   data = singleTrail)
@@ -382,13 +415,13 @@ For example, <AR1 vs ARMA>.
               optimMethod="L-BFGS-B")
  
  ## AR(1)
-m.AR1 <- gamm(count ~ 
+gamm_mod2_AR1 <- gamm(count ~ 
                 # s(yday) + 
                 s(month, k = 3) +
                 s(wday, 
                   bs = "cc", k = 7) +
                 s(daily_aqi_value) +
-                s(temp_min_f, k = 5) +
+                s(temp_max_f, k = 5) +
                 s(precipitation_in, k = 5) +
                 max.count,
               data = singleTrail, 
@@ -396,7 +429,9 @@ m.AR1 <- gamm(count ~
               correlation = corAR1(form = ~ yday),
               control = ctrl)
  
-save(m.AR1, file=here("output/models/mAR1.rda"), compress='xz')
+save(gamm_mod2_AR1, 
+     file=here("output/models/singleT_gamm-Ar1.rda"), 
+     compress='xz')
 
 
 ```
@@ -477,7 +512,7 @@ This is an approximate test. Always visualize your results too, and compare the 
 ```{r, eval = T, echo = T}
 # gam.check(gam_mod)
 # gam.check(gam_mod2)
-gam.check(gamm_mod2$gam,)
+gam.check(gamm_mod2$gam)
 ```
 
 Each of these gives a different way of looking at your model residuals. These plots show the results from the original, poorly fit model. On the top-left is a Q-Q plot, which compares the model residuals to a normal distribution. A well-fit model's residuals will be close to a straight line. On bottom left is a histogram of residuals. We would expect this to have a symmetrical bell shape. On top-right is a plot of residual values. These should be evenly distributed around zero. Finally, on the bottom-right is plot of response against fitted values. A perfect model would form a straight line. We don't expect a perfect model, but we do expect the pattern to cluster around the 1-to-1 line.
@@ -531,6 +566,8 @@ sum(residuals(gamm_mod2$gam, type = "pearson")^2) / df.residual(gamm_mod2$gam)
 
 ### Identifying AR and MA using ACF and PACF Plots
 
+There are two visualizations of the residuals that can help you model autocorrelations: the ACF graph and the PACF. In general, ACF lets you assess the moving average component of the model and PACF lets you identify the autoregressive component. The p,q parameters can be estimated from the sharp cut off in the (P)ACF graphs. 
+
 <!-- https://towardsdatascience.com/identifying-ar-and-ma-terms-using-acf-and-pacf-plots-in-time-series-forecasting-ccb9fd073db8 -->
 
 <!-- https://cran.r-project.org/web/packages/itsadug/vignettes/acf.html -->
@@ -542,10 +579,10 @@ sum(residuals(gamm_mod2$gam, type = "pearson")^2) / df.residual(gamm_mod2$gam)
 <!-- https://stats.stackexchange.com/questions/332685/modeling-autocorrelation-in-generalized-additive-models-gam-with-re-splines -->
 
 ```{r gamm diagnostics, eval=F}
-
-layout(matrix(1:6, ncol = 2))
-plot(gamm_mod2$gam, scale = 0)
-layout(1)
+# 
+# layout(matrix(1:6, ncol = 2))
+# plot(gamm_mod2$gam, scale = 0)
+# layout(1)
 
 layout(matrix(1:2, ncol = 2))
 acf(resid(gamm_mod2$lme, type = "normalized"), 
@@ -629,10 +666,10 @@ plot(singleTrail$count ~ singleTrail$yday,
 # lines(Y ~ xt, lty = "dashed", lwd = 1)
 # lines(fitted(lm_mod) ~ singleTrail$yday, lty = "solid", col = "darkolivegreen", lwd = 2)
 # lines(fitted(glm_mod) ~ singleTrail$yday, lty = "solid", col = "midnightblue", lwd = 2)
-lines(fitted(gam_mod) ~ singleTrail$yday, lty = "solid", col = "purple", lwd = 2)
-lines(fitted(gamm_mod$gam) ~ singleTrail$yday, lty = "dashed", col = "red", lwd = 2)
+# lines(fitted(gam_mod) ~ singleTrail$yday, lty = "solid", col = "purple", lwd = 2)
+# lines(fitted(gamm_mod$gam) ~ singleTrail$yday, lty = "dashed", col = "red", lwd = 2)
 lines(fitted(gamm_mod2$gam) ~ singleTrail$yday, lty = "solid", col = "orange", lwd = 2)
-lines(fitted(m.AR1$gam) ~ singleTrail$yday, lty = "solid" , col = "darkolivegreen", lwd = 2)
+# lines(fitted(m.AR1$gam) ~ singleTrail$yday, lty = "solid" , col = "darkolivegreen", lwd = 2)
 
 # legend("topleft",
 #        legend = c("Truth",
@@ -725,7 +762,7 @@ lines(fitted(m.AR1$gam) ~ singleTrail$yday, lty = "solid" , col = "darkolivegree
 
 ## Prediction and Forecasting Trail Use
 
-```{r}
+```{r predictions}
  # itsadug::get_predictions(model = gamm_mod2$gam,
  #                          cond = list(yday = seq(0, 365, length = 50)))
 
@@ -734,14 +771,27 @@ pred.datagrid <- marginaleffects::predictions(gamm_mod2$gam,
                                          newdata = datagrid())
 pred.newdata <- marginaleffects::predictions(gamm_mod2$gam,
                                          newdata = predict.data)
+```
 
 
-#  plot(count ~ yday, data = singleTrail, type = "p")
-# lines(predicted ~ yday, data = pred, col = "red")
-# # lines(p2 ~ yday, data = predict.data, col = "blue")
-# legend("topleft",
-#        legend = c("Uncorrelated Errors","AR(1) Errors"),
-#        bty = "n", col = c("red","blue"), lty = 1)
+```{r}
+
+
+ plot(count ~ yday, data = singleTrail, type = "p")
+lines(predicted ~ yday, data = pred, col = "red")
+# lines(p2 ~ yday, data = predict.data, col = "blue")
+legend("topleft",
+       legend = c("Uncorrelated Errors","AR(1) Errors"),
+       bty = "n", col = c("red","blue"), lty = 1)
+
+## plot extrapolated (in time) predictions
+x.min <- min(singleTrail$yday) - 30
+x.max <- max(singleTrail$yday) + 30
+plot(predicted ~ yday, data = pred.newdata,
+     type = "p", col = "red", 
+     xlim = c(x.min, x.max), 
+     ylim = c(0, 5000))
+lines(count~ yday, data = singleTrail, type = "p", col = "black")
 
 
 marginaleffects::plot_cap(gamm_mod2$gam, condition = "yday") #+    
@@ -760,6 +810,96 @@ marginaleffects::plot_cap(gamm_mod2$gam, condition = "wday")
 
 
 ```
+
+```{r diff model predictions}
+p_gam2 <- as_tibble(predict(gam_mod2, predict.data, 
+                            se.fit = TRUE, type = "response")) %>%
+    rename(fit_gam = fit, se_gam = se.fit)
+p_gamm2 <- as_tibble(predict(gamm_mod2$gam, predict.data, 
+                             se.fit = TRUE, type = "response")) %>%
+    rename(fit_gamm = fit, se_gamm = se.fit)
+p_gamm2AR1 <- as_tibble(predict(gamm_mod2_AR1$gam, predict.data, 
+                                se.fit = TRUE, type = "response")) %>%
+    rename(fit_AR1 = fit, se_AR1 = se.fit)
+
+new_data_bases <- bind_cols(predict.data, p_gam2, p_gamm2, p_gamm2AR1) %>%
+    tidyr::pivot_longer(fit_gam:se_AR1, names_sep = '_',
+                 names_to = c('variable', 'model')) %>%
+    tidyr::pivot_wider(names_from = variable, values_from = value) %>%
+    mutate(upr_ci = fit + (2 * se), lwr_ci = fit - (2 * se))
+```
+
+
+
+```{r diff models predictin plots}
+ggplot(mapping = aes(x = yday, y = count)) +
+    geom_ribbon(data = new_data_bases,
+                mapping = aes(ymin = lwr_ci, ymax = upr_ci, x = yday, fill = factor(model)),
+                inherit.aes = FALSE, alpha = 0.2) +
+    geom_point(data = singleTrail, aes(colour = wday)) +
+    geom_line(data = new_data_bases, aes(y = fit, x = yday, colour2 = factor(model)),
+              size = 1) %>%
+    relayer::rename_geom_aes(new_aes = c("colour" = "colour2")) +
+    scale_colour_distiller(palette = "Set1", aesthetics = "colour", name = "Day of Week") +
+    scale_colour_OkabeIto(aesthetics = "colour2", name = "Model") +
+    scale_fill_OkabeIto(name = "Model") +
+    coord_cartesian(xlim = c(min(singleTrail$yday) - 30, max(singleTrail$yday) + 30), ylim = c(0, 1000)) +
+    labs(title = "Extrapolation",
+         subtitle = "How prediction varies with different model specifications")
+```
+
+```{r gamm2 b spline}
+gamm_mod2_bspline <- gamm(count ~ s(yday, bs = "bs", m = c(3,1)) + 
+                            s(month, k = 3) +
+                            s(wday, 
+                              bs = "cc", k = 7) +
+                            s(daily_aqi_value, bs = "bs", m = c(3,1)) +
+                            s(temp_max_f, bs = "bs", m = c(3,1)) +
+                            s(precipitation_in, k = 9, bs = "bs", m = c(3,1)) +
+                            max.count,
+                          data = singleTrail, 
+                          method = "REML",
+                          family = poisson)
+
+p_bs <- as_tibble(predict(gamm_mod2_bspline$gam, 
+                                 predict.data, 
+                                 se.fit = TRUE, 
+                                 type = "response")) %>%
+    rename(fit_bs = fit, se_bs = se.fit)
+p_tprs <- as_tibble(predict(gamm_mod2$gam, 
+                            predict.data, 
+                            se.fit = TRUE, 
+                            type = "response")) %>%
+    rename(fit_tprs = fit, se_tprs = se.fit)
+
+
+new_data_bases <- bind_cols(predict.data, p_tprs, p_bs) %>%
+    tidyr::pivot_longer(fit_tprs:se_bs, names_sep = '_',
+                 names_to = c('variable', 'spline')) %>%
+    tidyr::pivot_wider(names_from = variable, values_from = value) %>%
+    mutate(upr_ci = fit + (2 * se), lwr_ci = fit - (2 * se))
+
+```
+
+
+```{r diff spline predictin plots}
+ggplot(mapping = aes(x = yday, y = count)) +
+  geom_ribbon(data = new_data_bases,
+              mapping = aes(ymin = lwr_ci, ymax = upr_ci, 
+                            x = yday, fill = spline),
+              inherit.aes = FALSE, alpha = 0.2) +
+  geom_point(data = singleTrail, aes(colour = factor(wday))) +
+  geom_line(data = new_data_bases, aes(y = fit, x = yday, colour2 = spline),
+            size = 1) %>%
+  relayer::rename_geom_aes(new_aes = c("colour" = "colour2")) +
+  scale_colour_brewer(palette = "Set1", aesthetics = "colour", name = "Data set") +
+  scale_colour_OkabeIto(aesthetics = "colour2", name = "Basis") +
+  scale_fill_OkabeIto(name = "Basis") +
+  coord_cartesian(xlim = c(min(singleTrail$yday) - 30, max(singleTrail$yday) + 30), ylim = c(0, 1000)) +    labs(title = "Extrapolating with splines",
+                                                                                                                 subtitle = "How behaviour varies with different basis types")
+```
+
+
 
 <!-- # Speculations on Applying <CHOSEN> Model to All Trails -->
 
