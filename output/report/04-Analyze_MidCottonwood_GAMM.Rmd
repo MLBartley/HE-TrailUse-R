@@ -66,106 +66,7 @@ We being with a quick look at the data available for our chosen trail, Middle Co
 
 ## The Data
 
-```{r combine-data , eval = T}
-## Focusing on Middle Cottenwood Trail (Trail # 586, Counter ID # 31)
-
-singleCount <- trail_count %>%
-  dplyr::filter(counterid == 31)
-
-singleStrava <- strava_day %>%
-  dplyr::filter(trailnumber == 586) %>% 
-  # we want a single representation count value for multiple edges per day
-  dplyr::group_by(timeframe) %>% 
-  dplyr::mutate(max.count = max(totaltrips)) %>% 
-  dplyr::select(-c(totaltrips, totalpeople, edge_uid, "Segment with trail counter" )) %>% 
-  dplyr::distinct()
-# trail characteristics not pertinent for single trail analysis
-# no variation within trail information
-
-# no variation within trail information
-
-## Combine Camera Counts, Strava Counts, Weather, Trail Characteristics
-
-singleTrail <- singleCount %>%
-  dplyr::left_join(
-    singleStrava,
-    by = c(
-      "date" = "timeframe",
-      "trailnumber" = "trailnumber",
-      "trailname" = "trailname",
-      "wday" = "wday"
-    )
-  ) %>%
-  dplyr::left_join(weather, by = c("date" = "date"))
-
-## Add in a Time variable
-singleTrail$yday <- lubridate::yday(singleTrail$date)
-
-## Assume missing Strava data reflect a 0 observation
-
-singleTrail$max.count[which(is.na(singleTrail$max.count))] <- 0
-
-## remove unecessary columns
-singleTrail <- singleTrail %>% 
-  dplyr::select(-c("counterid",
-                   "trailnumber",
-                   # "subsectionname", 
-                   "counterowner",
-                   "th_lat",
-                   "th_long",
-                   "counter_lat", 
-                   "counter_long",
-                   "stravaedgeid2022" 
-                  # "Segment with trail counter"                   
-  )) %>% 
-  dplyr::distinct()
-
-#convert week and wday to integers now
-singleTrail$wday <- as.integer(singleTrail$wday)
-singleTrail$week <- as.integer(singleTrail$week)
-
-
-## remove rows with NA in temp_min_F (only NA in covariates used in model fitting)
-# singleTrail <- singleTrail[-49, ]
-
-
-## gather strava+covariate data w/out camera counter data for predicting
-
-# add zeros into missing STRAVA days
-
-singleStrava_zeros <- singleStrava %>% 
-  dplyr::mutate(yday = lubridate::yday(timeframe))
-
-zeros_df <- as.data.frame(which(1:365 %notin%  singleStrava_zeros$yday))
-colnames(zeros_df) <- "yday"
-zeros_df <- zeros_df %>% 
-  mutate(timeframe = lubridate::as_date(yday, origin = "2020-12-31"), 
-         trailname = unique(singleStrava$trailname), 
-         trailnumber = unique(singleStrava$trailnumber), 
-         wday = lubridate::wday(timeframe, label = T), 
-         max.count = 0) %>% 
-  dplyr::left_join(weather, by = c("timeframe" = "date"))
-
-predict.data <- singleStrava %>% 
-  dplyr::left_join(weather, by = c("timeframe" = "date")) %>% 
-  # dplyr::filter(timeframe %notin% singleCount$date) %>% 
-  dplyr::mutate(yday = lubridate::yday(timeframe)) %>% 
-  dplyr::ungroup() %>% 
-   dplyr::bind_rows(zeros_df) %>% 
-  dplyr::select(c("yday", 
-                  "wday", 
-                  "max.count", 
-                  "month", 
-                  "precipitation_in", 
-                  "temp_max_f", 
-                  "daily_aqi_value"))
-
-#convert week and wday to integers now
-predict.data$wday <- as.integer(predict.data$wday)
-# predict.data$week <- as.integer(predict.data$week)
-
-
-```
+<!-- Data used in this analysis created in 01-LoadData.R -->
 
 This 2.3-mile out-and-back trail was monitored via infrared counters between `r min(singleTrail$date)` and `r max(singleTrail$date)`. This daily time series count data is combined with data from Strava Metro, and local weather data.
 
@@ -361,6 +262,10 @@ gamm_mod2 <- gamm(count ~ s(yday) +
                   data = singleTrail, 
                   method = "REML", 
                   family = poisson)
+
+save(gamm_mod2,
+     file = here("output/models/singleT_gamm.rda"),
+     compress='xz')
 
 ```
 
@@ -770,7 +675,7 @@ pred <- marginaleffects::predictions(gamm_mod2$gam)
 pred.datagrid <- marginaleffects::predictions(gamm_mod2$gam,
                                          newdata = datagrid())
 pred.newdata <- marginaleffects::predictions(gamm_mod2$gam,
-                                         newdata = predict.data)
+                                         newdata = predict.MidCot)
 ```
 
 
@@ -779,7 +684,7 @@ pred.newdata <- marginaleffects::predictions(gamm_mod2$gam,
 
  plot(count ~ yday, data = singleTrail, type = "p")
 lines(predicted ~ yday, data = pred, col = "red")
-# lines(p2 ~ yday, data = predict.data, col = "blue")
+# lines(p2 ~ yday, data = predict.MidCot, col = "blue")
 legend("topleft",
        legend = c("Uncorrelated Errors","AR(1) Errors"),
        bty = "n", col = c("red","blue"), lty = 1)
@@ -812,17 +717,17 @@ marginaleffects::plot_cap(gamm_mod2$gam, condition = "wday")
 ```
 
 ```{r diff model predictions}
-p_gam2 <- as_tibble(predict(gam_mod2, predict.data, 
+p_gam2 <- as_tibble(predict(gam_mod2, predict.MidCot, 
                             se.fit = TRUE, type = "response")) %>%
     rename(fit_gam = fit, se_gam = se.fit)
-p_gamm2 <- as_tibble(predict(gamm_mod2$gam, predict.data, 
+p_gamm2 <- as_tibble(predict(gamm_mod2$gam, predict.MidCot, 
                              se.fit = TRUE, type = "response")) %>%
     rename(fit_gamm = fit, se_gamm = se.fit)
-p_gamm2AR1 <- as_tibble(predict(gamm_mod2_AR1$gam, predict.data, 
+p_gamm2AR1 <- as_tibble(predict(gamm_mod2_AR1$gam, predict.MidCot, 
                                 se.fit = TRUE, type = "response")) %>%
     rename(fit_AR1 = fit, se_AR1 = se.fit)
 
-new_data_bases <- bind_cols(predict.data, p_gam2, p_gamm2, p_gamm2AR1) %>%
+new_data_bases <- bind_cols(predict.MidCot, p_gam2, p_gamm2, p_gamm2AR1) %>%
     tidyr::pivot_longer(fit_gam:se_AR1, names_sep = '_',
                  names_to = c('variable', 'model')) %>%
     tidyr::pivot_wider(names_from = variable, values_from = value) %>%
@@ -862,18 +767,18 @@ gamm_mod2_bspline <- gamm(count ~ s(yday, bs = "bs", m = c(3,1)) +
                           family = poisson)
 
 p_bs <- as_tibble(predict(gamm_mod2_bspline$gam, 
-                                 predict.data, 
+                                 predict.MidCot, 
                                  se.fit = TRUE, 
                                  type = "response")) %>%
     rename(fit_bs = fit, se_bs = se.fit)
 p_tprs <- as_tibble(predict(gamm_mod2$gam, 
-                            predict.data, 
+                            predict.MidCot, 
                             se.fit = TRUE, 
                             type = "response")) %>%
     rename(fit_tprs = fit, se_tprs = se.fit)
 
 
-new_data_bases <- bind_cols(predict.data, p_tprs, p_bs) %>%
+new_data_bases <- bind_cols(predict.MidCot, p_tprs, p_bs) %>%
     tidyr::pivot_longer(fit_tprs:se_bs, names_sep = '_',
                  names_to = c('variable', 'spline')) %>%
     tidyr::pivot_wider(names_from = variable, values_from = value) %>%

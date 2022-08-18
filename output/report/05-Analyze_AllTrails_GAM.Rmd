@@ -6,7 +6,9 @@ output:
 # Analysis of All Camera-Monitered Bridger Trails: HGA(M)M Approach
 
 ```{r, echo=FALSE, message=F, warning=F, include = F}
+library(cowplot)
 library(dplyr)
+library(forecast)
 library(here)
 library(ggplot2)
 library(gratia)
@@ -74,6 +76,11 @@ allTrail$trailnameF <- factor(allTrail$trailname, order = F)
 
 sub.number <- length(unique(allTrail$subsectionname))
 
+##useful when need to plot high/low use trail subsections separately
+high_use <- c("Baldy to Bridger", "Bridger", "Bridger to Ross Pass", 
+              "College M", "M to Baldy", "Middle Cottonwood", "Sypes Canyon",
+              "Ross Pass to Sacagawea Peak", "Sacagawea Pass", "Steep Way")
+
 ```
 
 ## Fitting a Generalized Additive Mixture Model
@@ -97,7 +104,7 @@ We start with a simple GAMM structure with a single smooth for each of the varia
 
 In R we can write our model as:
 
-```{r, echo = T, eval = F}
+```{r model G shown, echo = T, eval = F}
 gamm_modG_sub <- gamm(max.camera ~
                          s(yday, bs="tp", k = 30) +
                          s(subsectionF,
@@ -117,7 +124,7 @@ gamm_modG_sub <- gamm(max.camera ~
                       method = 'REML',
                        data = allTrail, 
                       correlation = corARMA(form = ~yday|subsectionF,
-                                            p = 7),
+                                            p = 2, q = 1),
                       family = poisson, 
                       niterPQL = 20)
 ```
@@ -148,76 +155,80 @@ if(F){
                          s(precipitation_in) +
                          max.count
                         ,
-                      method = 'REML',
+                      # method = 'REML',
                       # correlation = corARMA(form = ~yday|subsectionF, p = 5), 
                        data = allTrail, 
-                       family = poisson, 
-                      niterPQL = 20)
+                       family = poisson#, 
+                      # niterPQL = 20 #argument only used in gamm, not gamm4
+                      )
   
   ## gamm model - check if this takes care of temporal dependence as is (w/o temporal autocorr sturcture on errors)
- gamm_modG_sub <- gamm(max.camera ~
-                         s(yday, bs="tp", k = 30) +
-                        # trailnameF + 
-                         s(subsectionF,
-                           bs="re",
-                           # by = trailnameF,
-                           k=25) +
-                         s(month, k = 7) +
-                         s(wday,
-                           bs = "cc", k = 7) +
-                         s(daily_aqi_value) +
-                         s(temp_max_f) +
-                         s(precipitation_in) +
-                         max.count
+  gamm_modG_sub <- gamm(max.camera ~
+                          s(yday, bs="tp", k = 30) +
+                          # trailnameF + 
+                          s(subsectionF,
+                            bs="re",
+                            # by = trailnameF,
+                            k=25) +
+                          s(month, k = 7) +
+                          s(wday,
+                            bs = "cc", k = 7) +
+                          s(daily_aqi_value) +
+                          s(temp_max_f) +
+                          s(precipitation_in) +
+                          max.count
                         ,
-                      method = 'REML',
-                      # correlation = corARMA(form = ~yday|subsectionF, p = 5), 
-                       data = allTrail, 
-                       family = poisson, 
-                      niterPQL = 20)
- 
-  gamm_modGAR1_sub <- gamm(max.camera ~
-                         s(yday, bs="tp") +
-                        # trailnameF + 
-                         s(subsectionF,
-                           bs="re",
-                           # by = trailnameF,
-                           k=25) +
-                         s(month, k = 7) +
-                         s(wday,
-                           bs = "cc", k = 7) +
-                         s(daily_aqi_value) +
-                         s(temp_max_f) +
-                         s(precipitation_in) +
-                         max.count
-                        ,
-                      method = 'REML',
-                      correlation = corAR1(form = ~yday|subsectionF),
-                       data = allTrail, 
-                       family = poisson, 
-                      niterPQL = 20)
+                        # method = 'REML',
+                        # correlation = corARMA(form = ~yday|subsectionF, p = 5), 
+                        data = allTrail, 
+                        family = poisson#, 
+                        # niterPQL = 20
+  )
+  
+ gamm_modGAR1_sub <- gamm(max.camera ~
+                            s(yday, bs="tp") +
+                            # trailnameF + 
+                            s(subsectionF,
+                              bs="re",
+                              # by = trailnameF,
+                              k=25) +
+                            s(month, k = 7) +
+                            s(wday,
+                              bs = "cc", k = 7) +
+                            s(daily_aqi_value) +
+                            s(temp_max_f) +
+                            s(precipitation_in) +
+                            max.count
+                          ,
+                          # method = 'REML',
+                          correlation = corAR1(form = ~yday|subsectionF),
+                          data = allTrail, 
+                          family = poisson#, 
+                          # niterPQL = 20
+ )
   
   gamm_modGARMA_sub <- gamm(max.camera ~
-                         s(yday, bs="tp") +
-                        # trailnameF + 
-                         s(subsectionF,
-                           bs="re",
-                           # by = trailnameF,
-                           k=25) +
-                         s(month, k = 7) +
-                         s(wday,
-                           bs = "cc", k = 7) +
-                         s(daily_aqi_value) +
-                         s(temp_max_f) +
-                         s(precipitation_in) +
-                         max.count
-                        ,
-                      method = 'REML',
-                      correlation = corARMA(form = ~yday|subsectionF,
-                                            p = 7),
-                       data = allTrail, 
-                       family = poisson, 
-                      niterPQL = 30)
+                              s(yday, bs="tp") +
+                              # trailnameF + 
+                              s(subsectionF,
+                                bs="re",
+                                # by = trailnameF,
+                                k=25) +
+                              s(month, k = 7) +
+                              s(wday,
+                                bs = "cc", k = 7) +
+                              s(daily_aqi_value) +
+                              s(temp_max_f) +
+                              s(precipitation_in) +
+                              max.count
+                            ,
+                            # method = 'REML',
+                            correlation = corARMA(form = ~yday|subsectionF,
+                                                  p = 2, q = 1),
+                            data = allTrail, 
+                            family = poisson#, 
+                            # niterPQL = 30
+  )
 
 save(gam_modG_sub, file=here("output/models/allT_subsection_gam_G.rda"),
      compress='xz')  
@@ -240,27 +251,23 @@ load(here("output/models/allT_subsection_gamm_G-ARMA.rda"))
 
 ```
 
+```{r modG pq choice}
+## this should help find values for p and q in the ARMA model 
+arma_res_G <- forecast::auto.arima(resid(gamm_modG_sub$lme, type = "normalized"),
+                       stationary = TRUE, seasonal = FALSE)
+ 
+arma_res_G$coef
+```
 
+The summary output indicates that all of our included parametric (linear) coefficients and smooth terms are (approximately) significant. The effective degree of freedom (edf) values represents the complexity of the smooth. We can see in this output that the highest smooth complexity is for subsectionF. The adjusted R-sq value (which should not be employed as an absolute measure of model performance) is 0.81 for this model. 
 
-```{r, eval = T, echo=T}
+```{r modG summary, eval = T, echo=T}
 summary(gamm_modGARMA_sub$gam)
 ```
 
-We plotted only QQ plots and fitted-vs. residual plots (FIGURE) to assess model G. Other common GAM diagnostic plots (e.g. fitted vs. response plots) are generally less useful for non-normally distributed data as it can be difficult to visually assess if the observed data shows more heteroskedasticity than expected.
 
 
-
-
-
-
-```{r, eval = T, echo=T}
-gratia::draw(gamm_modGARMA_sub$gam)
-gratia::appraise(gamm_modGARMA_sub$gam)
-gam.vcomp(gamm_modGARMA_sub$gam)
-
-rg <- gratia::rootogram(gamm_modGARMA_sub$gam)
-draw(rg)
-
+```{r modG diagnoses}
 allTrail_G <- allTrail %>% 
   tidyr::drop_na('daily_aqi_value')
 
@@ -268,13 +275,25 @@ allTrail_G <- allTrail %>%
 with(allTrail_G, tsDiagGamm(gamm_modGARMA_sub, timevar = yday,
                           observed = max.camera))
 
+```
 
-layout(matrix(1:2, ncol = 2))
-acf(resid(gamm_modGARMA_sub$lme, type = "normalized"), 
-    lag.max = 36, main = "ACF")
-pacf(resid(gamm_modGARMA_sub$lme, type = "normalized"),
-     lag.max = 36, main = "pACF")
-layout(1)
+
+```{r, eval = T, echo=T}
+gratia::draw(gamm_modGARMA_sub$gam)
+# gratia::appraise(gamm_modGARMA_sub$gam)
+# gam.vcomp(gamm_modGARMA_sub$gam)
+
+rg <- gratia::rootogram(gamm_modGARMA_sub$gam)
+draw(rg)
+
+
+
+# layout(matrix(1:2, ncol = 2))
+# acf(resid(gamm_modGARMA_sub$lme, type = "normalized"), 
+#     lag.max = 36, main = "ACF")
+# pacf(resid(gamm_modGARMA_sub$lme, type = "normalized"),
+#      lag.max = 36, main = "pACF")
+# layout(1)
 ```
 
 
@@ -325,6 +344,44 @@ ggplot(allTrail_G, aes(x=mod_G, y=max.camera)) +
   labs(x="Predicted count", y="Observed count")
 ```
 
+```{r modelG-predict,echo=FALSE, fig.width=6, fig.height=4, out.width="\\linewidth", fig.cap="\\label{fig:Fig}Predicted trail use count values (lines) versus observed trail use (points) for each trail subsection, based on model \\emph{G}."}
+gamm_modG_ARMA_pred <- predict(gamm_modGARMA_sub$gam, se.fit=TRUE, type = "response")
+allTrail_G <- transform(allTrail_G, 
+                 modG = gamm_modG_ARMA_pred$fit, 
+                 modG_se = gamm_modG_ARMA_pred$se.fit)
+ggplot(data=allTrail_G, aes(x=yday, y=max.camera, group=subsectionF)) +
+  facet_wrap(~subsectionF) +
+  geom_ribbon(aes(ymin=(modG-2*modG_se),
+                  ymax=(modG+2*modG_se)), alpha=0.25) +
+  geom_line(aes(y=(modG))) +
+  geom_point() +
+  labs(x=expression("Day of Year"),
+       y=expression("Trail use"))
+
+## turn this into two graphs with high/low trail use so scales are different and we can see low trail use subsections better
+
+high_pred_G <- ggplot(data=filter(allTrail_G, subsectionF %in% high_use),
+                   aes(x=yday, y=max.camera, group=subsectionF)) +
+  facet_wrap(~subsectionF) +
+  geom_ribbon(aes(ymin=(modG-2*modG_se),
+                  ymax=(modG+2*modG_se)), alpha=0.25) +
+  geom_line(aes(y=(modG))) +
+  geom_point() +
+  labs(x=expression("Day of Year"),
+       y=expression("Trail use"))
+
+low_pred_G <- ggplot(data=filter(allTrail_G, subsectionF %notin% high_use),
+                   aes(x=yday, y=max.camera, group=subsectionF)) +
+  facet_wrap(~subsectionF) +
+  geom_ribbon(aes(ymin=(modG-2*modG_se),
+                  ymax=(modG+2*modG_se)), alpha=0.25) +
+  geom_line(aes(y=(modG))) +
+  geom_point() +
+  labs(x=expression("Day of Year"),
+       y=expression("Trail use"))
+
+
+```
 
 ```{r}
 
@@ -376,12 +433,41 @@ ggplot(data=allTrail, aes(x=yday, y=max.camera, group=subsectionF)) +
   #      y=expression(CO[2] ~ uptake ~ (mu*mol ~ m^{-2})))
 ```
 
+
 ### Single common smoother plus group-level smoothers that have the same wiggliness (model GS)
 
-```{r subsection modGS, echo=T, eval=T}
+Model GS constricts all groups to having similar functional responses, but, unlike model G, intergroup variation in responses is allowed. This approach works by allowing each grouping level (here, subsectionF) to have its own functional response, but penalizing functions that are too far from the average.
+
+In R we can write our model as:
+
+```{r model GS shown, echo =T, eval =F}
+
+ gamm_modGS_ARMA_sub <- gamm(max.camera ~ 
+                           s(yday, m=2, bs="tp", k = 10) +
+                           s(yday, subsectionF,
+                             m=2, bs="fs", k = 25) +
+                           s(subsectionF, bs = "re") +
+                           s(month, k = 7) +
+                           s(wday,
+                             bs = "cc", k = 7) +
+                           s(daily_aqi_value) +
+                           s(temp_max_f) +
+                           s(precipitation_in) +
+                           max.count
+                         ,
+                         data = allTrail, 
+                         method = "REML", 
+                         correlation = corARMA(form = ~yday|subsectionF, 
+                                               p = 7),
+                         family = poisson)
+```
+
+With this model specification we explicitly specifying one term for the global smoother (as in model G above) then added a second smooth term specifying the group-level smooth terms (here, subsectionF), using a penalty term that tends to draw these group-level smoothers toward zero. This penalty is incorporated via the factor-smoothing basis type (bs = "fs") which creates a copy of each set of basis functions for each level of the grouping variable, but only estimates one smoothing parameter for all groups (see `?mgcv::factor.smooth.interaction` for details).  
+
+```{r subsection modGS, echo=F, eval=T}
 
 if(F){
-  gamm4_modGS_sub <- gamm4::gamm4(max.camera ~ 
+  gamm_modGS_sub <- gamm(max.camera ~ 
                            s(yday, m=2, bs="tp", k = 10) +
                            s(yday, subsectionF,
                              m=2, bs="fs", k = 25) +
@@ -391,11 +477,11 @@ if(F){
                            s(wday, bs = "cc", k = 7) +
                            s(daily_aqi_value) +
                            s(temp_max_f) +
-                           # s(precipitation_in) +
+                           s(precipitation_in) +
                            max.count
                          ,
                          data = allTrail, 
-                         # method = "REML",
+                         method = "REML",
                          family = poisson#, 
                          # niterPQL = 20
                         )
@@ -411,7 +497,7 @@ if(F){
                              bs = "cc", k = 7) +
                            s(daily_aqi_value) +
                            s(temp_max_f) +
-                           # s(precipitation_in) +
+                           s(precipitation_in) +
                            max.count
                          ,
                          data = allTrail, 
@@ -432,18 +518,18 @@ if(F){
                              bs = "cc", k = 7) +
                            s(daily_aqi_value) +
                            s(temp_max_f) +
-                           # s(precipitation_in) +
+                           s(precipitation_in) +
                            max.count
                          ,
                          data = allTrail, 
                          method = "REML", 
                          correlation = corARMA(form = ~yday|subsectionF, 
-                                               p = 7),
+                                               p = 2, q = 2),
                          family = poisson #, 
                          # niterPQL = 20
                          )
 
-save(gamm4_modGS_sub, file=here("output/models/allT_subsection_gamm4_GS.rda"),
+save(gamm_modGS_sub, file=here("output/models/allT_subsection_gamm_GS.rda"),
      compress='xz')
 
 save(gamm_modGS_AR1_sub, file=here("output/models/allT_subsection_gamm_GS_AR1.rda"),
@@ -453,25 +539,83 @@ save(gamm_modGS_ARMA_sub, file=here("output/models/allT_subsection_gamm_GS_ARMA.
      compress='xz')
 }
 
-load(here("output/models/allT_subsection_gamm4_GS.rda"))
+load(here("output/models/allT_subsection_gamm_GS.rda"))
 load(here("output/models/allT_subsection_gamm_GS_AR1.rda"))
 load(here("output/models/allT_subsection_gamm_GS_ARMA.rda"))
 
 ```
 
-```{r}
+```{r modGS pq choice}
+## this should help find values for p and q in the ARMA model 
+arma_res_GS <- forecast::auto.arima(resid(gamm_modGS_sub$lme, type = "normalized"),
+                       stationary = TRUE, seasonal = FALSE)
+ 
+arma_res_GS$coef
+```
+
+Figure \ref{fig:modelGS-draw} shows the fitted smoothers for `gamm_modGS_ARMA_sub`. The plots of group-specific smoothers indicate that trail sections differ not only in average (log) trail use (which would correspond to each trail having a straight line at different levels for the group-level smoother), but differ slightly in the shape of their functional responses. Figure \ref{fig:Fig11} shows how the global and group-specific smoothers combine to predict uptake rates for individual plants.  We see that, unlike in the single global smoother case above, none of the curves deviate from the data systematically.
+
+```{r modelGS-draw, fig.width=6, fig.height=3, dev.args=list(pointsize=10), out.width="\\linewidth", echo=FALSE, fig.cap="\\label{fig:Fig}Global function (\\texttt{s(yday)}) and group-specific deviations from the global function (\\texttt{s(yday, subsection)}) for \\texttt{gamm\\_modGS\\_ARMA\\_sub)}. "}
+#gratia draw() plot 
+gratia::draw(gamm_modGS_ARMA_sub)
+```
+
+```{r modelGS-predict,echo=FALSE, fig.width=6, fig.height=4, out.width="\\linewidth", fig.cap="\\label{fig:Fig11}Predicted trail use count values (lines) versus observed trail use (points) for each trail subsection, based on model \\emph{GS}."}
+gamm_modGS_ARMA_pred <- predict(gamm_modGS_ARMA_sub$gam, se.fit=TRUE, type = "response")
+allTrail_GS <- transform(allTrail_G, 
+                 modGS = gamm_modGS_ARMA_pred$fit, 
+                 modGS_se = gamm_modGS_ARMA_pred$se.fit)
+ggplot(data=allTrail_GS, aes(x=yday, y=max.camera, group=subsectionF)) +
+  facet_wrap(~subsectionF) +
+  geom_ribbon(aes(ymin=(modGS-2*modGS_se),
+                  ymax=(modGS+2*modGS_se)), alpha=0.25) +
+  geom_line(aes(y=(modGS))) +
+  geom_point() +
+  labs(x=expression("Day of Year"),
+       y=expression("Trail use"))
+
+## turn this into two graphs with high/low trail use so scales are different and we can see low trail use subsections better
+
+high_pred_GS <- ggplot(data=filter(allTrail_GS, subsectionF %in% high_use),
+                   aes(x=yday, y=max.camera, group=subsectionF)) +
+  facet_wrap(~subsectionF) +
+  geom_ribbon(aes(ymin=(modGS-2*modGS_se),
+                  ymax=(modGS+2*modGS_se)), alpha=0.25) +
+  geom_line(aes(y=(modGS))) +
+  geom_point() +
+  labs(x=expression("Day of Year"),
+       y=expression("Trail use"))
+
+low_pred_GS <- ggplot(data=filter(allTrail_GS, subsectionF %notin% high_use),
+                   aes(x=yday, y=max.camera, group=subsectionF)) +
+  facet_wrap(~subsectionF) +
+  geom_ribbon(aes(ymin=(modGS-2*modGS_se),
+                  ymax=(modGS+2*modGS_se)), alpha=0.25) +
+  geom_line(aes(y=(modGS))) +
+  geom_point() +
+  labs(x=expression("Day of Year"),
+       y=expression("Trail use"))
+
+
+```
+
+
+
+```{r modGS summary}
 
 summary(gamm_modGS_sub$gam)
-gratia::draw(gamm_modGS_sub$gam)
-gratia::appraise(gamm_modGS_sub$gam)
+```
 
-with(allTrail_G, tsDiagGamm(gamm_modGS_sub, timevar = yday,
+```{r}
+gratia::appraise(gamm_modGS_ARMA_sub$gam)
+
+with(allTrail_G, tsDiagGamm(gamm_modGS_ARMA_sub, timevar = yday,
                           observed = max.camera))
 
 
 layout(matrix(1:2, ncol = 2))
-acf(residuals(gam_modGS_sub))
-pacf(residuals(gam_modGS_sub))
+acf(residuals(gamm_modGS_ARMA_sub$lme, type = "normalized"))
+pacf(residuals(gamm_modGS_ARMA_sub$lme, type = "normalized"))
 layout(1)
 ```
 
@@ -488,19 +632,21 @@ lines(fitted(gamm_modGS_AR1_sub$gam) ~ allTrail_G$yday, lty = "solid", col = "or
 ```{r subsection modGI}
 
 if(F){
-  gamm4_modGI_sub <- gamm4::gamm4(max.camera ~
+  gamm_modGI_sub <- gamm(max.camera ~
                                   s(yday, m=2, bs="tp") +
                                   s(yday, by = subsectionF,
                                     m=1, bs="tp") +
-                                  # s(subsectionF,
-                                  #   bs="re", by = trailnameF, k=25) +
+                                  s(subsectionF,
+                                    bs="re",
+                                    # by = trailnameF,
+                                    k=25) +
                                   # trailnameF +
                                   s(month, k = 7) +
                                   s(wday,
                                     bs = "cc", k = 7) +
                                   s(daily_aqi_value) +
                                   s(temp_max_f) +
-                                  # s(precipitation_in) +
+                                  s(precipitation_in) +
                                   max.count,
                                 data = allTrail,
                                 family = poisson)
@@ -520,28 +666,8 @@ if(F){
 #                                  family = poisson#, 
 #                                  # method = "REML"
 # )
-
-save(gamm4_modGI_sub, 
-     file=here("output/models/allT_subsection_gamm4_GI.rda"),
-     compress='xz')
-}
-
-
-summary(bam_modGI_sub)
-itsadug::check_resid(bam_modGI_sub)
-
-gratia::draw(bam_modGI_sub)
-gratia::appraise(bam_modGI_sub)
-
-layout(matrix(1:2, ncol = 2))
-acf(resid(bam_modGI_sub), 
-    lag.max = 36, main = "ACF")
-pacf(resid(bam_modGI_sub),
-     lag.max = 36, main = "pACF")
-layout(1)
-
-
-# gamm_modGI2_sub <- gamm(max.camera ~ 
+  
+  # gamm_modGI2_sub <- gamm(max.camera ~ 
 #                          s(yday, m=2, bs="tp") + 
 #                           s(subsectionF, bs = "re") +
 #                          s(yday, by = subsectionF,
@@ -561,7 +687,104 @@ layout(1)
 # 
 # save(gamm_modGI_sub, file=here("output/models/allT_subsection_gamm_GI.rda"),
 #      compress='xz')
+  
+  gamm_modGI_AR1_sub <- gamm(max.camera ~
+                           s(yday, m=2, bs="tp") +
+                           s(yday, by = subsectionF,
+                             m=1, bs="tp") +
+                           s(subsectionF,
+                             bs="re",
+                             # by = trailnameF,
+                             k=25) +
+                           # trailnameF +
+                           s(month, k = 7) +
+                           s(wday,
+                             bs = "cc", k = 7) +
+                           s(daily_aqi_value) +
+                           s(temp_max_f) +
+                           s(precipitation_in) +
+                           max.count,
+                           correlation = corAR1(form = ~yday|subsectionF),
+                         data = allTrail,
+                         family = poisson)
+  
+  gamm_modGI_ARMA_sub <- gamm(max.camera ~
+                           s(yday, m=2, bs="tp") +
+                           s(yday, by = subsectionF,
+                             m=1, bs="tp") +
+                           s(subsectionF,
+                             bs="re",
+                             # by = trailnameF,
+                             k=25) +
+                           # trailnameF +
+                           s(month, k = 7) +
+                           s(wday,
+                             bs = "cc", k = 7) +
+                           s(daily_aqi_value) +
+                           s(temp_max_f) +
+                           s(precipitation_in) +
+                           max.count,
+                           correlation = corARMA(form = ~yday|subsectionF, 
+                                                 p = 1, q = 1),
+                         data = allTrail,
+                         family = poisson)
 
+save(gamm_modGI_sub, 
+     file=here("output/models/allT_subsection_gamm_GI.rda"),
+     compress='xz')
+
+save(gamm_modGI_AR1_sub, 
+     file=here("output/models/allT_subsection_gamm_GI-AR1.rda"),
+     compress='xz')
+
+save(gamm_modGI_ARMA_sub, 
+     file=here("output/models/allT_subsection_gamm_GI-ARMA.rda"),
+     compress='xz')
+}
+
+load(file=here("output/models/allT_subsection_gamm_GI.rda"))
+
+load(file=here("output/models/allT_subsection_gamm_GI-AR1.rda"))
+
+load(file=here("output/models/allT_subsection_gamm_GI-ARMA.rda"))
+
+```
+
+
+```{r modGI pq choice}
+## this should help find values for p and q in the ARMA model 
+arma_res_GI <- forecast::auto.arima(resid(gamm_modGI_sub$lme, 
+                                          type = "normalized"),
+                       stationary = TRUE, seasonal = FALSE)
+ 
+arma_res_GI$coef
+```
+
+```{r modelGI-summary}
+
+summary(gamm_modGI_sub$gam)
+```
+
+```{r}
+itsadug::check_resid(gamm_modGI_AR1_sub$gam)
+
+gratia::draw(gamm_modGI_sub)
+gratia::appraise(bam_modGI_sub)
+
+with(allTrail_G, tsDiagGamm(gamm_modGI_ARMA_sub, timevar = yday,
+                          observed = max.camera))
+
+
+layout(matrix(1:2, ncol = 2))
+acf(resid(gamm_modGI_ARMA_sub$lme, type = "normalized"), 
+    lag.max = 36, main = "ACF")
+pacf(resid(gamm_modGI_ARMA_sub$lme, type = "normalized"),
+     lag.max = 36, main = "pACF")
+layout(1)
+
+```
+
+```{r}
 ## AR1 with rho - needs to define the multiple time series for each subsection
 # allTrail2 <- itsadug::start_event(allTrail, 
 #                                   column="yday",
@@ -572,27 +795,26 @@ allTrail <- allTrail %>%
   dplyr::group_by(subsectionF) %>% 
   mutate(start.event = ifelse(min(yday) == yday, TRUE, FALSE)) %>% 
   dplyr::ungroup()
-
-valRho <- acf(resid(bam_modGI_sub), plot=FALSE)$acf[2]
-
-
-bam_modGI_AR1_sub <- bam(max.camera ~ 
-                         s(yday, bs="tp") +
-                         s(subsectionF, bs = "re")+
-                         s(yday, by= subsectionF) +
-                         s(wday,
-                           bs = "cc", k = 7) +
-                         s(daily_aqi_value) +
-                         s(temp_max_f) +
-                         s(precipitation_in) +
-                         max.count,
-                       data = allTrail, 
-                       family = poisson,
-                       AR.start=allTrail$start.event, 
-                       rho=valRho)
-save(bam_modGI_AR1_sub,
-     here("output/models/allT_subsection_bam_GIAR1.rda"),
-     compress='xz')
+# valRho <- acf(resid(bam_modGI_sub), plot=FALSE)$acf[2]
+# 
+# 
+# bam_modGI_AR1_sub <- bam(max.camera ~ 
+#                          s(yday, bs="tp") +
+#                          s(subsectionF, bs = "re")+
+#                          s(yday, by= subsectionF) +
+#                          s(wday,
+#                            bs = "cc", k = 7) +
+#                          s(daily_aqi_value) +
+#                          s(temp_max_f) +
+#                          s(precipitation_in) +
+#                          max.count,
+#                        data = allTrail, 
+#                        family = poisson,
+#                        AR.start=allTrail$start.event, 
+#                        rho=valRho)
+# save(bam_modGI_AR1_sub,
+#      here("output/models/allT_subsection_bam_GIAR1.rda"),
+#      compress='xz')
 
 gratia::appraise(bam_modGI_AR1_sub)
 
@@ -605,78 +827,47 @@ layout(1)
 ```
 
 
-```{r}
 
+```{r modelGI-predict,echo=FALSE, fig.width=6, fig.height=4, out.width="\\linewidth", fig.cap="\\label{fig:}Predicted trail use count values (lines) versus observed trail use (points) for each trail subsection, based on model \\emph{GI}."}
+gamm_modGI_ARMA_pred <- predict(gamm_modGI_ARMA_sub$gam, se.fit=TRUE, type = "response")
+allTrail_GI <- transform(allTrail_G, 
+                 modGI = gamm_modGI_ARMA_pred$fit, 
+                 modGI_se = gamm_modGI_ARMA_pred$se.fit)
+ggplot(data=allTrail_GI, aes(x=yday, y=max.camera, group=subsectionF)) +
+  facet_wrap(~subsectionF) +
+  geom_ribbon(aes(ymin=(modGI-2*modGI_se),
+                  ymax=(modGI+2*modGI_se)), alpha=0.25) +
+  geom_line(aes(y=(modGI))) +
+  geom_point() +
+  labs(x=expression("Day of Year"),
+       y=expression("Trail use"))
 
-gamm_modGS_AR1_sub <- gamm(max.camera ~ 
-                         # s(yday, m=2, bs="tp") + 
-                         s(yday, subsectionnumber,
-                           m=2, bs="fs") +
-                         s(month, k = 7) +
-                         s(wday,
-                           bs = "cc", k = 7) +
-                         s(daily_aqi_value) +
-                         s(temp_max_f) +
-                         s(precipitation_in) +
-                         max.count
-                         , 
-                       correlation = corAR1(form = ~ yday | subsectionnumber),
-                       data = allTrail, 
-                       family = poisson, niterPQL = 25)
+## turn this into two graphs with high/low trail use so scales are different and we can see low trail use subsections better
 
-save(gamm_modGS_AR1_sub, file=here("output/models/allT_subsection_gamm_GS_AR1.rda"),
-     compress='xz')
+high_pred_GI <- ggplot(data=filter(allTrail_GI, subsectionF %in% high_use),
+                   aes(x=yday, y=max.camera, group=subsectionF)) +
+  facet_wrap(~subsectionF) +
+  geom_ribbon(aes(ymin=(modGI-2*modGI_se),
+                  ymax=(modGI+2*modGI_se)), alpha=0.25) +
+  geom_line(aes(y=(modGI))) +
+  geom_point() +
+  ylim(0, 800) +
+  labs(x=expression("Day of Year"),
+       y=expression("Trail use"))
 
-
-summary(gamm_modGS_AR1_sub$gam)
-gratia::draw(gamm_modGS_AR1_sub$gam)
-
-layout(matrix(1:2, ncol = 2))
-acf(resid(gamm_modGS_AR1_sub$lme, type = "normalized"), 
-    lag.max = 36, main = "ACF")
-pacf(resid(gamm_modGS_AR1_sub$lme, type = "normalized"),
-     lag.max = 36, main = "pACF")
-layout(1)
-
-
-
-gamm_modGS_ARMA_sub <- gamm(max.camera ~ 
-                         # s(yday, m=2, bs="tp") + 
-                         s(yday, subsectionnumber,
-                           m=2, bs="fs") +
-                         s(month, k = 7) +
-                         s(wday,
-                           bs = "cc", k = 7) +
-                         s(daily_aqi_value) +
-                         s(temp_max_f) +
-                         s(precipitation_in) +
-                         max.count
-                         , 
-                       correlation = corARMA(form = ~ yday | subsectionnumber, 
-                                             p = 3, q = 2),
-                       data = allTrail, 
-                       family = poisson)
-
-save(gamm_modGS_ARMA_sub, file=here("output/models/allT_subsection_gamm_GS_ARMA.rda"),
-     compress='xz')
-
-
-summary(gamm_modGS_ARMA_sub$gam)
-gratia::draw(gamm_modGS_ARMA_sub$gam)
-
-layout(matrix(1:2, ncol = 2))
-acf(resid(gamm_modGS_ARMA_sub$lme, type = "normalized"), 
-    lag.max = 36, main = "ACF")
-pacf(resid(gamm_modGS_ARMA_sub$lme, type = "normalized"),
-     lag.max = 36, main = "pACF")
-layout(1)
-
-
-
+low_pred_GI <- ggplot(data=filter(allTrail_GI, subsectionF %notin% high_use),
+                   aes(x=yday, y=max.camera, group=subsectionF)) +
+  facet_wrap(~subsectionF) +
+  geom_ribbon(aes(ymin=(modGI-2*modGI_se),
+                  ymax=(modGI+2*modGI_se)), alpha=0.25) +
+  geom_line(aes(y=(modGI))) +
+  geom_point() +
+  ylim(0,200) +
+  labs(x=expression("Day of Year"),
+       y=expression("Trail use"))
 
 
 ```
-
 
 ## Visual Inspection of Model
 
@@ -708,6 +899,100 @@ ggplot(data=CO2, aes(x=conc, y=uptake, group=Plant_uo)) +
 ```
 
 
+
+## Prediction/Forecasting
+
+-compare top version of each model type (G, GS, GI)
+-compare Middle Cottonwood singleTrail to allTrail
+-predict at new trails
+
+```{r compare model type predictions}
+p_G <- as_tibble(predict(gamm_modGS_ARMA_sub$gam, 
+                                 predict.data, 
+                                 se.fit = TRUE, 
+                                 type = "response")) %>%
+    rename(fit_G = fit, se_G = se.fit)
+p_GS <- as_tibble(predict(gamm_modGS_sub$gam, 
+                            predict.data, 
+                            se.fit = TRUE, 
+                            type = "response")) %>%
+    rename(fit_GS = fit, se_GS = se.fit)
+p_GI <- as_tibble(predict(gamm_modGI_sub$gam, 
+                            predict.data, 
+                            se.fit = TRUE, 
+                            type = "response")) %>%
+    rename(fit_GI = fit, se_GI = se.fit)
+
+
+new_data_bases <- bind_cols(predict.data, p_G, p_GS, p_GI) %>%
+    tidyr::pivot_longer(fit_G:se_GI, names_sep = '_',
+                 names_to = c('variable', 'model')) %>%
+    tidyr::pivot_wider(names_from = variable, values_from = value) %>%
+    mutate(upr_ci = fit + (2 * se), lwr_ci = fit - (2 * se))
+
+ggplot(mapping = aes(x = yday, y = count)) +
+    geom_ribbon(data = new_data_bases,
+                mapping = aes(ymin = lwr_ci, ymax = upr_ci, x = yday, fill = factor(model)),
+                inherit.aes = FALSE, alpha = 0.2) +
+    geom_point(data = allTrail, aes(colour = wday)) +
+    geom_line(data = new_data_bases, aes(y = fit, x = yday, colour2 = factor(model)),
+              size = 1) %>%
+  facet_wrap(~subsectionF, col = 5) %>% 
+    relayer::rename_geom_aes(new_aes = c("colour" = "colour2")) +
+    scale_colour_distiller(palette = "Set1", aesthetics = "colour", name = "Day of Week") +
+    scale_colour_OkabeIto(aesthetics = "colour2", name = "Model") +
+    scale_fill_OkabeIto(name = "Model") +
+    coord_cartesian(xlim = c(0, 365), ylim = c(0, 1000)) +
+    labs(title = "Extrapolation",
+         subtitle = "How prediction varies with different model specifications")
+```
+
+```{r compare Middle Cottonwood predictions}
+p_single <- as_tibble(predict(gamm_modGS_ARMA_sub$gam, 
+                                 predict.data, 
+                                 se.fit = TRUE, 
+                                 type = "response")) %>%
+    rename(fit_single = fit, se_single = se.fit)
+p_all <- as_tibble(predict(gamm_modGI_ARMA_sub$gam, 
+                            predict.data, 
+                            se.fit = TRUE, 
+                            type = "response")) %>%
+    rename(fit_all = fit, se_all = se.fit)
+
+
+
+new_data_bases <- bind_cols(predict.data, p_single, p_all) %>%
+    tidyr::pivot_longer(fit_single:se_all, names_sep = '_',
+                 names_to = c('variable', 'data-used')) %>%
+    tidyr::pivot_wider(names_from = variable, values_from = value) %>%
+    mutate(upr_ci = fit + (2 * se), lwr_ci = fit - (2 * se)) %>% 
+  dplyr::filter(subsectionF == "Middle Cottonwood")
+
+ggplot(mapping = aes(x = yday, y = count)) +
+    geom_ribbon(data = new_data_bases,
+                mapping = aes(ymin = lwr_ci, ymax = upr_ci, x = yday, fill = factor(model)),
+                inherit.aes = FALSE, alpha = 0.2) +
+    geom_point(data = allTrail, aes(colour = wday)) +
+    geom_line(data = new_data_bases, aes(y = fit, x = yday, colour2 = factor(model)),
+              size = 1) %>%
+  # facet_wrap(~subsectionF, col = 5) %>% 
+    relayer::rename_geom_aes(new_aes = c("colour" = "colour2")) +
+    scale_colour_distiller(palette = "Set1", aesthetics = "colour", name = "Day of Week") +
+    scale_colour_OkabeIto(aesthetics = "colour2", name = "Model") +
+    scale_fill_OkabeIto(name = "Model") +
+    coord_cartesian(xlim = c(0, 365), ylim = c(0, 10000)) +
+    labs(title = "Extrapolation",
+         subtitle = "How prediction varies with data used to fit model")
+```
+
+
+
+## Results
+-how to compare gamm models?
+-which model do we recommend overall? 
+-Overview of model, predictions, use in future
+
+
 ```{r AIC_table, echo=FALSE,  fig.width=4, fig.height=6, message=FALSE, warning=FALSE, cache=TRUE}
 AIC_table <- AIC(CO2_modG,CO2_modGS, CO2_modGI, CO2_modS, CO2_modI,
              bird_modG, bird_modGS, bird_modGI, bird_modS, bird_modI)%>%
@@ -730,16 +1015,12 @@ kable(AIC_table, format =table_out_format,
   kableExtra::group_rows("B. bird_move models", 6,10)
 ```
 
-## Results
-
-## Prediction/Forecasting
-
-```{r}
-
-```
 
 
-## Limitations of Model
+## Conclusions
+-limitations of model
+-recommendations for future use
+
 
 
 <!-- ```{r group by trailnumber, eval = F} -->

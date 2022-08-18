@@ -15,14 +15,15 @@ library(ggspatial)
 
 allTrailChar_full <- trail_char %>% 
   dplyr::left_join(trail_spatial_summary, 
-                   by = c("trailnumber" = "ID" ))
+                   by = c("trailnumber" = "ID" )) 
 
 
 
 trail_spatial %>%  
+  dplyr::filter(ID %in% spatial_subset) %>% #spatail_subset created in 01-LoadData.R
   st_zm() %>% 
   ggplot() + 
-  geom_sf(aes(color = factor(OBJECTID)), size = 2) +
+  geom_sf(aes(color = factor(NAME)), size = 2) +
   annotation_scale(style = 'ticks', pad_x = unit(4.35, 'cm'), 
                    pad_y = unit(.5, 'cm')) +
   theme_void() +
