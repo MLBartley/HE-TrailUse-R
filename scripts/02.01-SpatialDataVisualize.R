@@ -20,7 +20,7 @@ allTrailChar_full <- trail_char %>%
 
 
 trail_spatial %>%  
-  dplyr::filter(ID %in% spatial_subset) %>% #spatail_subset created in 01-LoadData.R
+  # dplyr::filter(ID %in% spatial_subset) %>% #spatail_subset created in 01-LoadData.R
   st_zm() %>% 
   ggplot() + 
   geom_sf(aes(color = factor(NAME)), size = 2) +

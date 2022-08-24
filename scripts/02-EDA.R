@@ -20,6 +20,7 @@ source("scripts/01-LoadData.R") #loads and cleans data
 library(devtools) #useful for installing packages from github
 library(dplyr) #lots of great data manipulation functions
 library(ggplot2) #needed for plots
+library(ggspatial) #spatial plots
 library(gridExtra) #arrange multiple plots in single panel
 library(magrittr) #allows for use of %>% pipe operator 
 library(scales)   # to access breaks/formatting functions
@@ -118,19 +119,34 @@ AQIDaily
 
 #save plots
 ggsave(filename = here::here("output/figures/MaxTempDaily.pdf"), 
-       plot = MaxTempDaily)
+       plot = MaxTempDaily, 
+       height = 8.5, 
+       width = 13,
+       dpi=700)
 
 ggsave(filename = here::here("output/figures/MinTempDaily.pdf"), 
-       plot = MinTempDaily)
+       plot = MinTempDaily, 
+       height = 8.5, 
+       width = 13,
+       dpi=700)
 
 ggsave(filename = here::here("output/figures/PM25Daily.pdf"), 
-       plot = PM25Daily)
+       plot = PM25Daily, 
+       height = 8.5, 
+       width = 13,
+       dpi=700)
 
 ggsave(filename = here::here("output/figures/PrecipDaily.pdf"), 
-       plot = PrecipDaily)
+       plot = PrecipDaily, 
+       height = 8.5, 
+       width = 13,
+       dpi=700)
 
 ggsave(filename = here::here("output/figures/AQIDaily.pdf"), 
-       plot = AQIDaily)
+       plot = AQIDaily, 
+       height = 8.5, 
+       width = 13,
+       dpi=700)
 
 ##ggarrange
 
@@ -140,11 +156,46 @@ weather.plots <- gridExtra::grid.arrange(MaxTempDaily,
                                          PrecipDaily,
                                          AQIDaily, ncol =2)
 ggsave(filename = here::here("output/figures/weatherplots.pdf"), 
-       plot = weather.plots)
+       plot = weather.plots, 
+       height = 8.5, 
+       width = 13,
+       dpi=700)
 # strava & counter data summaries ----------------------------------------
 
 summary(strava_day$totaltrips)
 summary(trail_count$count)
+
+
+# camera locations --------------------------------------------------------
+cameras_sf <- st_as_sf(cameras, coords = c("counter_long", "counter_lat"), 
+                   crs = 4326, agr = "constant")
+
+trail_spatial %>% 
+  dplyr::filter(NAME %notin% c("NEW WORLD GULCH")) %>%
+  st_zm() %>% 
+  ggplot() + 
+  geom_sf() +
+  geom_sf(data = cameras_sf,
+          aes(
+            # x = counter_long,
+            # y = counter_lat, 
+            color = factor(trailname)), size = 2) +
+  annotation_scale(style = 'ticks', pad_x = unit(4.35, 'cm'), 
+                   pad_y = unit(.5, 'cm')) +
+  labs(title='Bridger Mountains Trail Cameras') +
+  labs(x = "Longitude", y = "Latitude", size = 20) +
+   labs(color='Trails') +
+theme(axis.text = element_text(size = rel(1.25)),
+      axis.title = element_text(size = rel(1.25)),
+      plot.title = element_text(size = rel(2))) #+  
+
+# theme_void() #+
+  # theme(legend.position = 'bottom')
+
+ggsave(filename = here::here("output/figures/camera_locations.pdf"), 
+       height = 8.5, 
+       width = 13,
+       dpi=700)
 
 # plot Strava timeseries --------------------------------------------------
 
@@ -165,7 +216,10 @@ strava_day_TSplot_trips <- strava_day %>%
 strava_day_TSplot_trips
 
 ggsave(filename = here::here("output/figures/Strava_day_TS_bytrip.pdf"), 
-       plot = strava_day_TSplot_trips
+       plot = strava_day_TSplot_trips, 
+       height = 8.5, 
+       width = 13,
+       dpi=700
 )
 
 strava_day_TSplot_people <- strava_day %>% 
@@ -218,27 +272,81 @@ strava_month_TSplot_people <- strava_month %>%
 
 # Counter TSplots by counterid --------------------------------------------
 
+not_included <- c(1, 16, 24, 25)
+
+# trail_count_plotting <- trail_count
+# 
+# ##weird workaround to fix facet labelling when we've got 
+# # multiple cameras on a single subsection
+# trail_count_plotting[which(trail_count_plotting$counterid == 5),
+#                      "subsectionname"] <- "Baldy to Bridger 2"
+# 
+# trail_count_plotting[which(trail_count_plotting$counterid == 10),
+#                      "subsectionname"] <- "Ross Pass to Sacagawea Peak 2"
+# 
+# trail_count_plotting[which(trail_count_plotting$counterid == 13),
+#                      "subsectionname"] <- "Sacagawea Pass 2"
+# 
+# trail_count_plotting[which(trail_count_plotting$counterid == 27),
+#                      "subsectionname"] <- "Corbly Gulch 2"
+
+
 #daily aggregated
-count_ID_TSplot <- trail_count %>% 
-  dplyr::group_by(counterid, date, trailname) %>% 
-  dplyr::summarise(total_count = sum(count)) %>%
+count_ID_TSplot_high <- trail_count %>% 
+  dplyr::filter(subsectionname %in% c(high_use, 
+                                      "Fairy Lakeshore"#, 
+                                      # "Sacagawea Pass 2", 
+                                      # "Baldy to Bridger 2"
+                                      )) %>% 
+  dplyr::group_by(subsectionname, date, trailname) %>% 
+  dplyr::summarise(total_count = max(count)) %>%
   ggplot(aes(x = date, y = total_count)) +
   geom_area(aes(fill = factor(trailname)),
             alpha = .5, position = "stack") +
-  facet_wrap(~counterid, ncol = 3) +
-  guides(fill = 'none') +
+  facet_wrap(~subsectionname, ncol = 3) +
+  # guides(fill = 'none') +
   # ylim(0, 1000) +
   # scale_x_date(labels = date_format("%b %y"),
   #              name = "Month",
   #              date_breaks = "Daily") +
   labs(y = "Count ",
        title = "Counter Daily Trail Traffic",
-       subtitle = "2021",
+       subtitle = "2021: High Use Trails",
        fill = "Trail Name")
 
-count_ID_TSplot
+count_ID_TSplot_high
 
-ggsave(filename = here("output/figures/Counter_byID_TS.pdf"))
+ggsave(filename = here("output/figures/Counter_byID_TS_highuse.pdf"), 
+       height = 8.5, 
+       width = 13,
+       dpi=700)
+
+#daily aggregated
+count_ID_TSplot_low <- trail_count %>% 
+  dplyr::filter(subsectionname %notin% c(high_use,
+                                         "Fairy Lakeshore")) %>% 
+  dplyr::group_by(subsectionname, date, trailname) %>% 
+  dplyr::summarise(total_count = max(count)) %>%
+  ggplot(aes(x = date, y = total_count)) +
+  geom_area(aes(fill = factor(trailname)),
+            alpha = .5, position = "stack") +
+  facet_wrap(~subsectionname, ncol = 3) +
+  # guides(fill = 'none') +
+  # ylim(0, 1000) +
+  # scale_x_date(labels = date_format("%b %y"),
+  #              name = "Month",
+  #              date_breaks = "Daily") +
+  labs(y = "Count ",
+       title = "Counter Daily Trail Traffic",
+       subtitle = "2021: Low Use Trails",
+       fill = "Trail Name")
+
+count_ID_TSplot_low
+
+ggsave(filename = here("output/figures/Counter_byID_TS_lowuse.pdf"), 
+       height = 8.5, 
+       width = 13,
+       dpi=700)
 
 # plot Counter timeseries by trail -------------------------------------------------
 
@@ -382,7 +490,10 @@ trail_hourly %>%
   labs(title = "Bridgers Trail Traffic Patterns by Hour and Weekday",
        subtitle = "Data: 2021") 
 
-ggsave(filename = here("output/figures/hourly_bydayofweek.pdf"))
+ggsave(filename = here("output/figures/hourly_bydayofweek.pdf"), 
+       height = 8.5, 
+       width = 13,
+       dpi=700)
 
 # Counters vs covariates ------------------------------------------
 

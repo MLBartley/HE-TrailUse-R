@@ -14,7 +14,6 @@
 ##   - Data updated (AllTrails search data) on August 8, 2022
 ## ---------------------------
 
-
 # load packages -----------------------------------------------------------
 library(data.table) #let's us use %like% operator 
 library(dplyr) #lots of data handling tools
@@ -66,6 +65,14 @@ allTrails_search <- readxl::read_excel(here("data/raw/alltrails_pageviews.xlsx")
                                                      "numeric", "numeric", "numeric", "numeric"))
 
 # process data ------------------------------------------------------------
+
+##useful when need to plot high/low use trail subsections separately
+high_use <- c("Baldy to Bridger", "Bridger", 
+              "Bridger to Ross Pass", 
+              "College M", "M to Baldy",
+              "Middle Cottonwood", "Sypes Canyon",
+              "Ross Pass to Sacagawea Peak",
+              "Sacagawea Pass", "Steep Way")
 
 ### fix inconsistancies in trailnaming  ####
 
@@ -138,10 +145,10 @@ weather_updateTemps$DATE <- lubridate::mdy(weather_updateTemps$DATE)
 ### fix class of trail_spatial$ID to be numeric ####
 trail_spatial$ID <- as.numeric(trail_spatial$ID)
 
-### remove trails not to be included in analysis ####
-
-trail_count <- trail_count %>% 
-  dplyr::filter(counterid %notin% c(1, 16, 24, 25))
+# ### remove trails not to be included in analysis ####
+# 
+# trail_count <- trail_count %>% 
+#   dplyr::filter(counterid %notin% c(1, 16, 24, 25))
 
 # strava_day <- strava_day %>% 
 #   dplyr::filter(trailname %notin% c("Fairy Lakeshore", "Felix Canyon Rd"))
@@ -155,6 +162,11 @@ strava_day <- strava_day %>%
                              "edge_uid" = "edge_uid", 
                              "trailname" = "TrailName")) %>% 
   dplyr::rename(subsectionname = SubsectionName)
+
+## add subsection name from trail name if NA
+trail_count[is.na(trail_count$subsectionname),
+         'subsectionname' ] <- trail_count[is.na(trail_count$subsectionname), 
+                                        'trailname' ] 
 
 ### update temp min and max values ####
 weather_updateTemps <- weather_updateTemps %>% 
@@ -171,17 +183,34 @@ weather <- weather %>%
   dplyr::rename(c("temp_max_f" = "TMAX", 
                   "temp_min_f" = "TMIN"))
   
-
+### camera data details ####
+cameras <- trail_count %>% 
+  dplyr::select(c(counterid,
+                  trailnumber, 
+                  trailname, 
+                  counterowner,
+                  counter_lat, 
+                  counter_long)) %>% 
+  dplyr::distinct()
 
 # combine for GAMM analysis -----------------------------------------------
 
 ### All Data ####
 
+### remove trails not to be included in analysis ####
+
+trail_count_analysis <- trail_count %>% 
+  dplyr::filter(counterid %notin% c(1,
+                                    # 14, 33, #Horsetrail and Benchroad don't have ANY Strava data
+                                    16, 24, 25))
+
+
 ## some subections (e.g. Baldy to Bridger and Ross Pass to Sac Peak)
-allCount <- trail_count %>% 
+allCount <- trail_count_analysis %>% 
   dplyr::group_by(date, trailnumber) %>% 
   dplyr::mutate(max.camera = max(count)) %>% 
   dplyr::select(-c(count, counterid, counter_lat,
+                   counterowner,
                    # subsectionname, # removing to start simple with all Trails WILL NEED TO REASSESS
                    counter_long, stravaedgeid2022)) %>% 
   dplyr::distinct()
@@ -289,7 +318,7 @@ allData$yday <- lubridate::yday(allData$date)
 # View(allTrail[is.na(allTrail$length_mi),]) #result: no spatial info for Johnson Canyon Jeep trail nor Benchmark Rd
 # View(allTrail[is.na(allTrail$totallength_miles),]) #result: no spatial info for Johnson Canyon Jeep trail nor Benchmark Rd
 
-spatialmissing.subsections <- pull(unique(allTrail[is.na(allTrail$totallength_miles),
+spatialmissing.subsections <- pull(unique(allData[is.na(allData$totallength_miles),
                                                    'subsectionname']))
 
 ## remove trails without Strava data/spatial data 
@@ -341,7 +370,18 @@ allData$week <- as.integer(allData$week)
 ## I moved the addition of zeros to the Strava data earlier in the process so 
     #it only has to be done once!
 allTrail <- allData %>% 
-  tidyr::drop_na(max.camera) 
+  tidyr::drop_na(max.camera) %>% 
+  ## remove trails that are ENTIRELY NA for strava data 
+  tidyr::drop_na(max.count) %>% 
+  ## remove non-independent ("duplicate') sections of Bridger Ridge
+  dplyr::filter(subsectionname %notin% c("Baldy to Bridger",
+                                         "Bridger to Ross Pass",
+                                         "M to Baldy", 
+                                         "Ross Pass to Sacagawea Peak"))
+
+subsection.excluded.num <- which(unique(allData$subsectionname) %notin% unique(allTrail$subsectionname))
+subsection.excluded.name <- unique(allData$subsectionname)[subsection.excluded.num]
+
 
 ## older, still valid way to combine data. 
 ## Unsure if this captures all Strava zeros added, especially when switching to 
@@ -367,11 +407,13 @@ allTrail <- allData %>%
 
 ## if trail doesnt have subsections, let's use the trailname as the subseciton name
 ## this allows us to analyse based on subsectionname - but we need to still address how to nest within trail number
-allTrail[is.na(allTrail$subsectionname), 'subsectionname' ] <- allTrail[is.na(allTrail$subsectionname), 'trailname' ] 
+# allTrail[is.na(allTrail$subsectionname), 'subsectionname' ] <- allTrail[is.na(allTrail$subsectionname), 'trailname' ] 
 
 ## CHECK: does allTrail have the same number of rows as trail_count? 
 ## If not something is off and we might have duplicate rows.
-nrow(allCount) == nrow(allTrail)
+nrow(allCount %>% filter(subsectionname %notin% c("Baldy to Bridger",
+                                                  "Bridger to Ross Pass",
+                                                  "M to Baldy"))) == nrow(allTrail)
 
 ## Add in a Time variable
 allTrail$yday <- lubridate::yday(allTrail$date)
@@ -390,17 +432,17 @@ spatialmissing.subsections <- pull(unique(allTrail[is.na(allTrail$totallength_mi
 # CHECK which trail/dates missing Strava data
 # View(allTrail[is.na(allTrail$max.count), ])
 
-checkStravaCount <- allTrail[is.na(allTrail$max.count), ]
+# checkStravaCount <- allTrail[is.na(allTrail$max.count), ]
 ## Horsetheif Moutain and Benchmark Trail both have NO STRAVA DATA AT ALL
 ## Only remaining NA = zeros, but seems less reliable since all data are missing
 
-nrow(allTrail[is.na(allTrail$max.count) & allTrail$max.camera <= 20, ])/ nrow(allTrail[is.na(allTrail$max.count), ])
+# nrow(allTrail[is.na(allTrail$max.count) & allTrail$max.camera <= 20, ])/ nrow(allTrail[is.na(allTrail$max.count), ])
 
 ## Assume missing Strava data reflect a 0 observation - BIG ASSUMPTION
 ## however ~75% of these missing (NA) Strava counts correspond to a camera count
 ## of 20 or less. 
 
-allTrail$max.count[which(is.na(allTrail$max.count))] <- 0
+# allTrail$max.count[which(is.na(allTrail$max.count))] <- 0
 
 ## CHECK do we have any strava counts that are greater than camera counts?
 
@@ -537,17 +579,20 @@ spatial_subset <- c(500, #Fairy Creek
 ### Middle Cottonwood ####
 
 predict.MidCot <- allData %>% 
-  dplyr::filter(trailnumber == 586, 
-                is.na(max.camera))  %>% 
+  dplyr::filter(trailnumber == 586)  %>% 
   dplyr::select(c("trailnumber", 
                   "trailname",
                   # "subsectionF", 
                   "date", 
-                  "wday", 
+                  "wday",
+                  "month",
+                  "yday",
                   "max.count", 
                   "precipitation_in", 
                   "daily_aqi_value", 
-                  "temp_max_f"
+                  "temp_max_f",
+                  "total_traveltime", 
+                  "totallength_miles"
                   ## add more if used in model
                   ))
   
@@ -587,39 +632,46 @@ predict.MidCot <- allData %>%
 
 ### All Trails####
 
-### Middle Cottonwood ####
-# add zeros into missing STRAVA days
-
-allStrava_zeros <- allStrava %>% 
-  dplyr::mutate(yday = lubridate::yday(timeframe))
-
-zeros_df_all <- as.data.frame(which(1:365 %notin%  allStrava_zeros$yday))
-colnames(zeros_df_all) <- "yday"
-zeros_df_all <- zeros_df_all %>% 
-  mutate(timeframe = lubridate::as_date(yday, origin = "2020-12-31"), 
-         trailname = unique(allStrava$trailname), 
-         trailnumber = unique(allStrava$trailnumber), 
-         wday = lubridate::wday(timeframe, label = T), 
-         max.count = 0) %>% 
-  dplyr::left_join(weather, by = c("timeframe" = "date"))
-
-predict.All <- allStrava %>% 
-  dplyr::left_join(weather, by = c("timeframe" = "date")) %>% 
-  # dplyr::filter(timeframe %notin% singleCount$date) %>% 
-  dplyr::mutate(yday = lubridate::yday(timeframe)) %>% 
-  dplyr::ungroup() %>% 
-  dplyr::bind_rows(zeros_df) %>% 
-  dplyr::select(c("yday", 
-                  "wday", 
+predict.All <- allData %>% 
+  dplyr::filter(subsectionname %notin% subsection.excluded.name)  %>%
+  dplyr::select(c("trailnumber", 
+                  "trailname",
+                  # "subsectionname",
+                  "subsectionF",
+                  "date", 
+                  "wday",
+                  "month",
+                  "yday",
                   "max.count", 
-                  "month", 
                   "precipitation_in", 
+                  "daily_aqi_value", 
                   "temp_max_f", 
-                  "daily_aqi_value"))
+                  "total_traveltime", 
+                  "totallength_miles"
+                  ## add more if used in model
+  )) %>% 
+  distinct()
 
-#convert week and wday to integers now
-predict.All$wday <- as.integer(predict.All$wday)
-# predict.MidCot$week <- as.integer(predict.MidCot$week)
+### New Trails (not in model) ####
+
+predict.New <- allData %>% 
+  dplyr::filter(subsectionname %in% subsection.excluded.name)  %>%
+  dplyr::select(c("trailnumber", 
+                  "trailname",
+                  "subsectionname",
+                  "subsectionF",
+                  "date", 
+                  "wday",
+                  "month",
+                  "yday",
+                  "max.count", 
+                  "precipitation_in", 
+                  "daily_aqi_value", 
+                  "temp_max_f",
+                  "total_traveltime", 
+                  "totallength_miles"
+                  ## add more if used in model
+  ))
 
 # save updated data files -------------------------------------------------
 

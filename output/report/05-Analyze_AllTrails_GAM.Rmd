@@ -6,6 +6,7 @@ output:
 # Analysis of All Camera-Monitered Bridger Trails: HGA(M)M Approach
 
 ```{r, echo=FALSE, message=F, warning=F, include = F}
+library(colorblindr)
 library(cowplot)
 library(dplyr)
 library(forecast)
@@ -71,15 +72,14 @@ tsDiagGamm <- function(x, timevar, observed, f = 0.3, type = "normalized") {
 ## Data Used 
 
 ```{r, eval = T}
-allTrail$subsectionF<- factor(allTrail$subsectionname, order = F)
-allTrail$trailnameF <- factor(allTrail$trailname, order = F)
+# allTrail$subsectionF<- factor(allTrail$subsectionname, order = F)
+# allTrail$trailnameF <- factor(allTrail$trailname, order = F)
 
-sub.number <- length(unique(allTrail$subsectionname))
+sub.number <- length(unique(allTrail$subsectionF))
 
-##useful when need to plot high/low use trail subsections separately
-high_use <- c("Baldy to Bridger", "Bridger", "Bridger to Ross Pass", 
-              "College M", "M to Baldy", "Middle Cottonwood", "Sypes Canyon",
-              "Ross Pass to Sacagawea Peak", "Sacagawea Pass", "Steep Way")
+#uncomment depending on whether you want all models to run (will take several hours)
+runall = T
+# runall = F
 
 ```
 
@@ -133,15 +133,15 @@ The arguments to the s() terms are smoothed. For each we explicitly specify the 
 
 ```{r subsection modG, eval = T, echo = F}
 ## Model G - Global smoother - A single common smoother for all observations
-if(F){
-  ## we are fitting several versions of Model G with increasing temporal structure on the errors. We will report the best one in this report, but provide the code for multiple specificiation in case a different model is needed in the future. 
+if(runall){
+  ## we are fitting several versions of each Model (here, model G) with increasing temporal structure on the errors. We will report the best one in this report, but provide the code for multiple specification in case a different model is needed in the future. 
   
   
   ## explore gam() approach - OK if other parameters take care of
   ## temporal dependence (don't seem to)
   
   gam_modG_sub <- gam(max.camera ~
-                         s(yday, bs="tp") +
+                         s(yday, bs="cc") +
                         # trailnameF + 
                          s(subsectionF,
                            bs="re",
@@ -153,9 +153,11 @@ if(F){
                          s(daily_aqi_value) +
                          s(temp_max_f) +
                          s(precipitation_in) +
-                         max.count
-                        ,
-                      # method = 'REML',
+                        s(totallength_miles) + 
+                        total_traveltime +
+                         max.count,
+                      knots = list(yday = c(0,365)),
+                      method = 'REML',
                       # correlation = corARMA(form = ~yday|subsectionF, p = 5), 
                        data = allTrail, 
                        family = poisson#, 
@@ -164,7 +166,7 @@ if(F){
   
   ## gamm model - check if this takes care of temporal dependence as is (w/o temporal autocorr sturcture on errors)
   gamm_modG_sub <- gamm(max.camera ~
-                          s(yday, bs="tp", k = 30) +
+                          s(yday, bs="cc", k = 30) +
                           # trailnameF + 
                           s(subsectionF,
                             bs="re",
@@ -176,9 +178,11 @@ if(F){
                           s(daily_aqi_value) +
                           s(temp_max_f) +
                           s(precipitation_in) +
-                          max.count
-                        ,
-                        # method = 'REML',
+                           s(totallength_miles) + 
+                        total_traveltime +
+                          max.count,
+                        knots = list(yday = c(0,365)),
+                        method = 'REML',
                         # correlation = corARMA(form = ~yday|subsectionF, p = 5), 
                         data = allTrail, 
                         family = poisson#, 
@@ -186,7 +190,7 @@ if(F){
   )
   
  gamm_modGAR1_sub <- gamm(max.camera ~
-                            s(yday, bs="tp") +
+                            s(yday, bs="cc") +
                             # trailnameF + 
                             s(subsectionF,
                               bs="re",
@@ -198,9 +202,11 @@ if(F){
                             s(daily_aqi_value) +
                             s(temp_max_f) +
                             s(precipitation_in) +
-                            max.count
-                          ,
-                          # method = 'REML',
+                             s(totallength_miles) + 
+                        total_traveltime +
+                            max.count,
+                          knots = list(yday = c(0,365)),
+                          method = 'REML',
                           correlation = corAR1(form = ~yday|subsectionF),
                           data = allTrail, 
                           family = poisson#, 
@@ -208,7 +214,7 @@ if(F){
  )
   
   gamm_modGARMA_sub <- gamm(max.camera ~
-                              s(yday, bs="tp") +
+                              s(yday, bs="cc") +
                               # trailnameF + 
                               s(subsectionF,
                                 bs="re",
@@ -220,11 +226,13 @@ if(F){
                               s(daily_aqi_value) +
                               s(temp_max_f) +
                               s(precipitation_in) +
-                              max.count
-                            ,
-                            # method = 'REML',
+                               s(totallength_miles) + 
+                        total_traveltime +
+                              max.count,
+                            knots = list(yday = c(0,365)),
+                            method = 'REML',
                             correlation = corARMA(form = ~yday|subsectionF,
-                                                  p = 2, q = 1),
+                                                  p = 1, q = 2),
                             data = allTrail, 
                             family = poisson#, 
                             # niterPQL = 30
@@ -253,8 +261,8 @@ load(here("output/models/allT_subsection_gamm_G-ARMA.rda"))
 
 ```{r modG pq choice}
 ## this should help find values for p and q in the ARMA model 
-arma_res_G <- forecast::auto.arima(resid(gamm_modG_sub$lme, type = "normalized"),
-                       stationary = TRUE, seasonal = FALSE)
+arma_res_G <- forecast::auto.arima(resid(gamm_modG_sub$lme, type = "normalized"), 
+                                   seasonal = T)
  
 arma_res_G$coef
 ```
@@ -265,11 +273,11 @@ The summary output indicates that all of our included parametric (linear) coeffi
 summary(gamm_modGARMA_sub$gam)
 ```
 
+[Explain time series GAMM diagnostics, cite source]
 
-
-```{r modG diagnoses}
+```{r modG TS diagnoses, eval = T}
 allTrail_G <- allTrail %>% 
-  tidyr::drop_na('daily_aqi_value')
+  tidyr::drop_na(c('daily_aqi_value', "totallength_miles"))
 
 
 with(allTrail_G, tsDiagGamm(gamm_modGARMA_sub, timevar = yday,
@@ -277,28 +285,26 @@ with(allTrail_G, tsDiagGamm(gamm_modGARMA_sub, timevar = yday,
 
 ```
 
+[explain partial effects plots for model G]
 
-```{r, eval = T, echo=T}
+```{r modG draw, eval = T, echo=T}
 gratia::draw(gamm_modGARMA_sub$gam)
 # gratia::appraise(gamm_modGARMA_sub$gam)
 # gam.vcomp(gamm_modGARMA_sub$gam)
+```
+
+[explain purpose of rootogram and what this says (i.e. slightly overdispersed but ok. What to do if more overdispersed)]
+
+```{r modG rootogram, eval = T, echo = T}
 
 rg <- gratia::rootogram(gamm_modGARMA_sub$gam)
 draw(rg)
 
-
-
-# layout(matrix(1:2, ncol = 2))
-# acf(resid(gamm_modGARMA_sub$lme, type = "normalized"), 
-#     lag.max = 36, main = "ACF")
-# pacf(resid(gamm_modGARMA_sub$lme, type = "normalized"),
-#      lag.max = 36, main = "pACF")
-# layout(1)
 ```
 
+[summary table explained (add other models?)]
 
-
-```{r, eval=T, result = "asis", message=F, include=knitr::is_latex_output(), echo= T, include = T}
+```{r, eval=T, result = "asis", message=F, include=knitr::is_latex_output(), echo= T, include = F}
 gamtabs(gamm_modGARMA_sub$gam,
         caption="Summaty of Global Smoothing Model (G)",
         comment=FALSE, type='latex')
@@ -330,7 +336,9 @@ B. smooth terms & edf & Ref.df & F-value & p-value \\
 \end{table}
 ```
 
-```{r, eval = T, echo = T}
+[explain species-specific plots of observed vs. predicted values. This model could potentially be improved by adding variation between trail subsections in trail use.]
+
+```{r modG predictions, eval = T, echo = T, fig.cap="Assuming a well-fitted model, we would expect all trail subsections exhibiting similar patterns of dispersion around the 1-1 line (and as we are assuming the data is Poisson, the variance around the mean should equal the mean). Instead we see that variance around the predicted value is much higher for some trails such as Sacagawea Pass."}
 
 #add the predicted values from the model 
 allTrail_G <- transform(allTrail_G, 
@@ -344,93 +352,122 @@ ggplot(allTrail_G, aes(x=mod_G, y=max.camera)) +
   labs(x="Predicted count", y="Observed count")
 ```
 
-```{r modelG-predict,echo=FALSE, fig.width=6, fig.height=4, out.width="\\linewidth", fig.cap="\\label{fig:Fig}Predicted trail use count values (lines) versus observed trail use (points) for each trail subsection, based on model \\emph{G}."}
+[look at in-sample prediction lines compared to data, will compare to other models later (Prediction sections)]
+
+```{r modelG-predict, eval = T, echo=FALSE}
 gamm_modG_ARMA_pred <- predict(gamm_modGARMA_sub$gam, se.fit=TRUE, type = "response")
-allTrail_G <- transform(allTrail_G, 
+allTrail_G_pred <- transform(allTrail_G, 
                  modG = gamm_modG_ARMA_pred$fit, 
                  modG_se = gamm_modG_ARMA_pred$se.fit)
-ggplot(data=allTrail_G, aes(x=yday, y=max.camera, group=subsectionF)) +
+all_pred_G <- ggplot(data=allTrail_G_pred, aes(x=yday, y=max.camera, group=subsectionF)) +
   facet_wrap(~subsectionF) +
   geom_ribbon(aes(ymin=(modG-2*modG_se),
                   ymax=(modG+2*modG_se)), alpha=0.25) +
-  geom_line(aes(y=(modG))) +
-  geom_point() +
+  geom_line(aes(y=(modG), col = trailname)) +
+  geom_point(aes(color = trailname)) +
   labs(x=expression("Day of Year"),
        y=expression("Trail use"))
 
 ## turn this into two graphs with high/low trail use so scales are different and we can see low trail use subsections better
 
-high_pred_G <- ggplot(data=filter(allTrail_G, subsectionF %in% high_use),
-                   aes(x=yday, y=max.camera, group=subsectionF)) +
-  facet_wrap(~subsectionF) +
+high_pred_G <- ggplot(data=filter(allTrail_G_pred, subsectionF %in% high_use),
+                   aes(x=yday, y=max.camera, 
+                       group=subsectionF)) +
+  facet_wrap(~subsectionF, ncol = 3) +
   geom_ribbon(aes(ymin=(modG-2*modG_se),
                   ymax=(modG+2*modG_se)), alpha=0.25) +
-  geom_line(aes(y=(modG))) +
-  geom_point() +
+  geom_line(aes(y=(modG), col = trailname)) +
+  geom_point(aes(color = trailname), size = 1) +
   labs(x=expression("Day of Year"),
-       y=expression("Trail use"))
+       y=expression("Trail use")) + 
+  theme(legend.position="bottom")
 
-low_pred_G <- ggplot(data=filter(allTrail_G, subsectionF %notin% high_use),
-                   aes(x=yday, y=max.camera, group=subsectionF)) +
-  facet_wrap(~subsectionF) +
+ggsave(filename = here::here("output/figures/high_pred_modG.pdf"),
+       plot = high_pred_G,
+       height = 8.5, 
+       width = 13,
+       dpi=700)
+
+low_pred_G <- ggplot(data=filter(allTrail_G_pred, subsectionF %notin% c("NA", high_use)),
+                   aes(x=yday, y=max.camera, 
+                       group=subsectionF)) +
+  facet_wrap(~subsectionF, ncol = 3) +
   geom_ribbon(aes(ymin=(modG-2*modG_se),
                   ymax=(modG+2*modG_se)), alpha=0.25) +
-  geom_line(aes(y=(modG))) +
-  geom_point() +
+  geom_line(aes(y=(modG), col = trailname)) +
+  geom_point(aes(color = trailname), size = 1) +
   labs(x=expression("Day of Year"),
-       y=expression("Trail use"))
+       y=expression("Trail use")) + 
+  theme(legend.position="bottom")
 
+ggsave(filename = here::here("output/figures/low_pred_modG.pdf"),
+       plot = low_pred_G,
+       height = 8.5, 
+       width = 13,
+       dpi=700)
+```
+
+```{r high-pred-G, eval = T , fig.cap="\\label{fig:Fig}Predicted trail use count values (lines) versus observed trail use (points) for each high-use trail subsection, based on model \\emph{G}."}
+
+knitr::include_graphics(path =  here::here("output/figures/high_pred_modG.pdf"))
 
 ```
 
+
+```{r low-pred-G, eval = T, fig.cap="\\label{fig:Fig}Predicted trail use count values (lines) versus observed trail use (points) for each low-use trail subsection, based on model \\emph{G}."}
+
+knitr::include_graphics(path =  here::here("output/figures/low_pred_modG.pdf"))
+```
+
+
 ```{r}
-
-# setup prediction data
-sub_modG_pred <- with(allTrail,
-                      expand.grid(yday=round(seq(min(yday), max(yday), length=15), 0),
-                                  # trailnameF=levels(trailnameF),
-                                  subsectionF = levels(subsectionF), 
-                                  # month = min(month):max(month), 
-                                  # wday = min(wday):max(wday), 
-                                  daily_aqi_value = seq(min(daily_aqi_value, na.rm = T),
-                                                        max(daily_aqi_value, na.rm = T), 
-                                                        length = 5),
-                                  temp_max_f = seq(min(temp_max_f, na.rm = T), 
-                                                   max(temp_max_f, na.rm = T), 
-                                                   length = 5), 
-                                    # precipitation_in = seq(min(precipitation_in, 
-                                    #                            na.rm = T), 
-                                    #                        max(precipitation_in, 
-                                    #                            na.rm = T), 
-                                    #                        length = 5),
-                                    max.count = seq(min(max.count), 
-                                                    max(max.count), 
-                                                    length = 10)
-                                  ))
-
-## add back month, wday from yday and trailnameF from subsectionF
-date <- lubridate::as_date(sub_modG_pred$yday, origin = as_date("2021-01-01"))
-sub_modG_pred$wday <- lubridate::wday(date)
-
-# make the prediction, add this and a column of standard errors to the prediction
-# data.frame. 
-sub_modG_pred <- cbind(sub_modG_pred,
-                       predict(gamm_modG_sub$gam, 
-                               sub_modG_pred, 
-                               se.fit=TRUE, 
-                               type="response"))
-# make the plot. Note here the use of the exp() function to back-transform the
-# predictions (which are for log-uptake) to the original scale
-ggplot(data=allTrail, aes(x=yday, y=max.camera, group=subsectionF)) +
-  facet_wrap(~subsectionF, nrow = 5) +
-  geom_ribbon(aes(ymin=(fit - 2*se.fit), ymax=(fit + 2*se.fit), x=yday),
-              data=sub_modG_pred, 
-              alpha=0.3, 
-              inherit.aes=FALSE) +
-  geom_line(aes(y=(fit)), data=sub_modG_pred) +
-  geom_point() #+
-  # labs(x=expression(CO[2] ~ concentration ~ (mL ~ L^{-1})),
-  #      y=expression(CO[2] ~ uptake ~ (mu*mol ~ m^{-2})))
+# 
+# # setup prediction data
+# sub_modG_pred <- with(allTrail,
+#                       expand.grid(yday=round(seq(min(yday), max(yday), length=15), 0),
+#                                   # trailnameF=levels(trailnameF),
+#                                   subsectionF = levels(subsectionF), 
+#                                   # month = min(month):max(month), 
+#                                   # wday = min(wday):max(wday), 
+#                                   daily_aqi_value = seq(min(daily_aqi_value, na.rm = T),
+#                                                         max(daily_aqi_value, na.rm = T), 
+#                                                         length = 5),
+#                                   temp_max_f = seq(min(temp_max_f, na.rm = T), 
+#                                                    max(temp_max_f, na.rm = T), 
+#                                                    length = 5), 
+#                                     # precipitation_in = seq(min(precipitation_in, 
+#                                     #                            na.rm = T), 
+#                                     #                        max(precipitation_in, 
+#                                     #                            na.rm = T), 
+#                                     #                        length = 5),
+#                                     max.count = seq(min(max.count), 
+#                                                     max(max.count), 
+#                                                     length = 10)
+#                                   ))
+# 
+# ## add back month, wday from yday and trailnameF from subsectionF
+# date <- lubridate::as_date(sub_modG_pred$yday, origin = as_date("2021-01-01"))
+# sub_modG_pred$wday <- lubridate::wday(date)
+# 
+# # make the prediction, add this and a column of standard errors to the prediction
+# # data.frame. 
+# sub_modG_pred <- cbind(sub_modG_pred,
+#                        predict(gamm_modG_sub$gam, 
+#                                sub_modG_pred, 
+#                                se.fit=TRUE, 
+#                                type="response"))
+# # make the plot. Note here the use of the exp() function to back-transform the
+# # predictions (which are for log-uptake) to the original scale
+# ggplot(data=allTrail, aes(x=yday, y=max.camera, group=subsectionF)) +
+#   facet_wrap(~subsectionF, nrow = 5) +
+#   geom_ribbon(aes(ymin=(fit - 2*se.fit), ymax=(fit + 2*se.fit), x=yday),
+#               data=sub_modG_pred, 
+#               alpha=0.3, 
+#               inherit.aes=FALSE) +
+#   geom_line(aes(y=(fit)), data=sub_modG_pred) +
+#   geom_point() #+
+#   # labs(x=expression(CO[2] ~ concentration ~ (mL ~ L^{-1})),
+#   #      y=expression(CO[2] ~ uptake ~ (mu*mol ~ m^{-2})))
 ```
 
 
@@ -453,8 +490,10 @@ In R we can write our model as:
                            s(daily_aqi_value) +
                            s(temp_max_f) +
                            s(precipitation_in) +
-                           max.count
-                         ,
+                          s(totallength_miles) + 
+                        total_traveltime +
+                            max.count,
+                          knots = list(yday = c(0,365)),
                          data = allTrail, 
                          method = "REML", 
                          correlation = corARMA(form = ~yday|subsectionF, 
@@ -466,9 +505,9 @@ With this model specification we explicitly specifying one term for the global s
 
 ```{r subsection modGS, echo=F, eval=T}
 
-if(F){
+if(runall){
   gamm_modGS_sub <- gamm(max.camera ~ 
-                           s(yday, m=2, bs="tp", k = 10) +
+                           s(yday, m=2, bs="cc", k = 10) +
                            s(yday, subsectionF,
                              m=2, bs="fs", k = 25) +
                            s(subsectionF, bs = "re") +
@@ -478,8 +517,10 @@ if(F){
                            s(daily_aqi_value) +
                            s(temp_max_f) +
                            s(precipitation_in) +
-                           max.count
-                         ,
+                            s(totallength_miles) + 
+                        total_traveltime +
+                            max.count,
+                          knots = list(yday = c(0,365)),
                          data = allTrail, 
                          method = "REML",
                          family = poisson#, 
@@ -487,7 +528,7 @@ if(F){
                         )
   
   gamm_modGS_AR1_sub <- gamm(max.camera ~ 
-                           s(yday, m=2, bs="tp", k = 10) +
+                           s(yday, m=2, bs="cc", k = 10) +
                            s(yday, subsectionF,
                              m=2, bs="fs", k = 25) +
                            s(subsectionF, bs = "re") +
@@ -498,8 +539,10 @@ if(F){
                            s(daily_aqi_value) +
                            s(temp_max_f) +
                            s(precipitation_in) +
-                           max.count
-                         ,
+                            s(totallength_miles) + 
+                        total_traveltime +
+                            max.count,
+                          knots = list(yday = c(0,365)),
                          data = allTrail, 
                          method = "REML", 
                          correlation = corAR1(form = ~yday|subsectionF),
@@ -508,7 +551,7 @@ if(F){
                          )
   
   gamm_modGS_ARMA_sub <- gamm(max.camera ~ 
-                           s(yday, m=2, bs="tp", k = 10) +
+                           s(yday, m=2, bs="cc", k = 10) +
                            s(yday, subsectionF,
                              m=2, bs="fs", k = 25) +
                            s(subsectionF, bs = "re") +
@@ -519,12 +562,14 @@ if(F){
                            s(daily_aqi_value) +
                            s(temp_max_f) +
                            s(precipitation_in) +
-                           max.count
-                         ,
+                           s(totallength_miles) + 
+                        # total_traveltime +
+                            max.count,
+                          knots = list(yday = c(1,365)),
                          data = allTrail, 
                          method = "REML", 
                          correlation = corARMA(form = ~yday|subsectionF, 
-                                               p = 2, q = 2),
+                                               p = 3, q = 3),
                          family = poisson #, 
                          # niterPQL = 20
                          )
@@ -548,24 +593,45 @@ load(here("output/models/allT_subsection_gamm_GS_ARMA.rda"))
 ```{r modGS pq choice}
 ## this should help find values for p and q in the ARMA model 
 arma_res_GS <- forecast::auto.arima(resid(gamm_modGS_sub$lme, type = "normalized"),
-                       stationary = TRUE, seasonal = FALSE)
+                                    seasonal = T)
  
 arma_res_GS$coef
 ```
+[explain summary]
 
-Figure \ref{fig:modelGS-draw} shows the fitted smoothers for `gamm_modGS_ARMA_sub`. The plots of group-specific smoothers indicate that trail sections differ not only in average (log) trail use (which would correspond to each trail having a straight line at different levels for the group-level smoother), but differ slightly in the shape of their functional responses. Figure \ref{fig:Fig11} shows how the global and group-specific smoothers combine to predict uptake rates for individual plants.  We see that, unlike in the single global smoother case above, none of the curves deviate from the data systematically.
+```{r modGS summary, eval = F}
 
-```{r modelGS-draw, fig.width=6, fig.height=3, dev.args=list(pointsize=10), out.width="\\linewidth", echo=FALSE, fig.cap="\\label{fig:Fig}Global function (\\texttt{s(yday)}) and group-specific deviations from the global function (\\texttt{s(yday, subsection)}) for \\texttt{gamm\\_modGS\\_ARMA\\_sub)}. "}
+summary(gamm_modGS_ARMA_sub$gam)
+```
+
+
+
+```{r modGS-tsDiag, eval = T}
+# gratia::appraise(gamm_modGS_ARMA_sub$gam)
+
+with(allTrail_G, tsDiagGamm(gamm_modGS_ARMA_sub, timevar = yday,
+                          observed = max.camera))
+
+# 
+# layout(matrix(1:2, ncol = 2))
+# acf(residuals(gamm_modGS_ARMA_sub$lme, type = "normalized"))
+# pacf(residuals(gamm_modGS_ARMA_sub$lme, type = "normalized"))
+# layout(1)
+```
+
+Figure \ref{fig:modelGS-draw} shows the fitted smoothers for `gamm_modGS_ARMA_sub`. The plots of group-specific smoothers indicate that trail sections differ not only in average (log) trail use (which would correspond to each trail having a straight line at different levels for the group-level smoother), but differ slightly in the shape of their functional responses. Figure \ref{fig:modelGS-predict} shows how the global and group-specific smoothers combine to predict uptake rates for individual plants.  We see that, unlike in the single global smoother case above, none of the curves deviate from the data systematically.
+
+```{r modelGS-draw, eval= T,  fig.width=6, fig.height=3, dev.args=list(pointsize=10), out.width="\\linewidth", echo=FALSE, fig.cap="\\label{fig:Fig}Global function (\\texttt{s(yday)}) and group-specific deviations from the global function (\\texttt{s(yday, subsection)}) for \\texttt{gamm\\_modGS\\_ARMA\\_sub)}. "}
 #gratia draw() plot 
 gratia::draw(gamm_modGS_ARMA_sub)
 ```
 
-```{r modelGS-predict,echo=FALSE, fig.width=6, fig.height=4, out.width="\\linewidth", fig.cap="\\label{fig:Fig11}Predicted trail use count values (lines) versus observed trail use (points) for each trail subsection, based on model \\emph{GS}."}
+```{r modelGS-predict,echo=FALSE, eval = T, fig.width=6, fig.height=4, out.width="\\linewidth", fig.cap="\\label{fig:Fig11}Predicted trail use count values (lines) versus observed trail use (points) for each trail subsection, based on model \\emph{GS}."}
 gamm_modGS_ARMA_pred <- predict(gamm_modGS_ARMA_sub$gam, se.fit=TRUE, type = "response")
 allTrail_GS <- transform(allTrail_G, 
                  modGS = gamm_modGS_ARMA_pred$fit, 
                  modGS_se = gamm_modGS_ARMA_pred$se.fit)
-ggplot(data=allTrail_GS, aes(x=yday, y=max.camera, group=subsectionF)) +
+all_pred_GS <- ggplot(data=allTrail_GS, aes(x=yday, y=max.camera, group=subsectionF)) +
   facet_wrap(~subsectionF) +
   geom_ribbon(aes(ymin=(modGS-2*modGS_se),
                   ymax=(modGS+2*modGS_se)), alpha=0.25) +
@@ -581,57 +647,64 @@ high_pred_GS <- ggplot(data=filter(allTrail_GS, subsectionF %in% high_use),
   facet_wrap(~subsectionF) +
   geom_ribbon(aes(ymin=(modGS-2*modGS_se),
                   ymax=(modGS+2*modGS_se)), alpha=0.25) +
-  geom_line(aes(y=(modGS))) +
-  geom_point() +
+  geom_line(aes(y=(modGS), col = trailname)) +
+  geom_point(aes(col = trailname)) +
   labs(x=expression("Day of Year"),
-       y=expression("Trail use"))
+       y=expression("Trail use")) + 
+    theme(legend.position="bottom")
+
+ggsave(filename = here::here("output/figures/high_pred_modGS.pdf"),
+       plot = high_pred_GS,
+       height = 8.5, 
+       width = 13,
+       dpi=700)
 
 low_pred_GS <- ggplot(data=filter(allTrail_GS, subsectionF %notin% high_use),
                    aes(x=yday, y=max.camera, group=subsectionF)) +
   facet_wrap(~subsectionF) +
   geom_ribbon(aes(ymin=(modGS-2*modGS_se),
                   ymax=(modGS+2*modGS_se)), alpha=0.25) +
-  geom_line(aes(y=(modGS))) +
-  geom_point() +
+  geom_line(aes(y=(modGS), col = trailname)) +
+  geom_point(aes(col = trailname)) +
   labs(x=expression("Day of Year"),
-       y=expression("Trail use"))
+       y=expression("Trail use")) + 
+  theme(legend.position="bottom")
 
+ggsave(filename = here::here("output/figures/low_pred_modGS.pdf"),
+       plot = low_pred_GS,
+       height = 8.5, 
+       width = 13,
+       dpi=700)
+
+
+```
+```{r high-pred-GS, eval = T , fig.cap="\\label{fig:Fig}Predicted trail use count values (lines) versus observed trail use (points) for each high-use trail subsection, based on model \\emph{GS}."}
+
+knitr::include_graphics(path =  here::here("output/figures/high_pred_modGS.pdf"))
 
 ```
 
 
+```{r low-pred-GS, eval = T, fig.cap="\\label{fig:Fig}Predicted trail use count values (lines) versus observed trail use (points) for each low-use trail subsection, based on model \\emph{GS}."}
 
-```{r modGS summary}
-
-summary(gamm_modGS_sub$gam)
+knitr::include_graphics(path =  here::here("output/figures/low_pred_modGS.pdf"))
 ```
 
 ```{r}
-gratia::appraise(gamm_modGS_ARMA_sub$gam)
-
-with(allTrail_G, tsDiagGamm(gamm_modGS_ARMA_sub, timevar = yday,
-                          observed = max.camera))
-
-
-layout(matrix(1:2, ncol = 2))
-acf(residuals(gamm_modGS_ARMA_sub$lme, type = "normalized"))
-pacf(residuals(gamm_modGS_ARMA_sub$lme, type = "normalized"))
-layout(1)
-```
-
-```{r}
-plot(allTrail$max.camera ~ allTrail$yday, 
-     xlab = "Day of Year", ylab = "Trail Use Count", pch = as.numeric(allTrail$wday))
-
-lines(fitted(gamm_modGS_AR1_sub$gam) ~ allTrail_G$yday, lty = "solid", col = "orange", lwd = 2)
+# plot(allTrail$max.camera ~ allTrail$yday, 
+#      # xlab = "Day of Year", ylab = "Trail Use Count", pch = as.numeric(allTrail$wday))
+# 
+# lines(fitted(gamm_modGS_AR1_sub$gam) ~ allTrail_G$yday, lty = "solid", col = "orange", lwd = 2)
 ```
 
 
 ### Single common smoother plus group-level smoothers with differing wiggliness (Model GI)
 
-```{r subsection modGI}
+[model GI overview!]
 
-if(F){
+```{r subsection modGI, eval = T}
+
+if(runall){
   gamm_modGI_sub <- gamm(max.camera ~
                                   s(yday, m=2, bs="tp") +
                                   s(yday, by = subsectionF,
@@ -760,7 +833,7 @@ arma_res_GI <- forecast::auto.arima(resid(gamm_modGI_sub$lme,
 arma_res_GI$coef
 ```
 
-```{r modelGI-summary}
+```{r modelGI-summary, eval = F}
 
 summary(gamm_modGI_sub$gam)
 ```
@@ -828,12 +901,12 @@ layout(1)
 
 
 
-```{r modelGI-predict,echo=FALSE, fig.width=6, fig.height=4, out.width="\\linewidth", fig.cap="\\label{fig:}Predicted trail use count values (lines) versus observed trail use (points) for each trail subsection, based on model \\emph{GI}."}
+```{r modelGI-predict, eval = T, echo=FALSE, fig.width=6, fig.height=4, out.width="\\linewidth", fig.cap="\\label{fig:}Predicted trail use count values (lines) versus observed trail use (points) for each trail subsection, based on model \\emph{GI}."}
 gamm_modGI_ARMA_pred <- predict(gamm_modGI_ARMA_sub$gam, se.fit=TRUE, type = "response")
 allTrail_GI <- transform(allTrail_G, 
                  modGI = gamm_modGI_ARMA_pred$fit, 
                  modGI_se = gamm_modGI_ARMA_pred$se.fit)
-ggplot(data=allTrail_GI, aes(x=yday, y=max.camera, group=subsectionF)) +
+all_pred_GI <- ggplot(data=allTrail_GI, aes(x=yday, y=max.camera, group=subsectionF)) +
   facet_wrap(~subsectionF) +
   geom_ribbon(aes(ymin=(modGI-2*modGI_se),
                   ymax=(modGI+2*modGI_se)), alpha=0.25) +
@@ -849,141 +922,305 @@ high_pred_GI <- ggplot(data=filter(allTrail_GI, subsectionF %in% high_use),
   facet_wrap(~subsectionF) +
   geom_ribbon(aes(ymin=(modGI-2*modGI_se),
                   ymax=(modGI+2*modGI_se)), alpha=0.25) +
-  geom_line(aes(y=(modGI))) +
-  geom_point() +
+  geom_line(aes(y=(modGI), col = trailname)) +
+  geom_point(aes(col= trailname)) +
   ylim(0, 800) +
   labs(x=expression("Day of Year"),
-       y=expression("Trail use"))
+       y=expression("Trail use")) + 
+  theme(legend.position="bottom")
+  
+ggsave(filename = here::here("output/figures/high_pred_modGI.pdf"),
+       plot = high_pred_GI,
+       height = 8.5, 
+       width = 13,
+       dpi=700)
 
 low_pred_GI <- ggplot(data=filter(allTrail_GI, subsectionF %notin% high_use),
                    aes(x=yday, y=max.camera, group=subsectionF)) +
   facet_wrap(~subsectionF) +
   geom_ribbon(aes(ymin=(modGI-2*modGI_se),
                   ymax=(modGI+2*modGI_se)), alpha=0.25) +
-  geom_line(aes(y=(modGI))) +
-  geom_point() +
+    geom_line(aes(y=(modGI), col = trailname)) +
+  geom_point(aes(col= trailname)) +
   ylim(0,200) +
   labs(x=expression("Day of Year"),
-       y=expression("Trail use"))
+       y=expression("Trail use")) + 
+  theme(legend.position="bottom")
 
+ggsave(filename = here::here("output/figures/low_pred_modGI.pdf"),
+       plot = low_pred_GI,
+       height = 8.5, 
+       width = 13,
+       dpi=700)
 
 ```
 
-## Visual Inspection of Model
+```{r high-pred-GI, eval = T , fig.cap="\\label{fig:Fig}Predicted trail use count values (lines) versus observed trail use (points) for each high-use trail subsection, based on model \\emph{GI}."}
 
-```{r}
+knitr::include_graphics(path =  here::here("output/figures/high_pred_modGI.pdf"))
 
-# setup prediction data
-CO2_modG_pred <- with(CO2,
-                      expand.grid(conc=seq(min(conc), max(conc), length=100),
-                                  Plant_uo=levels(Plant_uo)))
-# make the prediction, add this and a column of standard errors to the prediction
-# data.frame. Predictions are on the log scale.
-CO2_modG_pred <- cbind(CO2_modG_pred,
-                       predict(CO2_modG, 
-                               CO2_modG_pred, 
-                               se.fit=TRUE, 
-                               type="response"))
-# make the plot. Note here the use of the exp() function to back-transform the
-# predictions (which are for log-uptake) to the original scale
-ggplot(data=CO2, aes(x=conc, y=uptake, group=Plant_uo)) +
-  facet_wrap(~Plant_uo) +
-  geom_ribbon(aes(ymin=exp(fit - 2*se.fit), ymax=exp(fit + 2*se.fit), x=conc),
-              data=CO2_modG_pred, 
-              alpha=0.3, 
-              inherit.aes=FALSE) +
-  geom_line(aes(y=exp(fit)), data=CO2_modG_pred) +
-  geom_point() +
-  labs(x=expression(CO[2] ~ concentration ~ (mL ~ L^{-1})),
-       y=expression(CO[2] ~ uptake ~ (mu*mol ~ m^{-2})))
 ```
 
 
+```{r low-pred-GI, eval = T, fig.cap="\\label{fig:Fig}Predicted trail use count values (lines) versus observed trail use (points) for each low-use trail subsection, based on model \\emph{GI}."}
+
+knitr::include_graphics(path =  here::here("output/figures/low_pred_modGI.pdf"))
+```
 
 ## Prediction/Forecasting
 
--compare top version of each model type (G, GS, GI)
--compare Middle Cottonwood singleTrail to allTrail
--predict at new trails
+[X]-compare top version of each model type (G, GS, GI)
+[X]-compare Middle Cottonwood singleTrail to allTrail
+[ ]-predict at new trails
+[X]- save files of model comparison for each subsection (individual plots for better viewing, may not be in report; possibly in appendix?)
+[ ] - animated spatial maps color by prediction value (and residuals)
 
-```{r compare model type predictions}
-p_G <- as_tibble(predict(gamm_modGS_ARMA_sub$gam, 
-                                 predict.data, 
+```{r compare model type predictions, eval = T}
+p_G <- as_tibble(predict(gamm_modGARMA_sub$gam, 
+                                 predict.All, 
                                  se.fit = TRUE, 
                                  type = "response")) %>%
     rename(fit_G = fit, se_G = se.fit)
-p_GS <- as_tibble(predict(gamm_modGS_sub$gam, 
-                            predict.data, 
+p_GS <- as_tibble(predict(gamm_modGS_ARMA_sub$gam, 
+                            predict.All, 
                             se.fit = TRUE, 
                             type = "response")) %>%
     rename(fit_GS = fit, se_GS = se.fit)
-p_GI <- as_tibble(predict(gamm_modGI_sub$gam, 
-                            predict.data, 
+p_GI <- as_tibble(predict(gamm_modGI_ARMA_sub$gam, 
+                            predict.All, 
                             se.fit = TRUE, 
                             type = "response")) %>%
     rename(fit_GI = fit, se_GI = se.fit)
 
 
-new_data_bases <- bind_cols(predict.data, p_G, p_GS, p_GI) %>%
+new_data_bases <- bind_cols(predict.All, p_G, p_GS, p_GI) %>%
     tidyr::pivot_longer(fit_G:se_GI, names_sep = '_',
                  names_to = c('variable', 'model')) %>%
     tidyr::pivot_wider(names_from = variable, values_from = value) %>%
     mutate(upr_ci = fit + (2 * se), lwr_ci = fit - (2 * se))
 
-ggplot(mapping = aes(x = yday, y = count)) +
+compare_models <- ggplot(mapping = aes(x = yday, y = max.camera)) +
     geom_ribbon(data = new_data_bases,
                 mapping = aes(ymin = lwr_ci, ymax = upr_ci, x = yday, fill = factor(model)),
                 inherit.aes = FALSE, alpha = 0.2) +
-    geom_point(data = allTrail, aes(colour = wday)) +
+    geom_point(data = allTrail, aes(colour = as.factor(wday))) +
     geom_line(data = new_data_bases, aes(y = fit, x = yday, colour2 = factor(model)),
               size = 1) %>%
-  facet_wrap(~subsectionF, col = 5) %>% 
     relayer::rename_geom_aes(new_aes = c("colour" = "colour2")) +
-    scale_colour_distiller(palette = "Set1", aesthetics = "colour", name = "Day of Week") +
+    scale_colour_brewer(palette = "Set1", aesthetics = "colour", name = "Day of Week") +
     scale_colour_OkabeIto(aesthetics = "colour2", name = "Model") +
     scale_fill_OkabeIto(name = "Model") +
     coord_cartesian(xlim = c(0, 365), ylim = c(0, 1000)) +
+   facet_wrap(~subsectionF, drop = T, ncol = 3) +
     labs(title = "Extrapolation",
          subtitle = "How prediction varies with different model specifications")
+
+compare_high <-  ggplot(mapping = aes(x = yday, y = max.camera)) +
+    geom_ribbon(data = new_data_bases %>% filter(subsectionF %in% high_use),
+                mapping = aes(ymin = lwr_ci, ymax = upr_ci, x = yday, fill = factor(model)),
+                inherit.aes = FALSE, alpha = 0.2) +
+    geom_point(data = allTrail %>% filter(subsectionF %in% high_use), aes(colour = as.factor(wday))) +
+    geom_line(data = new_data_bases  %>% filter(subsectionF %in% high_use),
+              aes(y = fit, x = yday, colour2 = factor(model)),
+              size = 1) %>%
+    relayer::rename_geom_aes(new_aes = c("colour" = "colour2")) +
+    scale_colour_brewer(palette = "Set1", aesthetics = "colour", name = "Day of Week") +
+    scale_colour_OkabeIto(aesthetics = "colour2", name = "Model") +
+    scale_fill_OkabeIto(name = "Model") +
+    coord_cartesian(xlim = c(0, 365), ylim = c(0, 1000)) +
+   facet_wrap(~subsectionF, drop = T, ncol = 3) +
+    labs(title = "Extrapolation",
+         subtitle = "How prediction varies with different model specifications")
+
+ggsave(filename = here::here("output/figures/high_pred_compare.pdf"),
+       plot = compare_high,
+       height = 8.5, 
+       width = 13,
+       dpi=700)
+  
+compare_low <-  ggplot(mapping = aes(x = yday, y = max.camera)) +
+    geom_ribbon(data = new_data_bases %>% filter(subsectionF %notin% high_use),
+                mapping = aes(ymin = lwr_ci, ymax = upr_ci, x = yday, fill = factor(model)),
+                inherit.aes = FALSE, alpha = 0.2) +
+    geom_point(data = allTrail %>% filter(subsectionF %notin% high_use), aes(colour = as.factor(wday))) +
+    geom_line(data = new_data_bases  %>% filter(subsectionF %notin% high_use),
+              aes(y = fit, x = yday, colour2 = factor(model)),
+              size = 1) %>%
+    relayer::rename_geom_aes(new_aes = c("colour" = "colour2")) +
+    scale_colour_brewer(palette = "Set1", aesthetics = "colour", name = "Day of Week") +
+    scale_colour_OkabeIto(aesthetics = "colour2", name = "Model") +
+    scale_fill_OkabeIto(name = "Model") +
+    coord_cartesian(xlim = c(0, 365), ylim = c(0, 300)) +
+   facet_wrap(~subsectionF, drop = T, ncol =3) +
+    labs(title = "Extrapolation",
+         subtitle = "How prediction varies with different model specifications")
+
+ggsave(filename = here::here("output/figures/low_pred_compare.pdf"),
+       plot = compare_low,
+       height = 8.5, 
+       width = 13,
+       dpi=700)
+
+
+### save for each individual subsectionF
+subsection.unique <- unique(new_data_bases$subsectionF)
+
+for(s in subsection.unique){
+   ggplot(mapping = aes(x = yday, y = max.camera)) +
+    geom_ribbon(data = new_data_bases %>% filter(subsectionF %in% s),
+                mapping = aes(ymin = lwr_ci, ymax = upr_ci, x = yday, fill = factor(model)),
+                inherit.aes = FALSE, alpha = 0.2) +
+    geom_point(data = allTrail %>% filter(subsectionF %in% s), aes(colour = as.factor(wday))) +
+    geom_line(data = new_data_bases  %>% filter(subsectionF %in% s),
+              aes(y = fit, x = yday, colour2 = factor(model)),
+              size = 1) %>%
+    relayer::rename_geom_aes(new_aes = c("colour" = "colour2")) +
+    scale_colour_brewer(palette = "Set1", aesthetics = "colour", name = "Day of Week") +
+    scale_colour_OkabeIto(aesthetics = "colour2", name = "Model") +
+    scale_fill_OkabeIto(name = "Model") +
+    coord_cartesian(xlim = c(0, 365), ylim = c(0, 1000)) +
+   # facet_wrap(~subsectionF, drop = T, ncol = 3) +
+    labs(title = paste0("Extrapolation: ", s),
+         subtitle = "How prediction varies with different model specifications")
+
+ggsave(filename = here::here(paste0("output/figures/pred_compare_",
+                                    s, ".pdf")),
+       height = 8.5, 
+       width = 13,
+       dpi=700)
+}
+
 ```
 
+```{r high-compare-pred, eval = T , fig.cap="\\label{fig:Fig}Predicted trail use count values (lines) versus observed trail use (points) for each high-use trail subsection, based on each model (\\emph{G}, \\emph{GS}, and \\emph{GI})."}
+
+knitr::include_graphics(path =  here::here("output/figures/high_pred_compare.pdf"))
+
+```
+
+
+```{r low-pred-compare, eval = T, fig.cap="\\label{fig:Fig}Predicted trail use count values (lines) versus observed trail use (points) for each low-use trail subsection, based on each model (\\emph{G}, \\emph{GS}, and \\emph{GI})."}
+
+knitr::include_graphics(path =  here::here("output/figures/low_pred_compare.pdf"))
+```
+
+
 ```{r compare Middle Cottonwood predictions}
-p_single <- as_tibble(predict(gamm_modGS_ARMA_sub$gam, 
-                                 predict.data, 
+load(file = here("output/models/singleT_gamm2.rda"))
+
+p_single <- as_tibble(predict(gamm_mod2$gam, 
+                                 predict.MidCot, 
                                  se.fit = TRUE, 
                                  type = "response")) %>%
     rename(fit_single = fit, se_single = se.fit)
 p_all <- as_tibble(predict(gamm_modGI_ARMA_sub$gam, 
-                            predict.data, 
+                            predict.All %>% filter(trailnumber == 586), 
                             se.fit = TRUE, 
                             type = "response")) %>%
     rename(fit_all = fit, se_all = se.fit)
 
 
 
-new_data_bases <- bind_cols(predict.data, p_single, p_all) %>%
+new_data_bases <- bind_cols(predict.MidCot, p_single, p_all) %>%
     tidyr::pivot_longer(fit_single:se_all, names_sep = '_',
-                 names_to = c('variable', 'data-used')) %>%
+                 names_to = c('variable', 'data_used')) %>%
     tidyr::pivot_wider(names_from = variable, values_from = value) %>%
-    mutate(upr_ci = fit + (2 * se), lwr_ci = fit - (2 * se)) %>% 
-  dplyr::filter(subsectionF == "Middle Cottonwood")
+    mutate(upr_ci = fit + (2 * se), lwr_ci = fit - (2 * se)) #%>% 
+  # dplyr::filter(subsectionF == "Middle Cottonwood")
 
-ggplot(mapping = aes(x = yday, y = count)) +
+ggplot(mapping = aes(x = yday, y = max.camera)) +
     geom_ribbon(data = new_data_bases,
-                mapping = aes(ymin = lwr_ci, ymax = upr_ci, x = yday, fill = factor(model)),
+                mapping = aes(ymin = lwr_ci, ymax = upr_ci, x = yday, fill = factor(data_used)),
                 inherit.aes = FALSE, alpha = 0.2) +
-    geom_point(data = allTrail, aes(colour = wday)) +
-    geom_line(data = new_data_bases, aes(y = fit, x = yday, colour2 = factor(model)),
+    geom_point(data = singleTrail, aes(colour = wday)) +
+    geom_line(data = new_data_bases, aes(y = fit, x = yday, colour2 = factor(data_used)),
               size = 1) %>%
   # facet_wrap(~subsectionF, col = 5) %>% 
     relayer::rename_geom_aes(new_aes = c("colour" = "colour2")) +
     scale_colour_distiller(palette = "Set1", aesthetics = "colour", name = "Day of Week") +
-    scale_colour_OkabeIto(aesthetics = "colour2", name = "Model") +
-    scale_fill_OkabeIto(name = "Model") +
+    scale_colour_OkabeIto(aesthetics = "colour2", name = "Data Used") +
+    scale_fill_OkabeIto(name = "Data Used") +
     coord_cartesian(xlim = c(0, 365), ylim = c(0, 10000)) +
     labs(title = "Extrapolation",
          subtitle = "How prediction varies with data used to fit model")
 ```
+
+```{r predict new trails}
+sapply(gamm_modGARMA_sub$gam$smooth, "[[",  "label")
+sapply(gamm_modGS_ARMA_sub$gam$smooth, "[[",  "label")
+sapply(gamm_modGI_ARMA_sub$gam$smooth, "[[",  "label")
+
+p_G_new <- as_tibble(predict(gamm_modGARMA_sub$gam, 
+                            predict.New, 
+                            exclude = c("s(subsectionF)"),
+                            se.fit = TRUE, 
+                            type = "response")) %>%
+    rename(fit_G = fit, se_G = se.fit)
+
+p_GS_new <- as_tibble(predict(gamm_modGS_ARMA_sub$gam, 
+                            predict.New, 
+                            exclude = c("s(subsectionF)", 
+                                        "s(yday,subsectionF)"),
+                            se.fit = TRUE, 
+                            type = "response")) %>%
+    rename(fit_GS = fit, se_GS = se.fit)
+
+p_GI_new <- as_tibble(predict(gamm_modGI_ARMA_sub$gam, 
+                            predict.New, 
+                            exclude = c("s(subsectionF)", 
+                                        "s(yday):subsectionFBaldy to Bridger",
+                                        "s(yday):subsectionFBenchmark Rd",
+                                        "s(yday):subsectionFBridger", 
+                                        "s(yday):subsectionFBridger to Ross Pass",
+                                        "s(yday):subsectionFCarroll Creek",
+                                        "s(yday):subsectionFCollege M",
+                                        "s(yday):subsectionFCollege M to Sypes",
+                                        "s(yday):subsectionFCorbly Gulch",
+                                        "s(yday):subsectionFEast Bridger North",
+                                        "s(yday):subsectionFEast Bridger South",
+                                        "s(yday):subsectionFFairy Creek",
+                                        "s(yday):subsectionFHorsethief Mountain",
+                                        "s(yday):subsectionFJohnson Canyon Jeep Trail",
+                                        "s(yday):subsectionFLower Shafthouse",
+                                        "s(yday):subsectionFM to Baldy",
+                                        "s(yday):subsectionFMiddle Cottonwood",
+                                        "s(yday):subsectionFNorth Cottonwood Access",
+                                        "s(yday):subsectionFNorth Cottonwood to Johnson Canyon",
+                                        "s(yday):subsectionFRaptor View",
+                                        "s(yday):subsectionFRoss Pass",
+                                        "s(yday):subsectionFRoss Pass to Sacagawea Peak",
+                                        "s(yday):subsectionFSacagawea Pass",
+                                        "s(yday):subsectionFSteep Way",
+                                        "s(yday):subsectionFSypes Canyon",
+                                        "s(yday):subsectionFTruman Gulch" ),
+                            se.fit = TRUE, 
+                            type = "response")) %>%
+    rename(fit_GI = fit, se_GI = se.fit)
+
+
+new_data_bases2 <- bind_cols(predict.New, p_G_new, p_GS_new,  p_GI_new) %>%
+    tidyr::pivot_longer(fit_G:se_GI, names_sep = '_',
+                 names_to = c('variable', 'model')) %>%
+    tidyr::pivot_wider(names_from = variable, values_from = value) %>%
+    mutate(upr_ci = fit + (2 * se), lwr_ci = fit - (2 * se))
+
+compare_models_newtrails <- ggplot(mapping = aes(x = yday, y = max.count)) +
+    geom_ribbon(data = new_data_bases2,
+                mapping = aes(ymin = lwr_ci, ymax = upr_ci, x = yday, fill = factor(model)),
+                inherit.aes = FALSE, alpha = 0.2) +
+    geom_point(data = predict.New, aes(colour = as.factor(wday))) +
+    geom_line(data = new_data_bases2, aes(y = fit, x = yday, colour2 = factor(model)),
+              size = 1) %>%
+    relayer::rename_geom_aes(new_aes = c("colour" = "colour2")) +
+    scale_colour_brewer(palette = "Set1", aesthetics = "colour", name = "Day of Week") +
+    scale_colour_OkabeIto(aesthetics = "colour2", name = "Model") +
+    scale_fill_OkabeIto(name = "Model") +
+    coord_cartesian(xlim = c(0, 365), ylim = c(0, 1000)) +
+   facet_wrap(~subsectionF, drop = T, ncol = 3) +
+    labs(title = "Extrapolation at new trails",
+         subtitle = "How prediction varies with different model specifications")
+```
+
 
 
 
@@ -994,25 +1231,26 @@ ggplot(mapping = aes(x = yday, y = count)) +
 
 
 ```{r AIC_table, echo=FALSE,  fig.width=4, fig.height=6, message=FALSE, warning=FALSE, cache=TRUE}
-AIC_table <- AIC(CO2_modG,CO2_modGS, CO2_modGI, CO2_modS, CO2_modI,
-             bird_modG, bird_modGS, bird_modGI, bird_modS, bird_modI)%>%
-  rownames_to_column(var= "Model")%>%
-  mutate(data_source = rep(c("CO2","bird_data"), each =5))%>%
-  group_by(data_source)%>%
-  mutate(deltaAIC = AIC - min(AIC))%>%
-  ungroup()%>%
-  dplyr::select(-data_source)%>%
-  mutate_at(.vars = vars(df,AIC, deltaAIC), 
-            .funs = funs(round,.args = list(digits=0)))
+# AIC_table <- AIC(gamm_modGARMA_sub$gam,
+#                  gamm_modGS_ARMA_sub$gam, 
+#                  gamm_modGI_ARMA_sub$gam)%>%
+#   tibble::rownames_to_column(var= "Model")%>%
+#   # mutate(data_source = rep(c("CO2","bird_data"), each =5))%>%
+#   # group_by(data_source)%>%
+#   mutate(deltaAIC = AIC - min(AIC))%>%
+#   # ungroup()%>%
+#   # dplyr::select(-data_source)%>%
+#   mutate_at(.vars = vars(df,AIC, deltaAIC), 
+#             .funs = funs(round,.args = list(digits=0)))
 ```
 
 ```{r AIC_table_kable, echo=FALSE,  fig.width=4, fig.height=6, message=FALSE, warning=FALSE, cache=TRUE, purl=FALSE}
-kable(AIC_table, format =table_out_format, 
-      caption="AIC table comparing model fits for example datasets", 
-      booktabs = TRUE)%>% 
-  kable_styling(full_width = FALSE)%>%
-  kableExtra::group_rows("A. CO2 models", 1,5)%>%
-  kableExtra::group_rows("B. bird_move models", 6,10)
+# kable(AIC_table, format =table_out_format, 
+#       caption="AIC table comparing model fits for example datasets", 
+#       booktabs = TRUE)%>% 
+#   kable_styling(full_width = FALSE)%>%
+#   kableExtra::group_rows("A. CO2 models", 1,5)%>%
+#   kableExtra::group_rows("B. bird_move models", 6,10)
 ```
 
 
