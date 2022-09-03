@@ -9,7 +9,9 @@
 ## Author: Dr. Meridith L. Bartley
 ## Date Created: 2022-07-13
 ## ---------------------------
-## Notes:
+## Notes: - This document is defunct. Please refer to 
+##  "output/report/04-Analyze_MidCottonwood_GAMM.Rmd for analysis
+## and "scripts/02-EDA.R" for plotting. 
 ##
 ##
 ## ---------------------------

@@ -1,5 +1,4 @@
-# GA(M)M Overview
-
+# Explanation of Models {#Models}
 ```{r, echo=FALSE, message=F, warning=F}
 library(dplyr)
 library(here)
@@ -15,14 +14,13 @@ source(here("scripts/01-LoadData.R"))
 knitr::opts_chunk$set(echo = F, 
                       eval = F,
                       message = F, 
-                      cache=TRUE, 
+                      # cache=TRUE, 
                       warning=FALSE, 
                       error=FALSE, 
                       root.dir = normalizePath(".."))
 
 ```
-
-# Overview of Generalized Additive (Mixture) Models
+The aim of this project is to understand and predict the pattern of trail use recorded at multiple multi-use trails in the Bridger Mountains. We want to be able to predict trail use over a full calendar year and in locations where no trail counter data exist, within the Bridgers and nearby trails. Here, we provide a description of the statistical approach employed (generalized additive mixture modeling) in addition to brief overviews of modelling approaches that `gamm`s build upon (e.g. linear regression, generalized linear regression, and generalized additive models). In Section \@ref(MidCot), we further this exploration in model choice by applying each to a single trail, Middle Cottonwood. 
 
 ## Linear Regression Model
 
@@ -57,11 +55,11 @@ y \sim \mathcal{P}(\lambda) \\
 \lambda=e^{b_{0}+b_{1} \cdot x_{1}+b_{2} \cdot x_{2} \ldots+b_{p} \cdot x_{p}}
 \end{gathered}
 $$
-Generalized linear models (and linear models as a subset) have a handfull of tools to adapt to data that do not have quite so straightforward a relationship with associated covariates. Transformations to covariates that allow for inclusion of polynomial terms (e.g. quadratic, cubic, etc) are useful but have their own limits. 
+Generalized linear models (and linear models as a subset) have a handful of tools to adapt to data that do not have quite so straightforward a relationship with associated covariates. Transformations to covariates that allow for inclusion of polynomial terms (e.g. quadratic, cubic, etc) are useful but have their own limits. 
 
 ## Generalized Additive Model
 
-Generalised additive models (GAMs) are statistical models that can be used to estimate trends as smooth functions of time. This form allows for the now nonlinear predictor(s) to relate to the expected value, with whatever link function may be appropriate.
+Generalized additive models (GAMs) are statistical models that can be used to estimate trends as smooth functions of time. This form allows for the now nonlinear predictor(s) to relate to the expected value, with whatever link function may be appropriate.
 
 $$
 \begin{gathered}
@@ -72,6 +70,17 @@ g(\mu)=b_{0}+f\left(x_{1}\right)+f\left(x_{2}\right) \ldots+f\left(x_{p}\right)
 $$
 This approach is similar to GLM, but now instead of parametric coefficients on each of the variables, we now have smoothing functions ($f$) which are very flexible in their forms. Note that we can still include some covariates that do linearly relate to the response variable ($y$). 
 
+A spline is a function defined piece-wise by polynomials. Each consist of smaller basis functions, of which we may choose between several types/forms based on the data. We may also choose how many "pieces" to use by defining the number of knots ($k$) for each spline.
+
+Spline Fun Fact: The term spline comes from the flexible devices used by shipbuilders and draftspersons to draw smooth shapes. Thanks, Wikipedia.
+
+To model a potentially nonlinear smooth or surface, three different smooth functions are available:
+
+ * s() : for modeling a 1-dimensional smooth, or
+for modeling isotropic interactions (variables are measured in same units and on same scale)
+ * te(): for modeling 2- or n-dimensional interaction surfaces of variables that are not isotropic (but see info about d parameter below). Includes ‘main’ effects.
+ * ti(): for modeling 2- or n-dimensional interaction surfaces that do not include the ‘main effects’.
+
 ### Basis Functions
 
 There are several smoothing bases $b$ (splines) which are suitable for regression:
@@ -81,11 +90,19 @@ There are several smoothing bases $b$ (splines) which are suitable for regressio
 * cyclic cubic regression spline
 * P-splines
 
+### Generalized Additive Mixture Model
 
-## Why not a Time Series Approach?
+### Hierarchical Generalized Additive Models
 
-## Assumptions Made
+## Summary
 
-## Limitations
 
-### Missing Covariate Data
+## Additional Resources
+
+This summary pulls heavily from the following resources that are very useful for a deeper dive into these models. 
+
+* [Generalized Additive Models](https://m-clark.github.io/generalized-additive-models/)
+
+
+
+

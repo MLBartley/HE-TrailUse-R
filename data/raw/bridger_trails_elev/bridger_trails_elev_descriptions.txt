@@ -1,0 +1,16 @@
+Field	Description	
+NAME	Trail Name
+BEGIN_TERM	Begninnig Location	
+END_TERMIN	Ending Location
+DESIGNED_U	Designated Use
+TRAIL_CLAS	Trail Class
+length_mi	Flat Surface Length - miles
+length_m	Flat Surface Length - meters
+Z_Min	Elevation Minimum - meters
+Z_Max	Elevation Maximum - meters	
+Z_Mean	Elevation Mean - meters
+SLength_m	Elevation Surface Length - meters
+Min_Slope	Minimum Slope
+Max_Slope	Max Slope
+Avg_Slope	Average Slope
+SLength_mi	Elevation Surface Length - miles

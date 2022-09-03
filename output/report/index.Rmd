@@ -3,6 +3,7 @@ title: "Statistical Analysis: Predicting Trail Use "
 author: "Dr. Meridith L. Bartley"
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
+geometry: margin=3cm
 documentclass: book
 bibliography: [book.bib, packages.bib]
 biblio-style: apalike

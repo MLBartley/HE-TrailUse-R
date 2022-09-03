@@ -1,5 +1,5 @@
 ## typically wd is set at the Project level, but needs to be changed to render bookdown documents
-
+library(here)
 
 setwd(here("output/report"))
 
@@ -13,3 +13,4 @@ bookdown::render_book("index.Rmd", "bookdown::pdf_book")
 
 # return to project level working directory
 setwd(here())
+  
