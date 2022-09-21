@@ -1,0 +1,923 @@
+
+# Application to Middle Cottonwood Trail {#MidCot}
+
+```{r, eval = T, echo=FALSE, message=F, warning=F, include = F}
+# remotes::install_github("clauswilke/colorblindr")
+library('colorblindr')
+library(dplyr)
+library(here)
+library(ggplot2)
+library(gratia)
+library(itsadug)
+library(lubridate)
+library(magrittr)
+library(marginaleffects)
+library(mgcv)
+# remotes::install_github("clauswilke/relayer")
+library(relayer)
+library(xtable)
+
+source(here("scripts/01-LoadData.R"))
+source(here("scripts/01.02-LoadFunctions.R"))
+
+#helps to format this document 
+#by default the included code chunks do not appear in the report view
+knitr::opts_chunk$set(echo = F, 
+                      eval = F,
+                      message = F, 
+                      # cache=TRUE, 
+                      warning=FALSE, 
+                      error=FALSE, 
+                      root.dir = normalizePath(".."))
+
+
+
+## Model Checking function
+tsDiagGamm <- function(x, timevar, observed, f = 0.3, type = "normalized") {
+  resi <- resid(x$lme, type = type)
+  fits <- fitted(x$lme)
+  on.exit(layout(1))
+  layout(matrix(1:6, ncol = 3, byrow = TRUE))
+  plot(resi ~ fits, ylab = "Normalized Residuals",
+       xlab = "Fitted Values", main = "Fitted vs. Residuals")
+  lines(lowess(x = fits, y = resi, f = f), col = "blue",
+        lwd = 2)
+  plot(resi ~ timevar, ylab = "Normalized Residuals",
+       xlab = "Time", main = "Time series of residuals")
+  lines(lowess(x = timevar, y = resi, f = f), col = "blue", lwd = 2)
+  plot(observed ~ fits, ylab = "Observed",
+       xlab = "Fitted Values", main = "Fitted vs. Observed",
+       type = "n")
+  abline(a = 0, b = 1, col = "red")
+  points(observed ~ fits)
+  lines(lowess(x = fits, y = observed, f = f), col = "blue",
+        lwd = 2)
+  hist(resi, freq = FALSE, xlab = "Normalized Residuals")
+  qqnorm(resi)
+  qqline(resi)
+  acf(resi, main = "ACF of Residuals")
+}
+
+
+```
+
+In this section, we explore gradually more complicated model choices (each described in Section \@ref(Models)) which we apply to a single trail (rather than then entire network of trails) so we can focus on understanding the model applied to these data.
+
+We begin with a quick look at the data available for our chosen trail, Middle Cottonwood Trail. Then we will progress through several `ga(m)m` models that incorporate more complexity with each iteration. This will include a detailed overview of useful diagnostic tools, a look at what explanatory predictor variables should/could be included, as well as an example of how we may forecast (predict into the near future) using our chosen model. 
+<!-- Should we add a note/references for packages used here? -->
+
+## Data Used
+<!-- Data used in this analysis created in 01-LoadData.R -->
+This 2.3-mile out-and-back trail was monitored via infrared counters between `r min(singleTrail$date)` and `r max(singleTrail$date)`. This daily time series count data is combined with data from Strava Metro, and local weather data.
+
+Strava Metro partners with Headwaters Economics to provide aggregated (daily, monthly, or annually) trail use information for the Bridgers. These data are broken into multiple edges within a single trail. Eight such edges are included for Middle Cottonwood. These edges do not represent independent observations as they represent trail use on connected locations and thus likely reflect the same trail users continuing along the trail. We summarize these data to a single value using the edge ID with the maximum observed number of trail numbers for a given day.
+
+In another partnership, AllTrails has provided information on daily trail name searches for a subsection of trails (including Middle Cottonwood) in the Bridger Mountains. 
+
+Thus each row in the dataset details the following:
+
+-   the number of trail users for a given day
+-   trail characteristics (trail name and number, location of trailhead)
+-   counter characteristics (counter ID number, owner, location along trail)
+-   Strava Metro information summarized to reflect the maximum count of all edges for a given day
+-   AllTrails information on search term numbers for a given day
+-   daily weather data (precipitation in inches, min/max temperature, AQI value, PM$_{2.5}$ concentration)
+
+<!-- The data look like this: -->
+
+```{r data structure, eval = F, echo=F}
+head(as.data.frame(singleTrail))
+str(as.data.frame(singleTrail))
+summary(as.data.frame(singleTrail))
+```
+
+Figure \@ref(fig:MidCotTS) shows times series plot of counter and Strava trip counts, in addition to AllTrails search counts.
+
+```{r MidCotTS, eval = T, fig.align='center',  out.width = "100%", fig.cap= "Daily trail traffic for Middle Cottonwood. Purple fill represents trail use counts from deployed counter cameras. Orange line represents trip counts per day provided by Strava Metro. Green line represents trail name searchs per day provided by AllTrails."}
+
+knitr::include_graphics(path = here("output/figures/MiddleCottonwood_TS.png"))
+```
+
+We also examine the relationship between our response variable (max.camera, or the number of trips counted on a trail section per day) and several explanatory variables (Figure \@ref(fig:covariates)). 
+
+```{r covariates, eval = T, fig.align='center',  out.width = "100%", fig.cap = "Relationship of select covariates to trail use for Middle Cottonwood."}
+p1 <- ggplot(singleTrail, aes(yday, max.camera)) +
+  geom_point()
+
+p2 <- ggplot(singleTrail, aes(wday, max.camera)) +
+  geom_point()
+
+p3 <- ggplot(singleTrail, aes(week, max.camera)) +
+  geom_point()
+
+p4 <- ggplot(singleTrail, aes(precipitation_in, max.camera)) +
+  geom_point()
+
+# p5 <- ggplot(singleTrail, aes(temp_min_f, max.camera)) +
+#   geom_point()
+
+p5 <- ggplot(singleTrail, aes(temp_max_f, max.camera)) +
+  geom_point()
+
+p6 <- ggplot(singleTrail, aes(daily_aqi_value, max.camera)) +
+  geom_point()
+
+p7 <-  ggplot(singleTrail, aes(max.count, max.camera)) +
+  geom_point()
+
+p8 <- ggplot(singleTrail, aes(num_views,
+                              max.camera)) +
+  geom_point()
+
+# ggplot(singleTrail, aes(total_traveltime, max.camera)) +
+#   geom_point()
+
+# ggplot(singleTrail, aes(totallength_miles, max.camera)) +
+#   geom_point()
+
+ggpubr::ggarrange(p1, p2, 
+          p3, p4, 
+          p5, p6,
+          p7, p8,
+          ncol = 2, nrow = 4)
+
+
+```
+
+## Model Options
+
+The following provides a very brief overview of several different types of regression models. This material is by no means an exhaustive coverage of the topic (see Section \@ref(Models)), but serves as an applied presentation allowing for us to build upon familiar modelling approaches towards what might be newer material.
+
+All models are fit in R. GA(M)Ms are fit with the **mgcv** package [@R-Wood1, @R-Wood2, @R-Wood3, @R-Wood4, @R-Wood5]. 
+
+### Linear Regression Model
+
+If we start simply and try to predict trail use count as our numeric response variable ($y$) via multiple linear regression (`lm`) using predictor variables, our model would have this general form:
+
+$$
+y = b_0 + b_1x_1 + b_2x_2 + \dots + \epsilon
+$$
+
+Translated in to `R` syntax, this model would look like:
+
+```{r lm , echo=TRUE, eval=T}
+lm_mod <- lm(max.camera ~ 
+               max.count + 
+               num_views +
+               daily_aqi_value + 
+               precipitation_in + 
+               temp_max_f, 
+             data = singleTrail)
+
+save(lm_mod, 
+     file=here("output/models/singleT_lm.rda"), 
+     compress='xz')
+
+```
+
+This model assumes linear relationships between variables, a Gaussian (normal) distribution for the response variable, AND independent observations - **all of which are unlikely to be met with our data.**
+
+### Generalized Linear Regression Model
+
+To address the issue of violated normality assumption in the previous model we can try a generalized linear model (`glm`) with a Poisson distribution (log link). The trail use count response is strictly non-negative and discrete (e.g. can't have 13.5 trail users). This model, using R syntax, would have this form:
+
+```{r glm, eval = T, echo=T}
+glm_mod <- glm(max.camera ~ 
+                 max.count + 
+                 num_views +
+                 daily_aqi_value + 
+                 precipitation_in + 
+                 temp_max_f, 
+               data = singleTrail, 
+               family = poisson)
+
+save(glm_mod, 
+     file=here("output/models/singleT_glm.rda"), 
+     compress='xz')
+```
+
+However, this does not address the non-linear relationship between response and predictors, nor the (temporal) dependence between observations.
+
+### Generalized Additive Models
+
+We can address non-linearity through a simple generalized additive model (`gam`) with the general form,
+
+$$
+y = b_0 + f_1(x_1) + f_2(x_2)\dots + \epsilon
+$$ 
+and the R syntax form of:
+
+```{r gam, eval = T, echo = T}
+gam_mod <- mgcv::gam(max.camera ~ 
+                       max.count +
+                       num_views +
+                       s(yday, bs = "cc") + 
+                       s(wday, bs = "cc",  k = 7) +
+                       s(month, k = 3), 
+                     data = singleTrail, 
+                     knots = list(yday = c(0,365)),
+                     method = 'REML',
+                     family = poisson)
+
+save(gam_mod, 
+     file=here("output/models/singleT_gam.rda"), 
+     compress='xz')
+```
+
+In the above code we fit a `gam` which is non-linear in `yday`, `wday`, and `month` but we also include `max.count` (Strava number of trips) and `num_views` (AllTrails searches) as linear terms. Note that these variable does not have the `s` prefix indicating a (spline based) smoothing term. 
+
+We specified basis functions for the day of year (`yday`) and day of week variable (`wday`). The code `bs="cc"` indicates that we are selecting a cyclic cubic regression spline, which is a penalized cubic regression spine whose ends match up. In the context of day of week we know that Sunday/Saturday would be the 'ends' that 'match' together. If we do not specify any, the default basis function is thin plate splines. They are the default smooth for `s` terms because there is a defined sense in which they are the optimal smoother of any given basis dimension/rank ([@R-Wood5]). One key advantage of this approach is that it avoids the knot placement problems of conventional regression spline modelling.
+
+We have also specified the number of knots, $k$, for both wday and month. If we do not specify $k$ then the default is 10. In both of these cases this results in the following errors:
+
+> Error in place.knots(x, nk) : 
+ more knots than unique data values is not allowed
+>
+> Error in smooth.construct.tp.smooth.spec(object, dk\$data, dk\$knots) :
+> A term has fewer unique covariate combinations than specified maximum degrees of freedom
+
+(I believe the error messages are different due to differing basis functions.) For the `wday` variable we know that there's only 7 unique values (for each day of the week) and thus this is the highest value of $k$ able to be used. Similarly, these data cover 3 `month` values and so that is our selection for $k$ in this instance.
+
+<!-- https://stats.stackexchange.com/questions/359568/choosing-k-in-mgcvs-gam  -->
+
+<!-- https://stats.stackexchange.com/questions/413955/should-i-use-poisson-or-gaussian-family-in-gam -->
+
+<!-- https://stats.stackexchange.com/questions/407429/is-there-a-maximum-number-of-independent-variables-for-generalized-additive-mode -->
+
+<!-- https://stats.stackexchange.com/questions/455988/how-do-you-include-change-in-a-variable-over-time-across-participants-within-a-g -->
+
+<!-- https://stats.stackexchange.com/questions/174936/gamm-choice-of-k-basis-dimension-with-temporal-correlation -->
+
+```{r, eval = T, echo =F}
+# we know that the assumptions for temporal independance aren't met so adding in more variables later. This model does well (i.e. high R-squared value) but I want to make sure we're checking our model assumptions carefully. 
+
+gam_mod2 <- mgcv::gam(max.camera ~  
+                        s(yday, bs = "cc") +
+                        s(month, k = 3) +
+                        s(wday,
+                          bs = "cc", k = 7) +
+                        s(daily_aqi_value) +
+                        s(temp_max_f, k = 5) +
+                        s(precipitation_in, k = 5) +
+                        max.count + 
+                        num_views,
+                knots = list(yday = c(0,365)),
+                method = 'REML',
+                data = singleTrail,
+                family = poisson)
+
+save(gam_mod2, 
+     file=here("output/models/singleT_gam2.rda"), 
+     compress='xz')
+
+```
+
+<!-- https://petolau.github.io/Analyzing-double-seasonal-time-series-with-GAM-in-R/ -->
+
+### Generalized Additive Mixed Models
+
+Recall that an assumption of the `gam` model is that observations are **conditionally** independent. Unless we specify that the data aren't independent using `gamm` instead of `gam`, the `gam` model will perform smoothness selection assuming that we have $n$ independent observations. 
+We first fit a `gamm` model to the exact same covariates and we used when fitting the previous `gam` model. The `R` syntax is as follows:
+
+```{r gamm, eval = T, echo = T, message=F,include = F, warning=F}
+
+gamm_mod <- gamm(max.camera ~  
+                   max.count + 
+                   num_views +
+                 s(yday, bs = "cc") + 
+                 s(wday, bs = "cc", k = 7) +
+                 s(month, k = 3), 
+                 data = singleTrail, 
+                 knots = list(yday = c(0,365)),
+                 method = 'REML',
+                 family = poisson)
+
+## save model fit output
+save(gamm_mod, 
+     file=here("output/models/singleT_gamm.rda"), 
+     compress='xz')
+```
+
+However, we may also include some more explanatory variables to better reflect our understanding of this system we are modelling. The following `gamm` model has additional non-linear terms included pulling from local weather information. We have specified `k=9` for `precipiation_in` again because the default value of 10 is too high and results in an error message and the code fails to run. 
+
+```{r, eval = T, echo= T, message=F, include = F}
+gamm_mod2 <- gamm(max.camera ~ 
+                    s(yday, bs = "cc") + 
+                    s(month, k = 3) +
+                    s(wday, 
+                      bs = "cc", k = 7) +
+                    s(daily_aqi_value) +
+                    s(temp_max_f) +
+                    s(precipitation_in, k = 9) +
+                    max.count +
+                    num_views,
+                  data = singleTrail,    
+                  knots = list(yday = c(0,365)),
+                  method = "REML", 
+                  family = poisson)
+
+save(gamm_mod2,
+     file = here("output/models/singleT_gamm2.rda"),
+     compress='xz')
+
+```
+
+```{r, eval = T, include =F}
+#the following code explores alternative distributions in case of overdispersion. However, since Poisson works well we do not cover these in the report. 
+
+gamm_mod2_qp <- gamm(max.camera ~ 
+                      s(yday, bs = "cc") + 
+                      s(month, k = 3) +
+                      s(wday, 
+                        bs = "cc", k = 7) +
+                      s(daily_aqi_value) +
+                      s(temp_max_f) +
+                      s(precipitation_in, k = 9) +
+                      max.count +
+                      num_views,
+                  data = singleTrail, 
+                  knots = list(yday = c(0,365)),
+                  family = quasipoisson)
+
+save(gamm_mod2_qp,
+     file = here("output/models/singleT_gamm2_qp.rda"),
+     compress='xz')
+
+gamm_mod2_nb <- gamm(max.camera ~ 
+                       s(yday, bs = "cc") + 
+                       s(month, k = 3) +
+                       s(wday, 
+                         bs = "cc", k = 7) +
+                       s(daily_aqi_value) +
+                       s(temp_max_f) +
+                       s(precipitation_in, k = 9) +
+                       max.count + 
+                       num_views,
+                  data = singleTrail, 
+                  knots = list(yday = c(0,365)),
+                  family = negbin(1))
+
+save(gamm_mod2_nb,
+     file = here("output/models/singleT_gamm2_nb.rda"),
+     compress='xz')
+
+gamm_mod2_gaus <- gamm(max.camera ~ 
+                         s(yday, bs = "cc") + 
+                         s(month, k = 3) +
+                         s(wday, 
+                           bs = "cc", k = 7) +
+                         s(daily_aqi_value) +
+                         s(temp_max_f) +
+                         s(precipitation_in, k = 9) +
+                         max.count + 
+                         num_views,
+                       knots = list(yday = c(0,365)),
+                       data = singleTrail)
+
+save(gamm_mod2_gaus,
+     file = here("output/models/singleT_gamm2_gaus.rda"),
+     compress='xz')
+```
+
+
+### GAMM with additional temporal autocorrelation specification
+
+If we model temporal autocorrelation through temporal terms in the model (as we did in `gamm_mod2`), then the smooth functions of temporal variables (such as `yday`, `wday`, etc) could be already accounting for the temporal structure in the data such that once we consider the model, the observations are independent. Note that it's also possible that the temporal autocorrelation is **not** captured through the terms in the model and additional complexity would be beneficial.
+
+Autocorrelation is meant to capture either temporal or spatial dependence in a model. With a `ga(m)m` approach we consider both autocorrelation and a moving average (MA) process. An autoregressive process (AR($n$)) is one in which the previous $n$ points influence the current observations. A moving average (MA) process is one in which the current value is an average of preceding white noise. We are most interested in the main (fixed) effects of our model, while any autocorrelation is ancillary, but necessary to include. 
+
+For optimal choose of AR(p) and MA(q) orders `auto.arima` function, from the **forecast** package [@R-forecast, @R-forecast2], is used on (normalized) residuals from the model fits. It automatically chooses optimal orders of ARMA (in our case) based on AIC criterion. As we can use just ARMA models in gamm, so nonstationarity isn’t allowed, we set an argument stationary = TRUE.
+
+<!-- https://stats.stackexchange.com/questions/316396/built-a-covariance-matrix-for-gam-using-magic-and-magic-post-proc-now-how-to-ca -->
+
+```{r modGI pq choice, echo = T}
+##find values for p and q in the ARMA model 
+arma_res <- forecast::auto.arima(resid(gamm_mod2$lme, 
+                                          type = "normalized"),
+                                 stationary = TRUE,
+                                 seasonal = TRUE)
+
+ #here there's no output bc an AR1 structure is sufficient, but in other instances 
+# this shows what values for p and q to choose
+arma_res$coef
+```
+
+```{r gamm AR1, eval=T, echo = T}
+
+ 
+ ## AR(1)
+gamm_mod2_AR1 <- gamm(max.camera ~ 
+                        s(yday) +
+                        s(month, k = 3) +
+                        s(wday, 
+                          bs = "cc", k = 7) +
+                        s(daily_aqi_value) +
+                        s(temp_max_f, k = 5) +
+                        s(precipitation_in, k = 5) +
+                        max.count + 
+                        num_views,
+              data = singleTrail, 
+              family = poisson,
+              correlation = corAR1(form = ~ yday),
+              method = "REML")
+ 
+save(gamm_mod2_AR1, 
+     file=here("output/models/singleT_gamm-Ar1.rda"), 
+     compress='xz')
+
+
+```
+```{r gamm-ARMA, echo = F}
+
+ ## ARMA(1,1) - included, but not necessary in this case to run as we've
+# seen the AR1 is sufficient. 
+# gamm_mod2_ARMA <- gamm(max.camera ~ 
+#                          s(yday) +
+#                          s(month, k = 3) +
+#                          s(wday, 
+#                            bs = "cc", k = 7) +
+#                          s(daily_aqi_value) +
+#                          s(temp_max_f, k = 5) +
+#                          s(precipitation_in, k = 5) +
+#                          max.count +
+#                          num_views,
+#                        data = singleTrail, 
+#                        family = poisson,
+#                        #note this is the same as a corAR1, but we don't have any evidence for different specification of p and q. 
+#               correlation = corARMA(form = ~ yday, p = 1, q = 1),
+#               control = ctrl)
+#  
+# save(gamm_mod2_ARMA, 
+#      file=here("output/models/singleT_gamm-ARMA.rda"), 
+#      compress='xz')
+```
+
+
+<!-- https://stats.stackexchange.com/questions/482944/autocorrelative-parameter-in-gam-in-r -->
+<!-- https://stats.stackexchange.com/questions/341632/seasonal-data-with-gamms -->
+Even with the use of `auto.arima` we must still examine diagnostic plots (in this case, ACF and PACF plots for identifying autocorrelation) and summaries for each model (see Section \@ref(Diag) for more details).
+
+### Why not a Classic Time Series Analysis?
+
+While both times series regression and GAM's can both be applied to temporal data, the two models are fundamentally different. Time series regression makes an assumption of a stationary series, while GAM deals with the trend internally with smoothing. With GAM, the estimated smoother is detrending the data and the (stationary) residuals are subjected to an ARMA model. The use of GAMs is useful when one is interested in estimating the trends in time series data and those trends are, in general, non-linear. In classical time series modelling, the interest is in modelling data as stochastic trends using lagged versions of the response and/or current and lagged versions of a white noise process.
+<!-- https://stats.stackexchange.com/questions/381509/time-series-analysis-via-generalized-additive-models-model-assumptions-and-stat -->
+<!-- https://jacolienvanrij.com/Tutorials/GAMM.html#analysis -->
+
+## Diagnostic Practices {#Diag}
+
+Once a model (or a suite of models) is fit, we need to take a more detailed look at model outputs to learn how to interpret the results of our model-fitting and better understand the relationships between variables.
+
+### Summarize
+
+We start with the `summary()` function which may be applied to a `gam` object in R. Below we have the summary output for our `gamm` model with explanatory variables.
+
+```{r, summary(), eval = T, echo =T}
+# summary(lm_mod)
+# summary(glm_mod)
+# summary(gam_mod)
+# summary(gam_mod2)
+# summary(gamm_mod$gam)
+summary(gamm_mod2$gam)
+# summary(gamm_mod2_AR1$gam)
+# summary(gamm_mod2_ARMA$gam)
+```
+The first part of the summary describes the model we fit. The "Family" component tells us the model assumes a Poisson distribution of our response, and the "Link" of "log" shows that the model transforms the predictions. 
+
+The next section describes the parametric terms of our model, referring to the linear terms in the model. This section may be familiar from linear modeling. It shows the coefficients for the linear terms in the model, their values, errors, test statistics, and p-values. Asterisks next to the p-values indicate statistical significance. In this case, the model intercept is significant, and the fixed effect of max.count (the number of aggregated/binned Strava trip counts) is also significant at the 0 level. However, the fixed effect of num_views (trail name searches in AllTrails) is not significant for Middle Cottonwood. 
+
+The next section covers smooth terms. For these smooths the summary for coefficients is not printed. This is because each smooth has coefficients for each basis function. Instead, the first column reads edf, which stands for effective degrees of freedom. This value represents the complexity of the smooth. An edf of 1 is equivalent to a straight line. An edf of 2 is equivalent to a quadratic curve, and so on, with higher edfs describing more wiggly curves. In our summary, all included smooth terms are significant at the 0.001 level. Note that the 'month' term has an edf of 1, indicating the smooth is equivalent to a straight line. The day of year term ('yday') has the highest edf (8.338) and thus highest wiggliness. These edf values (and wiggliness) for each smoothing term may be compared to the corresponding partial effects plot in Figure \@ref(fig:MCdraw).
+
+The terms to the right of the EDF column have to do with significance testing for smooths. The Ref.df and F columns are test statistics used in an ANOVA test to test overall significance of the smooth. The result of this test is the p-value to the right. It's important to note that these values are approximate, and it's important to visualize your model to check them.
+
+The R-sq(adj.) does not a straight-forward interpretation of a measure of "proportion of variance explained" in nonlinear regression, and thus can not be employed as an absolute measure of model performance. Deviance explained should be a more generalized measurement of goodness of fit especially for non-gaussian models (such as we have here).
+
+The scale estimate is $\hat{\phi}$ , i.e. this is the value of $\phi$ estimated during model fitting. For the Poisson and Binomial families/distributions, by definition $\phi$=1, but for other distributions this is not the case, including the Gaussian. In the Gaussian case, $\hat{\phi}$  is the residual standard error squared.
+
+### Visualize
+
+After examining the summary, we should visualize our results.  This may be accomplished using the several available function, however we choose to use the **gratia** package [@R-gratia] to produce these plots in **ggplot2** rather than base R. 
+
+#### Draw
+
+```{r MCdraw, eval=T, echo=T, fig.align='center', fig.cap="Plots of estimated smooths from the model fit with Middle Cottonwood trail use count data only."}
+
+# gratia::draw(gam_mod, residuals = T)
+# gratia::draw(gam_mod2, residuals = T)
+# gratia::draw(gamm_mod, residuals = T)
+gratia::draw(gamm_mod2, residuals = T)
+```
+
+The plots (Figure \@ref(fig:MCdraw) generated by **gratia**'s draw()  (or **mgcv**'s plot() in base R graphics) function are partial effect plots. These may help diagnose problems with the model, such as oversmoothing. These plots show the component effect of each of the smooth or linear terms in the model, which add up to the overall prediction (summed effect). We often want to show data alongside model predictions. These plots aid in this by (1) including covariate values along the bottom axis of the plots and (2) plotting partial residuals (here in light blue) on the plots. Partial residuals are the difference between the partial effect and the data, after all other partial effects have been accounted for. These plots also include shading representing 95% confidence interval for the mean shape of the effect.
+
+#### GAM Check
+
+Running gam.check() on a model provides several outputs, in both the console and as plots. We'll start with the console output. First, gam.check() reports on model convergence. Here, it immediately provides a warning against interpreting these results when applied to a `gamm` based fit. We include this check here mainly to note this restriction and the usefulness if a `gam` fit is appropriate. 
+
+Below, we see a table of basis checking results. This shows a statistical test for patterns in model residuals, which should be random. Each line reports the test results for one smooth. It shows the k value or number of basis functions, the effective degrees of freedom, a test statistic, and p-value.
+
+Here, small p-values indicate that residuals are not randomly distributed. This often means there are not enough basis functions.
+
+This is an approximate test. Always visualize your results too, and compare the k and edf values in addition to looking at the p-value.
+
+```{r, eval = T, echo = T}
+# gam.check(gam_mod)
+# gam.check(gam_mod2)
+layout(matrix(1:4, ncol = 2))
+gam.check(gamm_mod2$gam)
+layout(1)
+```
+
+Each of these plot outputs gives a different way of looking at your model residuals. These plots show the results from the original, poorly fit model. On the top-left is a Q-Q plot, which compares the model residuals to a normal distribution. A well-fit model's residuals will be close to a straight line. On bottom left is a histogram of residuals. We would expect this to have a symmetrical bell shape. On top-right is a plot of residual values. These should be evenly distributed around zero. Finally, on the bottom-right is plot of response against fitted values. A perfect model would form a straight line. We don't expect a perfect model, but we do expect the pattern to cluster around the 1-to-1 line.
+
+#### Appraise
+
+The `appraise`() function provides another way to obtain standard diagnotic plots for GAMs.
+
+The plots produced are (from left-to-right, top-to-bottom),
+
+* quantile-quantile (QQ) plot of deviance residuals,
+* scatterplot of deviance residuals against the linear predictor,
+* histogram of deviance residuals, and
+* scatterplot of observed vs fitted values.
+
+```{r, echo = T, eval = T}
+# gratia::appraise(gam_mod)
+# gratia::appraise(gam_mod2)
+# gratia::appraise(gamm_mod$gam)
+gratia::appraise(gamm_mod2$gam)
+```
+
+Fitted vs. response plots are generally less useful for non-normally distributed data as it can be difficult to visually assess if the observed data shows more heteroskedasticity than expected.
+
+#### Time Series GAMM Diagnostic Plots
+
+The following plots are a combination of various  residuals plots and ACF plots produced with a bespoke R function created by Gavin Simpson and hosted on GitHub at: https://github.com/gavinsimpson/random_code/blob/master/tsDiagGamm.R. This function creates diagnostic plots specifically for time series data fit with a `gamm`, as we have with our trail use data. 
+
+```{r tsDiagGAMM, eval = T, echo= T}
+
+singleTrail_dropna <- singleTrail %>% 
+  tidyr::drop_na('daily_aqi_value')
+
+with(singleTrail_dropna, 
+     tsDiagGamm(gamm_mod2, 
+                timevar = yday,
+                observed = max.camera))
+```
+
+#### Rootogram
+
+A good way to check how well the model compares with the observed data (and hence check for over-dispersion in the data relative to the conditional distribution implied by the model) is via a rootogram. A rootogram is a model diagnostic tool that assesses the goodness of fit of a statistical model. The observed values of the response are compared with those expected from the fitted model. For discrete, count responses, the frequency of each count (0, 1, 2, etc) in the observed data and expected from the conditional distribution of the response implied by the model are compared.
+
+```{r rootogram, echo = T, eval = T}
+rg <- gratia::rootogram(gamm_mod2$gam)
+draw(rg)
+```
+
+Looking at Figure \@ref(rootogram) we see the main features of the rootogram:
+
+* expected counts, given the model, are shown by the thick blue line,
+* observed counts are shown as bars, which in a hanging rootogram are show hanging from the blue line of expected counts,
+* on the x-axis we have the count bin, 0 count, 1 count, 2 count, etc,
+* on the y-axis we have the square root of the observed or expected count — the square root transformation allows for departures from expectations to be seen even at small frequencies,
+* a reference line is drawn at a height of 0.
+
+Because this is a hanging rootogram, we can think of the rootogram as relating to the fitted counts — if a bar doesn’t reach the zero line then the model over predicts a particular count bin, and if the bar exceeds the zero line it under predicts.
+
+```{r}
+sum(residuals(gamm_mod2$gam, type = "pearson")^2) / df.residual(gamm_mod2$gam)
+
+
+```
+
+#### Identifying AR and MA using ACF and PACF Plots {#ACF}
+
+There are two visualizations of the residuals that can help you model autocorrelations: the ACF graph and the PACF. In general, ACF lets you assess the moving average component of the model and PACF lets you identify the autoregressive component. The p,q parameters can be estimated from the sharp cut off in the (P)ACF graphs. 
+
+<!-- https://towardsdatascience.com/identifying-ar-and-ma-terms-using-acf-and-pacf-plots-in-time-series-forecasting-ccb9fd073db8 -->
+
+<!-- https://cran.r-project.org/web/packages/itsadug/vignettes/acf.html -->
+
+<!-- https://jroy042.github.io/nonlinear/week4.html -->
+
+<!-- https://stackoverflow.com/questions/56562634/adding-an-moving-average-component-in-gams-model -->
+
+<!-- https://stats.stackexchange.com/questions/332685/modeling-autocorrelation-in-generalized-additive-models-gam-with-re-splines -->
+
+```{r gamm diagnostics, eval=T, echo = T}
+layout(matrix(1:2, ncol = 2))
+acf(resid(gamm_mod2$lme, type = "normalized"), 
+    lag.max = 36, main = "ACF")
+pacf(resid(gamm_mod2$lme, type = "normalized"),
+     lag.max = 36, main = "pACF")
+layout(1)
+```
+
+### Choosing an Appropriate Model for Trail Use in Middle Cottonwood
+
+Often when we fit a linear regression model, we use R-squared as a way to assess how well a model fits the data.
+
+R-squared represents the proportion of the variance in the response variable that can be explained by the predictor variables in a regression model. This number ranges from 0 to 1, with higher values indicating a better model fit. However, there is no such R-squared value for general linear models like logistic regression models and Poisson regression models. Instead, we can calculate a metric known as McFadden's R-Squared, which ranges from 0 to just under 1, with higher values indicating a better model fit.
+<!-- https://www.statology.org/glm-r-squared/ -->
+
+You shouldn't compare the AICs between objects fitted with different software. gam() is fitted via the mgcv package, whereas  gamm() fit is actually accomplished via the MASS (glmmPQL()) and then nlme (lme()) packages. It would be common for different constants to end up in the log likelihood.
+
+Within the `gamm` framework we may use `anova`() to compare between models with different temporal autocorrelation structures.
+
+```{r MCgamm-anovacompare, eval = T}
+anova(gamm_mod2$lme, 
+      gamm_mod2_AR1$lme)
+```
+
+This output indicates that our `gamm_mod2` fit (without any temporal correlation structure) is the best (i.e. has the lowest AIC and BIC values). 
+
+```{r model-summaries, eval=TRUE}
+#create table of 
+summary.table <- as.data.frame(matrix(data = NA, nrow = 6, ncol = 3))
+colnames(summary.table) <- c("model", "AIC", "R.sq")
+
+summary.table$model <- c("lm_mod",
+                          "glm_mod",
+                          "gam_mod",
+                          # "gam_mod2",
+                          "gamm_mod", 
+                         "gamm_mod2", 
+                         "gamm_AR1"
+                         )
+#lm
+summary.table[1, 2:3] <- c(AIC(lm_mod),
+                           summary(lm_mod)$adj.r.squared)
+#glm
+summary.table[2, 2:3]<- c(AIC(glm_mod), 
+                          with(summary(glm_mod), 1 - deviance/null.deviance)
+)
+
+#gam
+summary.table[3, 2:3] <- c(gam_mod$aic, summary(gam_mod)$r.sq)
+
+# #gam2
+# summary.table[4, 2:3] <- c(gam_mod2$aic, summary(gam_mod2)$r.sq)
+
+#gamm
+summary.table[4, 3] <- c(
+  # AIC(gamm_mod$lme),
+                           summary(gamm_mod$gam)$r.sq)
+
+#gamm2
+summary.table[5, 3] <- c(
+  # AIC(gamm_mod$lme),
+                           summary(gamm_mod2$gam)$r.sq)
+
+#gamm.AR1
+summary.table[6, 3] <- c(
+  # AIC(gamm_mod$lme),
+                           summary(gamm_mod2_AR1$gam)$r.sq)
+
+
+
+#round r.sq values
+summary.table[, 3] <- round(summary.table[, 3], 2)
+
+
+knitr::kable(summary.table, 
+             booktabs = T,
+             format = "latex")
+```
+
+```{r}
+#code from https://fromthebottomoftheheap.net/2011/07/21/smoothing-temporally-correlated-data/
+
+edf.gamm <- summary(gamm_mod$gam)$edf
+edf.gamm2 <- summary(gamm_mod2$gam)$edf
+
+plot(singleTrail$max.camera ~ singleTrail$yday, 
+     xlab = "Day of Year", ylab = "Trail Use Count", pch = as.numeric(singleTrail$wday))
+# lines(Y ~ xt, lty = "dashed", lwd = 1)
+# lines(fitted(lm_mod) ~ singleTrail$yday, lty = "solid", col = "darkolivegreen", lwd = 2)
+# lines(fitted(glm_mod) ~ singleTrail$yday, lty = "solid", col = "midnightblue", lwd = 2)
+# lines(fitted(gam_mod) ~ singleTrail$yday, lty = "solid", col = "purple", lwd = 2)
+# lines(fitted(gamm_mod$gam) ~ singleTrail$yday, lty = "dashed", col = "red", lwd = 2)
+lines(fitted(gamm_mod2$gam) ~ singleTrail$yday, lty = "solid", col = "orange", lwd = 2)
+# lines(fitted(m.AR1$gam) ~ singleTrail$yday, lty = "solid" , col = "darkolivegreen", lwd = 2)
+
+# legend("topleft",
+#        legend = c("Truth",
+#        paste("Cubic spline (edf = ", round(m1$df, 2), ")", sep = ""),
+#        paste("AM (edf = ", round(edf2, 2), ")", sep = ""),
+#        paste("AM + AR(1) (edf = ", round(edf3, 2), ")", sep = "")),
+#        col = c("black", "darkgreen", "red", "midnightblue"),
+#        lty = c("dashed", rep("solid", 3)),
+#        lwd = c(1, rep(2, 3)),
+#        bty = "n", cex = 0.8)
+```
+
+<!-- https://stackoverflow.com/questions/59825442/get-the-aic-or-bic-citerium-from-a-gamm-gam-and-lme-models-how-in-mgcv-and-h -->
+
+<!-- https://stats.stackexchange.com/questions/318278/generalized-additive-models-gams-interactions-and-covariates -->
+
+**Final Choice: Generalized Additive Mixture Model with Explanatory Variables**
+
+
+<!-- ```{r, eval = F, result = "asis", message=F, warning=F} -->
+<!-- itsadug::gamtabs(gamm_mod2$gam,  -->
+<!--                  caption="Summary of Explanatory GAMM",  -->
+<!--                  comment=F, -->
+<!--                  type='latex') -->
+
+
+<!-- ``` -->
+
+<!-- ```{=latex} -->
+<!--     \begin{table}[ht] -->
+<!-- \centering -->
+<!-- \begin{tabular}{lrrrr} -->
+<!--    \hline -->
+<!-- A. parametric coefficients & Estimate & Std. Error & t-value & p-value \\  -->
+<!--   (Intercept) & 4.9790 & 0.0337 & 147.6956 & $<$ 0.0001 \\  -->
+<!--   max.count & 0.0096 & 0.0023 & 4.1454 & 0.0005 \\  -->
+<!--    \hline -->
+<!-- B. smooth terms & edf & Ref.df & F-value & p-value \\  -->
+<!--   s(yday) & 8.4169 & 8.4169 & 13.9495 & $<$ 0.0001 \\  -->
+<!--   s(month) & 1.0000 & 1.0000 & 18.8885 & 0.0003 \\  -->
+<!--   s(wday) & 4.8314 & 5.0000 & 25.7923 & $<$ 0.0001 \\  -->
+<!--   s(daily\_aqi\_value) & 4.6698 & 4.6698 & 10.4663 & $<$ 0.0001 \\  -->
+<!--   s(temp\_min\_f) & 4.2163 & 4.2163 & 14.4487 & $<$ 0.0001 \\  -->
+<!--   s(precipitation\_in) & 3.7374 & 3.7374 & 42.5743 & $<$ 0.0001 \\  -->
+<!--    \hline -->
+<!-- \end{tabular} -->
+<!-- \caption{Summary of Explanatory GAMM}  -->
+<!-- \label{tab.gam} -->
+<!-- \end{table} -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- mgcv::vis.gam(gamm_mod2$gam,  -->
+<!--                  view=c("precipitation_in", "temp_min_f"), -->
+<!--                  select=2, -->
+<!--                  main='Explanatory GAMM', labcex=.8, -->
+<!--                 print.summary=FALSE) -->
+<!-- ``` -->
+
+<!-- <https://stats.stackexchange.com/questions/425194/visreg-visualization-of-mgcv-results-gam> -->
+
+<!-- <https://cran.r-project.org/web/packages/itsadug/vignettes/inspect.html> -->
+
+## Prediction and Forecasting Trail Use {#MidCotPred}
+
+A common issue with any model, the generalized additive modelling framework included, is how to extrapolate beyond the range of data used to train the model. Temporal extrapolation is particularly tricky with temporal (time series) data. For GAMs, the issue arises as this framework uses splines to learn from the data via the basis functions. The splines are often set up directly related to the data included in the training set and it's not always clear how these should extend past that range of data, especially in this single trail application. (In Section \@ref(AllTrailsAnalysis) we apply this framework to a suite of trails and allow for a global smoother which can help inform trails with shorter camera deployment times by pulling/sharing from these global trends.) 
+
+Figure \@ref(fig:MidCot-predict-compare) shows predictions (and 95% credible interval on predicted values) for three different model specifications (`gam` with no temporal autocorrelation structure, `gamm` with no temporal autocorrelation structure, and `gamm` with an AR1 temporal autocorrelation structure). It's clear that all models perform best when interpolating, as expected. Improving forecasting with this single trail approach could be accomplished with several years of year-round observations. 
+
+```{r predictions}
+ # itsadug::get_predictions(model = gamm_mod2$gam,
+ #                          cond = list(yday = seq(0, 365, length = 50)))
+
+pred <- marginaleffects::predictions(gamm_mod2$gam)
+pred.datagrid <- marginaleffects::predictions(gamm_mod2$gam,
+                                         newdata = datagrid())
+pred.newdata <- marginaleffects::predictions(gamm_mod2$gam,
+                                         newdata = predict.MidCot)
+```
+
+
+```{r}
+
+ plot(max.camera ~ yday, data = singleTrail, type = "p")
+lines(predicted ~ yday, data = pred, col = "red")
+# lines(p2 ~ yday, data = predict.MidCot, col = "blue")
+legend("topleft",
+       legend = c("Uncorrelated Errors","AR(1) Errors"),
+       bty = "n", col = c("red","blue"), lty = 1)
+
+## plot extrapolated (in time) predictions
+x.min <- min(singleTrail$yday) - 30
+x.max <- max(singleTrail$yday) + 30
+plot(predicted ~ yday, data = pred.newdata,
+     type = "p", col = "red", 
+     xlim = c(x.min, x.max), 
+     ylim = c(0, 5000))
+lines(max.camera~ yday, data = singleTrail, type = "p", col = "black")
+
+
+marginaleffects::plot_cap(gamm_mod2$gam, condition = "yday") #+    
+  # ggplot2::xlim(100, 305) + 
+  # ylim(0, 1000) +
+  # geom_line(data = pred.newdata, 
+            # aes(x = yday, y = predicted), 
+            # color = 'red', size = 1) 
+
+
+
+marginaleffects::plot_cap(gamm_mod2$gam, condition = "max.count")
+marginaleffects::plot_cap(gamm_mod2$gam, condition = "wday")
+
+
+
+
+```
+
+```{r diff model predictions, eval = T}
+#get predictions from each model for full year of prediction data
+p_gam2 <- as_tibble(predict(gam_mod2, predict.MidCot, 
+                            se.fit = TRUE, type = "response")) %>%
+    rename(fit_gam = fit, se_gam = se.fit)
+p_gamm2 <- as_tibble(predict(gamm_mod2$gam, predict.MidCot, 
+                             se.fit = TRUE, type = "response")) %>%
+    rename(fit_gamm = fit, se_gamm = se.fit)
+p_gamm2AR1 <- as_tibble(predict(gamm_mod2_AR1$gam, predict.MidCot, 
+                                se.fit = TRUE, type = "response")) %>%
+    rename(fit_gammAR1 = fit, se_gammAR1 = se.fit)
+
+#data wrangling for easier plotting 
+new_data_bases <- bind_cols(predict.MidCot, p_gam2, p_gamm2, p_gamm2AR1) %>%
+    tidyr::pivot_longer(fit_gam:se_gammAR1, names_sep = '_',
+                 names_to = c('variable', 'model')) %>%
+    tidyr::pivot_wider(names_from = variable, values_from = value) %>%
+    mutate(upr_ci = fit + (2 * se), lwr_ci = fit - (2 * se))
+```
+
+```{r MidCot-predict-compare, eval = T, fig.align='center', fig.cap = "Predictions for Middle Cottonwood trail use showing interpolation and extrapolation behavior for temporal data range and extrended one month before and after data availability. Data points are colored by day of the week. Prediction lines (and error ribbons) are colored by model type applied."}
+singleTrail$wday2 <- lubridate::wday(singleTrail$date, label = 2)
+
+ggplot(mapping = aes(x = yday, y = max.camera)) +
+    geom_ribbon(data = new_data_bases,
+                mapping = aes(ymin = lwr_ci, 
+                              ymax = upr_ci, x = yday,
+                              fill = factor(model)),
+                inherit.aes = FALSE, alpha = 0.2) +
+    geom_point(data = singleTrail, aes(colour = factor(wday2))) +
+    geom_line(data = new_data_bases, aes(y = fit, x = yday, colour2 = factor(model)),
+              size = 1) %>%
+    relayer::rename_geom_aes(new_aes = c("colour" = "colour2")) +
+    # scale_colour_distiller(palette = "Set1", 
+    #                       aesthetics = "colour", 
+    #                       name = "Day of Week") +
+  scale_color_brewer(name = "Day of Week", palette = "Set1") +
+    scale_colour_OkabeIto(aesthetics = "colour2", name = "Model") +
+    scale_fill_OkabeIto(name = "Model") +
+    coord_cartesian(xlim = c(min(singleTrail$yday) - 30, max(singleTrail$yday) + 30), ylim = c(0, 1000)) +
+    labs(title = "Extrapolation: Middle Cottonwood",
+         subtitle = "How prediction varies with different model specifications") + 
+  xlab("Day of Year") +
+  ylab("Camera Trail Use Counts")
+```
+
+
+```{r gamm2 b spline}
+## the following code is a peek at whether a different basis choice replacing the default TPRS might improve extrapolation as in https://fromthebottomoftheheap.net/2020/06/03/extrapolating-with-gams/
+## no difference seen, so not presented in report. 
+
+gamm_mod2_bspline <- gamm(max.camera ~ 
+                            s(yday, bs = "cc", 
+                              m = c(3,1)) + 
+                            s(month,  k = 3) +
+                            s(wday, 
+                              bs = "cc", k = 7) +
+                            s(daily_aqi_value, 
+                              bs = "bs", m = c(3,1)) +
+                            s(temp_max_f, 
+                              bs = "bs", m = c(3,1)) +
+                            s(precipitation_in, k = 9,
+                              bs = "bs", m = c(3,1)) +
+                            max.count + 
+                            num_views,
+                          data = singleTrail, 
+                          knots = list(yday = c(0,365)),
+                          method = "REML",
+                          family = poisson)
+
+p_bs <- as_tibble(predict(gamm_mod2_bspline$gam, 
+                                 predict.MidCot, 
+                                 se.fit = TRUE, 
+                                 type = "response")) %>%
+    rename(fit_bs = fit, se_bs = se.fit)
+p_tprs <- as_tibble(predict(gamm_mod2$gam, 
+                            predict.MidCot, 
+                            se.fit = TRUE, 
+                            type = "response")) %>%
+    rename(fit_tprs = fit, se_tprs = se.fit)
+
+
+new_data_bases <- bind_cols(predict.MidCot, p_tprs, p_bs) %>%
+    tidyr::pivot_longer(fit_tprs:se_bs, names_sep = '_',
+                 names_to = c('variable', 'spline')) %>%
+    tidyr::pivot_wider(names_from = variable, values_from = value) %>%
+    mutate(upr_ci = fit + (2 * se), lwr_ci = fit - (2 * se))
+
+```
+
+
+```{r diff spline predictin plots}
+ggplot(mapping = aes(x = yday, y = max.camera)) +
+  geom_ribbon(data = new_data_bases,
+              mapping = aes(ymin = lwr_ci, ymax = upr_ci, 
+                            x = yday, fill = spline),
+              inherit.aes = FALSE, alpha = 0.2) +
+  geom_point(data = singleTrail, aes(colour = factor(wday))) +
+  geom_line(data = new_data_bases, aes(y = fit, x = yday, colour2 = spline),
+            size = 1) %>%
+  relayer::rename_geom_aes(new_aes = c("colour" = "colour2")) +
+  scale_colour_brewer(palette = "Set1", aesthetics = "colour", name = "Data set") +
+  scale_colour_OkabeIto(aesthetics = "colour2", name = "Basis") +
+  scale_fill_OkabeIto(name = "Basis") +
+  coord_cartesian(xlim = c(min(singleTrail$yday) - 30, max(singleTrail$yday) + 30), ylim = c(0, 1000)) +    labs(title = "Extrapolating with splines",
+                                                                                                                 subtitle = "How behaviour varies with different basis types")
+```

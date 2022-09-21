@@ -1,0 +1,5 @@
+book_filename: "Statistical Analysis: Prediction of Trail Use in Bridger Mountains"
+delete_merged_file: true
+language:
+  ui:
+    chapter_name: "Section "

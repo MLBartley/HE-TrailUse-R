@@ -1,0 +1,537 @@
+\cleardoublepage 
+
+# (APPENDIX) Appendix {-}
+
+# Utility of All Trails auxilary data {#ATDataUtility}
+
+```{r}
+library(colorblindr)
+library(here)
+library(ggplot2)
+library(mgcv)
+
+
+# source(here("scripts/01-LoadData.R"))
+source(here("scripts/01.01-OrganizeSpatialData.R"))
+
+
+##set colors for new plots 
+colors <- palette(pals::polychrome(36))
+
+names(colors) <- c(levels(as.factor(allData$trailname)), "Felix Canyon")
+ 
+#fix light Bridger Foothils
+colors[2] <- "#c0b9bd"
+
+#helps to format this document 
+#by default the included code chunks do not appear in the report view
+knitr::opts_chunk$set(echo = F, 
+                      eval = F,
+                      message = F, 
+                      # cache=TRUE, 
+                      warning=FALSE, 
+                      error=FALSE, 
+                      root.dir = normalizePath(".."))
+
+options(knitr.table.format = function() {
+  if (knitr::is_latex_output()) 'latex' else 'pandoc'
+})
+
+
+```
+
+```{r process AT data, eval = T}
+#add subsection (trailname only ) to AT search data
+
+allTrail_search <- allTrail %>% 
+  filter(subsectionname %in% unique(allTrails_search$subsectionname)) %>% 
+  left_join(allTrails_search %>% select(-c("trailnum", 
+                                           # "subsectionname", 
+                                           "month",
+                                           "day",
+                                           "year")),
+            by = c("subsectionname" = "subsectionname",
+                   "trailname" = "trailname",
+                   "date" = "date")) 
+
+allTrail_search[is.na(allTrail_search$num_views), "num_views"] <- 0
+
+##update moving averages and cumulative sums now we added zeros in
+allTrail_search <- allTrail_search %>% 
+  group_by(trailname) %>%
+  arrange(trailname, date) %>%
+  #unsure why above creates duplicate lines but let's fix that
+  distinct() %>% 
+  mutate(moving_avg7 = slider::slide_dbl(num_views, 
+                                        mean, 
+                                        na.rm=T,
+                                        .before = 7
+                                        ), 
+         moving_avg3 = slider::slide_dbl(num_views, 
+                                         mean, 
+                                         na.rm=T,
+                                         .before = 2), 
+         sum_cuml7 = slider::slide_dbl(num_views, 
+                                       sum, 
+                                       na.rm=T,
+                                       .before = 7), 
+         sum_cuml3 = slider::slide_dbl(num_views, 
+                                       sum, 
+                                       na.rm=T,
+                                       .before = 3)
+         ) %>%
+  # mutate(moving_avg = zoo::rollmean(num_views, k = 7, fill = NA)) %>% 
+  ungroup() %>% 
+  distinct()
+
+# unique(allTrail_search$trailname)
+
+sub.number <- length(unique(allTrail_search$subsectionname))
+
+```
+
+Through a partnership between AllTrails and Headwaters Economics, AllTrails has provided search data for a subset of trails in the Bridger Mountains to be used as auxillary data for the Bridger Mountain trail use statistical analysis.  The following trails are included in this dataset:
+
+1. Fairy Creek
+2. College M
+3. Bridger Ridge
+4. Sacagawea Pass
+5. Sypes Canyon
+6. Truman Gulch
+7. Corbly Gulch
+8. Ross Pass
+9. Middle Cottonwood
+
+An overview of the available AllTrials data is presented in Section \@ref(ATData). In this report we aim to investigate the utility of these data (and potential transformation of the data) as a predictor variable in the trail use analysis. We are interested in whether some transformation of the data (e.g., moving average of views or perhaps the cumulative sum of views over the preceding $n$ days) may prove more informative than the raw data themselves. 
+
+## Data Visualization
+
+We start with exploring some visualizations of different data transformations. Figure \@ref{fig:AT-vis-views} shows potential linear relationships between the different trail subsections and the untransformed number of views for each. While not all trail subsections exhibit evidence for a linear relationship (or non-linear) we do see evidence for a positive relationship with Sacagawea Pass and Sypes Way. Additional data (days of year or different trail subsections) could still hold more evidence for this relationship. 
+
+```{r AT-vis-views, eval = T, fig.cap="Scatterplot of trail use camera counts and AllTrails number of search views. Linear relationship fit (line) plotted in black."}
+
+# visualize relationship with trail use -----------------------------------
+
+ggplot(allTrail_search, aes(num_views,
+                        max.camera)) +
+  geom_point(aes(color = trailname)) +
+  geom_smooth(method = "lm", color = "black") +
+  facet_wrap(~subsectionF, ncol = 3) +
+  scale_color_manual(values = colors) +
+ theme(legend.position="bottom")
+```
+We started our exploration of potential data transformations with a 7-day moving average that takes the preceding 7 days to average over. This assumes the recreational users might be conducting trail searches in the week leading up to a trail use event. Figure \@ref(fig:AT-vis-moving7) shows the relationship between trail use by camera counter and AllTrails searches as this 7 day moving average. There is not any increase in the number or strength of linear relationships for any of the trail subsections. Sypes Canyon no longer has quite as prominent of a positive linear relationship between the two variables. Using a shorter time frame for the moving average does not seem to provide any improvement (not shown). 
+
+```{r AT-vis-moving7,  eval = T, fig.cap="Scatterplot of trail use camera counts and AllTrails search views represented as a moving average of the number of views for the preceding seven days. Linear relationship fit (line) plotted in black."}
+
+ggplot(allTrail_search, aes(moving_avg7,
+                        max.camera)) +
+  geom_point(aes(color = trailname)) +
+  geom_smooth(method = "lm", color = "black") +
+  facet_wrap(~subsectionF, ncol = 3) +
+  scale_color_manual(values = colors) + 
+  theme(legend.position="bottom")
+```
+
+```{r}
+ggplot(allTrail_search, aes(moving_avg3,
+                        max.camera)) +
+  geom_point(aes(color = trailname)) +
+  geom_smooth(method = "lm", color = "black") +
+  facet_wrap(~subsectionF, ncol = 3) +
+  scale_color_manual(values = colors) + 
+  theme(legend.position="bottom")
+```
+
+We also explored using the cumulative sum of the previous $n$ days. Figure \@ref(fig:sumcum3) shows that this approach can show a different linear relationship compared to non-transformed search views. Both Steep Way and Middle Cottonwood now show evidence of *negative* linear relationships between camera counts and search views. 
+
+```{r, sumcum3, fig.align='center',  out.width = "100%",fig.cap="Scatterplot of trail use camera counts and AllTrails search views represented as a moving average of the number of views for the preceding three days. Linear relationship fit (line) plotted in black."}
+ggplot(allTrail_search, aes(sum_cuml3,
+                        max.camera)) +
+  geom_point(aes(color = trailname)) +
+  geom_smooth(method = "lm", color = "black") +
+  facet_wrap(~subsectionF, ncol = 3) +
+  scale_color_manual(values = colors)
+```
+
+What these visualizations show is that we must be careful in our choice for how we incorporate these data into our model for trail use. 
+
+## Fitting Models
+
+Another consideration is how to include AllTrails search data in our GAM framework with (or instead of) the Strava trip count data. We fit and compare the following models:
+
+1. Model GI with AR1 temporal correlation structure and only the Alltrail search views as the raw data. 
+2. Model GI-AR1 with only the AllTrails search data as a 7 day moving average. 
+3.  Model GI-AR1 with both the Strava trip counts and the Alltrail search views as the raw data. 
+4.  Model GI-AR1 with both the Strava trip counts and the Alltrail search views as a 3 day moving average. 
+```{r AT-fit, eval = T}
+runall = F
+
+if(runall){
+  
+# Run GI-AR1 model with Search Only ---------------------------------------
+gamm_modGI_AR1_searchOnly_MA3 <- gamm(max.camera ~
+                            s(yday, m=2, bs="cc") +
+                            s(yday, by = subsectionF,
+                              m=1, bs="cc") +
+                            s(subsectionF,
+                              bs="re",
+                              # by = trailnameF,
+                              k=sub.number) +
+                            # trailnameF +
+                            s(month, k = 7) +
+                            s(wday,
+                              bs = "cc", k = 7) +
+                            s(daily_aqi_value) +
+                            s(temp_max_f) +
+                            s(precipitation_in, k = 5) +
+                            s(totallength_miles, k = 9) + 
+                            total_traveltime +
+                            moving_avg3,
+                          knots = list(yday = c(0,365)),
+                          correlation = corAR1(form = ~yday|subsectionF),
+                          data = allTrail_search,
+                          family = poisson)
+
+save(gamm_modGI_AR1_searchOnly_MA3, 
+     file=here("output/models/allT_subsection_gamm_GI-AR1_ATSearch_MA3.rda"),
+     compress='xz')
+
+gamm_modGI_AR1_searchOnly_raw <- gamm(max.camera ~
+                            s(yday, m=2, bs="cc") +
+                            s(yday, by = subsectionF,
+                              m=1, bs="cc") +
+                            s(subsectionF,
+                              bs="re",
+                              # by = trailnameF,
+                              k=sub.number) +
+                            # trailnameF +
+                            s(month, k = 7) +
+                            s(wday,
+                              bs = "cc", k = 7) +
+                            s(daily_aqi_value) +
+                            s(temp_max_f) +
+                            s(precipitation_in, k = 5) +
+                            s(totallength_miles, k = 9) + 
+                            total_traveltime +
+                            num_views,
+                          knots = list(yday = c(0,365)),
+                          correlation = corAR1(form = ~yday|subsectionF),
+                          data = allTrail_search,
+                          family = poisson)
+
+save(gamm_modGI_AR1_searchOnly_raw, 
+     file=here("output/models/allT_subsection_gamm_GI-AR1_ATSearch_raw.rda"),
+     compress='xz')
+
+# Run GI-AR1 Model with Strava AND AllTrails ------------------------------
+
+gamm_modGI_AR1_Both_MA3 <- gamm(max.camera ~
+                              s(yday, m=2, bs="cc") +
+                              s(yday, by = subsectionF,
+                                m=1, bs="cc") +
+                              s(subsectionF,
+                                bs="re",
+                                # by = trailnameF,
+                                k=sub.number) +
+                              # trailnameF +
+                              s(month, k = 7) +
+                              s(wday,
+                                bs = "cc", k = 7) +
+                              s(daily_aqi_value) +
+                              s(temp_max_f) +
+                              s(precipitation_in, k = 5) +
+                              s(totallength_miles, k = 9) + 
+                              total_traveltime +
+                              moving_avg3 +
+                              max.count,
+                            knots = list(yday = c(0,365)),
+                            correlation = corAR1(form = ~yday|subsectionF),
+                            data = allTrail_search,
+                            family = poisson)
+
+save(gamm_modGI_AR1_Both_MA3, 
+     file=here("output/models/allT_subsection_gamm_GI-AR1_Both_MA3.rda"),
+     compress='xz')
+
+gamm_modGI_AR1_Both_raw <- gamm(max.camera ~
+                              s(yday, m=2, bs="cc") +
+                              s(yday, by = subsectionF,
+                                m=1, bs="cc") +
+                              s(subsectionF,
+                                bs="re",
+                                # by = trailnameF,
+                                k=sub.number) +
+                              # trailnameF +
+                              s(month, k = 7) +
+                              s(wday,
+                                bs = "cc", k = 7) +
+                              s(daily_aqi_value) +
+                              s(temp_max_f) +
+                              s(precipitation_in, k = 5) +
+                              s(totallength_miles, k = 9) + 
+                              total_traveltime +
+                              num_views +
+                              max.count,
+                            knots = list(yday = c(0,365)),
+                            correlation = corAR1(form = ~yday|subsectionF),
+                            data = allTrail_search,
+                            family = poisson)
+
+save(gamm_modGI_AR1_Both_raw, 
+     file=here("output/models/allT_subsection_gamm_GI-AR1_Both_raw.rda"),
+     compress='xz')
+
+## strava only to compare (limited subsections)
+
+gamm_modGI_AR1_StravaOnly <- gamm(max.camera ~
+                              s(yday, m=2, bs="cc") +
+                              s(yday, by = subsectionF,
+                                m=1, bs="cc") +
+                              s(subsectionF,
+                                bs="re",
+                                # by = trailnameF,
+                                k=sub.number) +
+                              # trailnameF +
+                              s(month, k = 7) +
+                              s(wday,
+                                bs = "cc", k = 7) +
+                              s(daily_aqi_value) +
+                              s(temp_max_f) +
+                              s(precipitation_in, k = 5) +
+                              s(totallength_miles, k = 9) + 
+                              total_traveltime +
+                              # num_views +
+                              max.count,
+                            knots = list(yday = c(0,365)),
+                            correlation = corAR1(form = ~yday|subsectionF),
+                            data = allTrail_search,
+                            family = poisson)
+
+save(gamm_modGI_AR1_StravaOnly, 
+     file=here("output/models/allT_subsection_gamm_GI-AR1_StravaOnly.rda"),
+     compress='xz')
+
+}
+
+load(file=here("output/models/allT_subsection_gamm_GI-AR1_ATSearch_MA3.rda"))
+load(file=here("output/models/allT_subsection_gamm_GI-AR1_ATSearch_raw.rda"))
+
+load(file=here("output/models/allT_subsection_gamm_GI-AR1_Both_MA3.rda"))
+load(file=here("output/models/allT_subsection_gamm_GI-AR1_Both_raw.rda"))
+
+load(file = here("output/models/allT_subsection_gamm_GI-AR1_StravaOnly.rda"))
+
+```
+
+## Comparing Models
+We compared models using `anova` and the model with only the raw AllTrails search view counts had the lowest AIC. 
+
+```{r ATStrava-anova, eval = T}
+load(file=here("output/models/allT_subsection_gamm_GI-AR1.rda"))
+
+# anova(
+#   # gamm_modGI_AR1$lme,
+#       gamm_modGI_AR1_searchOnly_MA3$lme, 
+#       gamm_modGI_AR1_searchOnly_raw$lme)
+# 
+# anova(
+#   # gamm_modGI_AR1$lme,
+#       gamm_modGI_AR1_Both_MA3$lme,
+#       gamm_modGI_AR1_Both_raw$lme)
+
+anova(gamm_modGI_AR1_searchOnly_raw$lme, 
+       gamm_modGI_AR1_Both_MA3$lme, 
+      gamm_modGI_AR1_StravaOnly$lme)
+```
+```{r predict.df, eval = T}
+
+# might need to subset predict.All data 
+predict.search <- predict.All %>% 
+  filter(subsectionF %in% unique(allTrail_search$subsectionname)) %>% 
+  # left_join(allTrails_search %>% select(c("subsectionname", "trailname", "date", "moving_avg")), 
+  #           by = c("subsectionF" = "subsectionname",
+  #                  "trailname" = "trailname",
+  #                  "date" = "date", 
+  #                  "trailnumber" = "trailnumber")) %>% 
+  left_join(allTrails_search %>% select(-c("trailnum", 
+                                           # "subsectionname", 
+                                           "month",
+                                           "day",
+                                           "year")),
+            by = c("subsectionF" = "subsectionname",
+                   "trailname" = "trailname",
+                   "date" = "date")) 
+
+predict.search[is.na(predict.search$num_views), "num_views"] <- 0
+
+##update moving averages and cumulative sums now we added zeros in
+predict.search <- predict.search %>% 
+  group_by(trailname) %>%
+  arrange(trailname, date) %>%
+  #unsure why above creates duplicate lines but let's fix that
+  distinct() %>% 
+  mutate(moving_avg7 = slider::slide_dbl(num_views, 
+                                        mean, 
+                                        na.rm=T,
+                                        .before = 7
+                                        ), 
+         moving_avg3 = slider::slide_dbl(num_views, 
+                                         mean, 
+                                         na.rm=T,
+                                         .before = 2), 
+         sum_cuml7 = slider::slide_dbl(num_views, 
+                                       sum, 
+                                       na.rm=T,
+                                       .before = 7), 
+         sum_cuml3 = slider::slide_dbl(num_views, 
+                                       sum, 
+                                       na.rm=T,
+                                       .before = 3)
+         ) %>%
+  # mutate(moving_avg = zoo::rollmean(num_views, k = 7, fill = NA)) %>% 
+  ungroup() %>% 
+  distinct()
+
+```
+
+A look at deviance in these model predictions (Table \@ref(tab:ATdeviance-kable)) shows a lot of variation between trails for the lowest amount of deviance. 
+
+```{r devianceAT, eval = T, echo=FALSE, message=FALSE}
+
+#Correlations between fitted and observed values for all subsections:
+#\n is in variable titles to add a line break in the printed table.
+
+modGI.searchraw.pred <- as_tibble((predict(gamm_modGI_AR1_searchOnly_raw$gam, 
+                          allTrail_search, 
+                          se.fit = F, 
+                          type = "response"))) %>% 
+    rename(modSearchRaw = value)
+modGI.BothMA3.pred <- as_tibble(predict(gamm_modGI_AR1_Both_MA3$gam, 
+                           allTrail_search, 
+                          se.fit = F, 
+                            type = "response")) %>%
+    rename(modBothMA3 = value)
+modGI.Strava.pred <- as_tibble(predict(gamm_modGI_AR1_StravaOnly$gam, 
+                           allTrail_search, 
+                          se.fit = F, 
+                            type = "response")) %>%
+    rename(modStrava = value)
+
+
+
+test_summary =  bind_cols(allTrail_search,
+                          modGI.searchraw.pred,
+                          modGI.BothMA3.pred, 
+                          modGI.Strava.pred) %>% 
+  tidyr::drop_na(daily_aqi_value) %>% 
+  group_by(subsectionF)%>%
+  summarise(
+    `Model GI-AT-Raw` = format(get_deviance(gamm_modGI_AR1_searchOnly_raw$gam,
+                                      modSearchRaw, max.camera), 
+                       scientific = FALSE, 
+                       digits=3),
+    `Model GI-Both-MA3` = format(get_deviance(gamm_modGI_AR1_Both_MA3$gam,
+                                              modBothMA3, max.camera), 
+                       scientific = FALSE, 
+                       digits=3),
+    `Model GI-Strava` = format(get_deviance(gamm_modGI_AR1_StravaOnly$gam,
+                                            modStrava, max.camera), 
+                       scientific = FALSE, 
+                       digits=3)
+    )
+```
+```{r ATdeviance-kable, eval= T, echo=FALSE, message=FALSE}
+test_summary%>%
+  #need to specify this to ensure that species names are italized in the table
+  # mutate(taxon = cell_spec(taxon, 
+  #                          italic = c(TRUE,FALSE,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE)))%>%
+  # #Capitilizing taxon in the table names
+  # rename(Taxon = taxon)
+kable(test_summary, 
+      format = table_out_format, 
+      caption="Predictive ability for models examining inclusion of AllTrails and Strava Metro data applied to the subsection of Bridger Mountain trail use dataset where both predictor variables are available.",
+      booktabs = TRUE,
+      escape = FALSE)%>%
+  add_header_above(c(" " = 1, "Total deviance" = 3),
+                   escape = FALSE)%>%
+  kable_styling(full_width = FALSE) %>%
+  row_spec(2:3,italic = FALSE) %>%
+  row_spec(2:3, italic = FALSE)
+  
+```
+
+Figure \@ref(fig:ATplot-compare) shows the variation in predictions when fitting models with different auxiliary data included. 
+
+```{r ATplot-compare, eval = T, fig.align='center', out.width="100%", fig.cap="Predicted trail use count values (lines) versus observed trail use (points) for each trail subsection, based on each model (Strava only with raw counts, both AllTrails and Strava with 3-day moving average, and Strava only)."}
+
+p_GI_Strava <- as_tibble(predict(gamm_modGI_AR1$gam, 
+                             predict.search, 
+                             se.fit = TRUE, 
+                             type = "response")) %>%
+  rename(fit_Strava = fit, se_Strava = se.fit)
+
+# p_GI_AllTrails_MA3 <- as_tibble(predict(gamm_modGI_AR1_searchOnly_MA3$gam, 
+#                                     predict.search, 
+#                             se.fit = TRUE, 
+#                             type = "response")) %>%
+#   rename(fit_ATMA3 = fit, se_ATMA3 = se.fit)
+# 
+# p_GI_AllTrails_raw <- as_tibble(predict(gamm_modGI_AR1_searchOnly_raw$gam, 
+#                                     predict.search, 
+#                             se.fit = TRUE, 
+#                             type = "response")) %>%
+#   rename(fit_ATraw = fit, se_ATraw = se.fit)
+
+p_GI_Both_MA3 <- as_tibble(predict(gamm_modGI_AR1_Both_MA3$gam, 
+                               predict.search, 
+                                    se.fit = TRUE, 
+                                    type = "response")) %>%
+  rename(fit_BothMA3 = fit, se_BothMA3 = se.fit)
+
+# p_GI_Both_raw <- as_tibble(predict(gamm_modGI_AR1_Both_raw$gam, 
+#                                predict.search, 
+#                                     se.fit = TRUE, 
+#                                     type = "response")) %>%
+#   rename(fit_Bothraw = fit, se_Bothraw = se.fit)
+
+
+pred_all_ATStrava <- bind_cols(predict.search,
+                               p_GI_Strava,
+                               # p_GI_AllTrails_MA3,
+                               # p_GI_AllTrails_raw,
+                               p_GI_Both_MA3#,
+                               # p_GI_Both_raw
+                               ) %>%
+  tidyr::pivot_longer(fit_Strava:se_BothMA3, names_sep = '_',
+                      names_to = c('variable', 'auxData')) %>%
+  tidyr::pivot_wider(names_from = variable, values_from = value) %>%
+  mutate(upr_ci = fit + (2 * se), lwr_ci = fit - (2 * se))
+
+compare_ATStrava <- ggplot(mapping = aes(x = yday, y = max.camera)) +
+  geom_ribbon(data = pred_all_ATStrava,
+              mapping = aes(ymin = lwr_ci, ymax = upr_ci,
+                            x = yday, fill = factor(auxData)),
+              inherit.aes = FALSE, alpha = 0.2) +
+  geom_point(data = allTrail_search, aes(colour = as.factor(wday)) 
+            ) +
+  geom_line(data = pred_all_ATStrava, aes(y = fit, x = yday, 
+                                    colour2 = factor(auxData)),
+            alpha = 0.5,
+            size = 1) %>%
+  relayer::rename_geom_aes(new_aes = c("colour" = "colour2")) +
+  scale_colour_brewer(palette = "Set1", aesthetics = "colour", name = "Day of Week") +
+  scale_colour_OkabeIto(aesthetics = "colour2", name = "Model") +
+  scale_fill_OkabeIto(name = "Model") +
+  coord_cartesian(xlim = c(0, 365), ylim = c(0, 1000)) +
+  facet_wrap(~subsectionF, drop = T) +
+  labs(title = "Model GI",
+       subtitle = "How prediction varies with different auxillary data inclusion.")
+compare_ATStrava
+```
+
+## Takeaway Conclusion
+
+In our initial investigation of the AllTrails search views data we found evidence of a positive linear relationship with trail use (as camera counts) for only a few trails. We have shown evidence for including some form of AllTrails search views data in tandem with the Strava Metro provided daily trip counts in our model to improve predictive abilities. However, in our current approach, which fits a HGAMM to 21 different trail subsections, we would need AllTrails search data for all included trails. This model is unable to handle any missing covariate values. We do included AllTrails searches as the raw number of views in our Middle Cottonwood only approach (Section \@ref(MidCot)) but it was not a significant linear term. 
+
+

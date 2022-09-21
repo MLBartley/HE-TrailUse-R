@@ -1,0 +1,244 @@
+---
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+# Explanation of Models {#Models}
+
+```{r, echo=FALSE, message=F, warning=F}
+library(dplyr)
+library(here)
+library(lubridate)
+library(ggplot2)
+library(magrittr)
+library(mgcv)
+
+source(here("scripts/01-LoadData.R"))
+
+#helps to format this document 
+#by default the included code chunks do not appear in the report view
+knitr::opts_chunk$set(echo = F, 
+                      eval = F,
+                      message = F, 
+                      # cache=TRUE, 
+                      warning=FALSE, 
+                      error=FALSE, 
+                      root.dir = normalizePath(".."))
+
+```
+
+The aim of this project is to understand and predict the pattern of
+trail use recorded at multiple multi-use trails in the Bridger
+Mountains. We want to be able to predict trail use over a full calendar
+year and in locations where no trail counter data exist, within the
+Bridgers and nearby trails. Here, we provide a description of the
+statistical approach employed (generalized additive mixture modeling) in
+addition to brief overviews of modelling approaches that `gamm`s build
+upon (e.g. linear regression, generalized linear regression, and
+generalized additive models). In Section \@ref(MidCot), we further this
+exploration in model choice by applying each to a single trail, Middle
+Cottonwood.
+
+## Linear Regression Model
+
+Linear regression is used to model the linear relationship between a
+scalar or vector response and one or more explanatory variables.
+
+$$ 
+ y_{i}=\beta_{0}+\beta_{1}x_{i,1}+\beta_{2}x_{i,2}+\ldots+\beta_{p-1}x_{i,p-1}+\epsilon_{i}. 
+$$
+
+where $y_i$ is (are) the response variable(s) for each unit ($i$),
+$x_{i, p-1}$ are the explanatory variables, and $\beta_{p-1}$ are the
+parameter coefficients. The errors, $\epsilon_i$, are assumed to be
+normally distributed with mean 0 and constant variance $\sigma^2$. In
+this approach one would find estimates for the $\beta_{p-1}$ parameters
+using values that minimize the sum of squared errors for the sample.
+
+## Generalized Linear Regression Model
+
+In generalized linear models, the response variable $y_i$ is now assumed
+to follow an exponential family distribution with mean $\mu_i$, which is
+assumed to be some (often nonlinear) function of $x_i^T\beta$. Note that
+the covariates affect the distribution of $y_i$ only through the linear
+combination $x_i^T\beta$.
+
+The general form, written now in matrix multiplication format, is: $$
+\begin{gathered}
+g(\mu)=\eta=X \beta \\
+E(y)=\mu=g^{-1}(\eta)
+\end{gathered}
+$$ where $g(.)$ is a link function relating the mean $\mu$ to the linear
+predictor(s) $X \beta$ (also denoted by $\eta$). Recall in linear
+regression we assume a Gaussian (i.e. normal) distribution for the
+response, we assume equal variance for all observations, and that there
+is a direct link of the linear predictor and the expected value $\mu$,
+i.e. $\mu = X\beta$. As such, the typical linear regression model is a
+generalized linear model with a Gaussian distribution and 'identity'
+link function.
+
+For count data, a Poisson distribution is used. There is only one
+parameter to be considered, $\lambda$, since for the Poisson the mean
+and variance are equal. For the Poisson, the (canonical) link function
+$g(.)$, is the natural log, and so relates the log of $\lambda$ to the
+linear predictor. As such we could also write it in terms of
+exponentiating the right-hand side.
+
+$$
+\begin{gathered}
+y \sim \mathcal{P}(\lambda) \\
+\ln (\lambda)=b_{0}+b_{1} \cdot x_{1}+b_{2} \cdot x_{2} \ldots+b_{p} \cdot x_{p} \\
+\lambda=e^{b_{0}+b_{1} \cdot x_{1}+b_{2} \cdot x_{2} \ldots+b_{p} \cdot x_{p}}
+\end{gathered}
+$$ Generalized linear models (and linear models as a subset) have a
+handful of tools to adapt to data that do not have quite so
+straightforward a relationship with associated covariates.
+Transformations to covariates that allow for inclusion of polynomial
+terms (e.g. quadratic, cubic, etc) are useful but have their own limits.
+
+## Generalized Additive Model
+
+Generalized additive models (GAMs) are statistical models that can be
+used to estimate trends as smooth functions of time. This form allows
+for the now nonlinear predictor(s) to relate to the expected value, with
+whatever link function may be appropriate.
+
+$$
+\begin{gathered}
+y \sim \operatorname{ExpoFam}(\mu, \text { etc. }) \\
+E(y)=\mu \\
+g(\mu)=b_{0}+f\left(x_{1}\right)+f\left(x_{2}\right) \ldots+f\left(x_{p}\right)
+\end{gathered}
+$$ This approach is similar to GLM, but now instead of parametric
+coefficients on each of the variables, we now have smoothing functions
+($f$) which are very flexible in their forms. Note that we can still
+include some covariates that do linearly relate to the response variable
+($y$).
+
+A spline is a function defined piece-wise by polynomials. Each consist
+of smaller basis functions, of which we may choose between several
+types/forms based on the data. We may also choose how many "pieces" to
+use by defining the number of knots ($k$) for each spline.
+
+Spline Fun Fact: The term spline comes from the flexible devices used by
+shipbuilders and draftspersons to draw smooth shapes. Thanks, Wikipedia.
+
+To model a potentially nonlinear smooth or surface, three different
+smooth functions are available:
+
+-   s() : for modeling a 1-dimensional smooth, or for modeling isotropic
+    interactions (variables are measured in same units and on same
+    scale)
+-   te(): for modeling 2- or n-dimensional interaction surfaces of
+    variables that are not isotropic (but see info about d parameter
+    below). Includes 'main' effects.
+-   ti(): for modeling 2- or n-dimensional interaction surfaces that do
+    not include the 'main effects'.
+
+### Basis Functions
+
+There are several smoothing bases $b$ (splines) which are suitable for
+regression:
+
+-   thin plate regression splines
+-   cubic regression spline
+-   cyclic cubic regression spline
+-   P-splines
+
+For a more in depth description of smooth terms as specified within a
+`gam` or `gamm` formula in R please refer to the associated Help
+document using the following code:
+
+```{r smooth help, echo = T}
+?mgcv::smooth.terms 
+```
+
+In practice, R code for such a model may look like this:
+
+```{r gam-example, eval = F, echo = T}
+gam_mod <- mgcv::gam(max.camera ~ max.count + 
+                       s(yday, bs = "cc") + 
+                       s(wday, bs = "cc",  k = 7) +
+                       s(month, k = 3), 
+                     data = singleTrail, 
+                     knots = list(yday = c(0,365)),
+                     family = poisson)
+```
+
+For each smoothing term you may select a basis function (the default is
+a thin plate regression spline (TPRS)) and an associated value for the
+number of knots, $k$.
+
+### Generalized Additive Mixture Model
+
+Generalized additive mixed models (GAMMs) are an extension of
+generalized additive models widely used to model correlated and
+clustered responses. Temporal correlation in time series data may be
+accounted for by specifying various types of autoregressive correlation
+structures, via functionality already present in the separate
+nlme::lme() function, meant for fitting linear mixed models (LMMs). It
+is also possible to use lme4 in place of nlme as the underlying fitting
+engine, see gamm4 from package **gamm4**.
+
+R code for GAMMs is very similar to that of GAMs, but now we add
+correlation structure (here, an AR(1) temporal correlation structure) to
+the model specification:
+
+```{r gamm-AR1-example, eval=F, echo = T}
+
+ ## AR(1)
+gamm_AR1 <- mgcv::gamm(max.camera ~ max.count +
+                         s(yday, bs = "cc") +
+                         s(wday, 
+                           bs = "cc", k = 7) +
+                         s(month, k = 3) +
+                         data = singleTrail, 
+                       family = poisson,
+                       knots = list(yday = c(0,365)),
+                       correlation = corAR1(form = ~ yday)
+)
+```
+
+### Hierarchical Generalized Additive Models
+
+Another natural extension to the GAM/GAMM framework is to allow smooth
+functional relationships between predictor and response to vary between
+groups, but in such a way that the different functions are in some sense
+pooled toward a common shape. With our application to hiking trails in
+the Bridger Mountains, we might be interested in understand how the
+relationship between trail use and various predictor variables differ
+between different trails (or subsections of trails).
+
+Model structure for HGAMs varies depending on choices concerning global
+smoothers and how group-specific smoothers vary. Figure \@ref(fig:HGAM),
+originally published in @pedersen2019hierarchical, shows the five types
+of models possible. In our application to all trail data in the Bridger
+Mountains (see Section \@ref(AllTrailsAnalysis)) we focus on the three
+possible models that all include some form of a global smoother term, as
+models without this term are not well suited for prediction for trails
+not included as part of the training dataset.
+
+```{r HGAM, eval = T, fig.cap="Alternate types of functional variation f(x) that can be fitted with HGAMs. Figure reproduced from: Pedersen EJ, Miller DL, Simpson GL, Ross N. 2019. Hierarchical generalized additive models in ecology: an introduction with mgcv. PeerJ 7:e6876 DOI: 10.7717/peerj.6876/fig-4"}
+
+knitr::include_graphics(here("output/figures/HGAM.png"))
+
+```
+
+## Furthur Explaination and Application of Models
+
+All models covered in this summary overview are explored in more detail
+through an application to a single trail (Middle Cottonwood) in Section
+\@ref(MidCot). Section \@ref(AllTrailsAnalysis) contains an analysis of
+all trails covered by trail-use cameras as well as a comparison of
+several HGAM model structures.
+
+## Additional Resources
+
+This summary pulls heavily from the following resources that are very
+useful for a deeper dive into these models.
+
+-   [Generalized Additive
+    Models](https://m-clark.github.io/generalized-additive-models/)
+-   [Simple overview of splines and basis
+    functions](https://asbates.rbind.io/2019/02/04/what-are-splines/)

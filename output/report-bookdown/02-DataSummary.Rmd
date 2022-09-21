@@ -1,0 +1,439 @@
+---
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+# Data Overview {#Data}
+
+```{r, echo=FALSE, message = F, warning = F, include = F}
+
+library(ggplot2) #plots
+library(here) #relative file paths
+library(knitr) #nicer formated tables in report (pdf)
+library(kableExtra) #more table formatting options
+library(raster) #plotting counter location maps
+library(magrittr) # %>% pipe
+library(mapview) #interactive maps
+
+# load packages
+
+#helps to format this document 
+#by default the included code chunks do not appear in the report view
+knitr::opts_chunk$set(echo = F, 
+                      eval = F,
+                      message = F, 
+                      # cache=TRUE, 
+                      warning=FALSE, 
+                      error=FALSE, 
+                      root.dir = normalizePath(".."))
+
+`%notin%` <- Negate(`%in%`) #useful for exploring data
+
+source(here::here("scripts/01-LoadData.R")) #loads + cleans data
+
+table_out_format = "latex"
+# table_out_format = "html"
+image_out_format = "png"
+# image_out_format = "pdf"
+
+```
+
+<!-- \linenumbers -->
+
+```{r, eval = T, include = F}
+## number of trails (by trailname) for each source of data
+length(unique(trail_count$trailname))
+length(unique(strava_day$trailname))
+length(unique(trail_char$trailname))
+length(unique(c(strava_day$trailname, 
+                trail_count$trailname, 
+                trail_char$trailname)))
+
+# which trails have counter deployed?
+#note that some trails have multiple counter locations as indicated by 
+#subseciton name (e.g. Bridger Ridge has M to Baldy AND steep way)
+unique(trail_count$trailname)
+unique(trail_count$countername)
+
+##how many trails (by trailname) in Stava data but not Counter data?
+table(unique(strava_day$trailname) %notin% unique(trail_count$trailname))
+
+##hour many trails in Counter data not in Stava data?
+table(unique(trail_count$trailname) %notin% unique(strava_day$trailname))
+
+#which trails are only in Stava data?
+unique(strava_day$trailname)[which(unique(strava_day$trailname) %notin% unique(trail_count$trailname))]
+
+#which trails are only in Counter data?
+unique(trail_count$trailname)[which(unique(trail_count$trailname) %notin% unique(strava_day$trailname))]
+
+#all trail names combined 
+unique(c(strava_day$trailname, trail_count$trailname, 
+         trail_char$trailname))
+```
+
+```{r table-prep, eval = T}
+trail_table <- trail_count %>% 
+  dplyr::group_by(counterid, trailname, 
+                  subsectionname
+                  ) %>% 
+  dplyr::mutate( "start" = min(date),
+                   "end" = max(date), 
+                 "length.deployed" = (end-start+1)) %>%
+  dplyr::summarise(count = sum(count),
+                   start = format(min(start), "%m-%d"), #the min function here is just pulling off one of multiple values of the same date
+                   end = format(min(end), "%m-%d"),
+                   deployment = min(length.deployed)
+                   # "avg.perday" = count/min(length.deployed)
+                   ) %>% 
+  dplyr::mutate("Mean Count per Day" = round(count/as.numeric(deployment),2), 
+                "Included in Analysis" = ifelse(subsectionname %in% allTrail$subsectionname, "Yes", "No"))
+
+```
+
+For our analysis, we used trail use count data obtained from trail
+counters deployed along select multi-use recreational trails in the
+Bridger Mountains outside of Bozeman, Montana. These data will be used
+to create a predictive model for trail use over time for all trails in
+the Bridger Mountain range.
+
+Data loading and wrangling is done with the **readxl** [@R-readxl] and
+**tidyverse** [@R-tidyverse] packages.
+
+Figures in this report are made with the **ggplot2** package
+[@R-ggplot2] and included using the **knitr** [@R-knitr] and
+**kableExtra** [@R-kableExtra] packages. The color palette is derived
+from the **pals** package [@R-pals]. Interactive maps of trails and
+camera locations are created with the **mapview** package [@R-mapview]
+and available in the HTML version of this report (not available in a
+PDF).
+
+## Sources of Data
+
+We predict trail use from trail counters, weather, trail
+characteristics, and novel data sources provided by Headwaters
+Economics. The provided data sources are as follows:
+
+1.  Headwaters Economics Counter Data
+2.  Strava Data (aggregated trip counts)
+3.  AllTrails Data (daily search view count)
+4.  Weather covariates
+5.  Trail characteristics
+
+### Counter Data
+
+Trail use camera counters (n =
+`r length(unique(trail_count$counterid))`) were deployed at a subset of
+all trails
+(`r length(unique(c(strava_day$trailname, trail_count$trailname, trail_char$trailname)))`)
+in the Bridger Mountains for `r as.numeric(min(trail_table$deployment))`
+to `r  as.numeric(max(trail_table$deployment))` days. The counters
+record a use each time the beam is broken and were installed to minimize
+inaccurate counts from dogs or vegetation. Because this method measures
+total traffic, on a trail where use predominately is out-and-back the
+number of users will be approximately half of the total traffic. Some
+trails have multiple cameras deployed (e.g. Bridger Ridge). Trail
+subsections have been designated by Headwaters Economics that break up
+longer trails into shorter segments, each with its own camera(s).
+Metadata on trail camera hardware includes the counter owner. Metadata
+on trail camera location includes latitude and longitude. See Figure
+\@ref(fig:counter-locations) for locations of trail counters in the
+Bridger Mountains.
+
+```{r counter-locations, eval = T, fig.align = "center", out.width = "100%", fig.cap= "Locations Surveyed with infrared camera trail counters in Bridger Mountains"}
+
+knitr::include_graphics(paste0(here(), "/output/figures/camera_locations.", image_out_format))
+```
+
+```{r location-test, eval= T, fig.cap="Interactive map of Bridger Mountain trails and camera counter locations. Available only in HTML format."}
+cameras_sf <- st_as_sf(cameras, coords = c("counter_long", "counter_lat"), 
+                       crs = 4326, agr = "constant")
+
+# mapcolors <- mapview::mapviewColors(x=trail_spatial,
+#                                     zcol = "NAME", 
+#                                     colors = colors,
+#                                     at = names(c(levels(as.factor(allData$trailname)), "Felix Canyon")))
+
+map_lines <-  mapview::mapview(trail_spatial %>% 
+                                 filter(NAME %notin% c("NEW WORLD GULCH")),
+                 # color = "black", 
+                 zcol= "NAME",
+                 color = "black",
+                 legend = F, 
+                 label = "NAME", 
+                 map.types = "OpenTopoMap")
+
+# mapcolors2 <- mapview::mapviewColors(x=cameras_sf,
+#                                     zcol = "trailname", 
+#                                     colors = colors,
+#                                     at = names(c(levels(as.factor(allData$trailname)), "Felix Canyon")))
+
+map_points <- mapview::mapview(cameras_sf,
+                               label = cameras_sf$subsectionname,
+                               col.regions = "darkgreen",
+                               # zcol = "trailname"#, 
+                               # col.regions = mapcolors2
+                                map.types = "OpenTopoMap")
+
+mapview::mapviewOptions(fgb = FALSE, georaster = FALSE)
+ map_lines + map_points
+```
+
+<!-- From Headwaters Economics website: -->
+
+<!-- > These data were collected using infrared counters rotated across 20 trails throughout the Bridgers.  The counters record a use each time the beam is broken and were installed to minimize inaccurate counts from dogs or vegetation. Because this method measures total traffic, on a trail where use predominately is out-and-back the number of users will be approixmately half of the total traffic. Counters were installed for anywhere from 13 to 61 days, with an average of 29 days at each site. To ensure sufficient data were collected, counters were installed longest on trails that were more remote or had relatively low use.  -->
+
+In Figures \autoref{fig:counter-byid-high} and
+\@ref(fig:counter-byid-low) we have time series plots for daily trail
+use counts separated by trail subsections (fill color indicates trail
+name). Most trail subsections have a single camera deployed, however a
+subset (Baldy to Bridger, Ross Pass to Sacagawea Peak, Sacagawea Pass,
+and Corbly Gulch) have two cameras. For subsections with multiple
+cameras we have plotted the maximum count of trail uses between each
+camera per day. Several counters are placed in subsequent subsections
+along a single trail resulting in the capture of similar (i.e.
+non-independent) trail use information. For example, counter IDs 4, 5,
+6, 7, and 9 are all located on Bridger Ridge and while the total counts
+for each counters are different (see Table \@ref(tab:counter-summary))
+the time series plots show very similar patterns of use of time
+indicating non-independent counts.
+
+```{r counter-byid-high, eval = T, fig.align = "center", out.width = "100%", fig.cap= "Timeseries plots of daily trail camera counts over time in the Bridger Mountains along high use trails. The following trails are not included in the analysis: Bridger, Bridger to Ross Pass, Fairy Lakeshore, M to Baldy, Ross Pass to Sacagawea Peak."}
+
+knitr::include_graphics(path = here(paste0("output/figures/Counter_bySubsection_TS_highuse.", image_out_format)))
+
+```
+
+```{r counter-byid-low, eval = T, fig.align = "center", out.width = "100%", fig.cap= "Timeseries plots of daily trail camera counts over time in the Bridger Mountains along low use trails. The following trails are not included in the analysis: Felix Canyon, South Fork Flathead Creek."}
+
+knitr::include_graphics(path = here(paste0("output/figures/Counter_bysubsection_TS_lowuse.", image_out_format)))
+
+```
+
+In Table \@ref(tab:counter-summary) we provide a summary of trail use
+recorded for each counter deployed along trails in the Bridger
+Mountains. In addition to total counts for each counter, the deployment
+dates and duration of each trail counter camera (as determined by the
+first and last date of data provided) and average daily trail use over
+this deployment duration is reported. <!-- Notable: -->
+<!--   * Two counters (ID #s 26 and 27) are located along the Corbly Gulch trail for nearly non-overlapping time periods.  -->
+<!--   * Counter ID 25 seems to only have been deployed for a single day (South Fork Flathead Creek) -->
+<!--   * Counter ID 24 was only deployed for 3 days (Shafthouse Hill - Upper Shafthouse).  -->
+<!-- Outcome: --> <!-- After discussion with Megan Lawson, -->
+
+```{r counter-summary, eval = T}
+colnames(trail_table) <- c("ID", "Trail", "Subsection", 
+                           "Count", "Start", "End", 
+                           "Deployment", "Mean Count Per Day", "Included in Analysis")
+
+kableExtra::landscape(knitr::kable(trail_table, 
+                                   booktabs = T,
+                                   format = table_out_format,
+                                   caption = "Total Number of Trail Camera Counts (2021)") %>% 
+                        kableExtra::column_spec(column = c(3, 8),
+                                                width = "4cm"), 
+)
+
+```
+
+Due to low deployment times and possibly unreliable camera recordings,
+the following trails (numbers refer to counter IDs) are removed from
+this analysis:
+
+-   #1 - Fairy Lakeshore
+-   #16 - Felix Canyon
+-   #24 - Shafthouse Hill (Upper Shafthouse)
+-   #25 - South Fork Flathead Creek.
+
+#### Hourly Data
+
+For each trail counter camera deployed data is provided on a daily
+scale. Finer resolution data (i.e. hourly counts rather than daily) are
+available for 17 trails. Figures \@ref(fig:hourly-high) and
+\@ref(fig:hourly-low) shows trail use patterns with use hitting highest
+counts on the weekends, as expected.
+<!-- Note that some of the trails have distinct subsection in 'trail_count' but not in 'trail_hourly'. I'm not sure that we'll need this information.  -->
+
+The most likely use for these days is a quick look at how daily activity
+trends look (i.e. are there more hikers in mornings vs afternoon?).
+However since Strava data is not available at this resolution, it would
+not be easy to model this trend without a lot of data (i.e. counters
+deployed for longer amounts of time) to provide information on this
+trend in any model used.
+
+```{r hourly-high, eval= TRUE, fig.align = "center", out.width = "100%", fig.cap= "Bridger Mountain trail traffic patterns by hour and day of week."}
+knitr::include_graphics(path = here(paste0("output/figures/hourly_bydayofweek_highuse.", image_out_format)))
+```
+
+```{r hourly-low, eval= TRUE, fig.align = "center", out.width = "100%", fig.cap= "Bridger Mountain trail traffic patterns by hour and day of week."}
+knitr::include_graphics(path = here(paste0("output/figures/hourly_bydayofweek_lowuse.", image_out_format)))
+```
+
+#### Strava Data
+
+Strava count data are made available through Strava Metro. Data are
+binned (intervals of 5 with ceiling rounding) and aggregated on multiple
+scales (daily, monthly, annual). Counts are available as "total trips"
+and "total people". Total trips should always be larger than the total
+people count as people sometimes make multiple passes of a single trail
+(e.g. M laps). Strava trails are subdivided into "edges". Edge IDs (for
+the counter locations which often aligns with the trailhead edge) are
+available in the Counter data. Strava count data are available for the
+entire year of 2021 (not just summer monitoring as in the counter data).
+These data also include the overarching trail name and number (e.g.
+511 - Bridger Foothills) that also correspond to the counter data
+provided by HE.
+
+It is important to note that when considering Strava data at the Trail
+scale (rather than edge scale) you are propagating rounding errors for
+each segment forward (+\_ 1-4 for each edge?). Similarly, aggregating
+the data in the daily data frame to a monthly timescale will likely not
+match the information provided in the monthly data frame.
+
+Table \@ref(tab:strava-summary) provides a summary of Strava data for
+the entire year. For each trail, the aggregated annual trail use count
+is provided as well as the number of Strava defined edges.
+
+```{r strava-summary, eval = T}
+strava_table <- strava_year %>% 
+  dplyr::group_by(trailname
+                  ) %>% 
+  # dplyr::mutate( "start" = min(timeframe),
+  #                  "end" = max(timeframe)) %>%
+  dplyr::summarise(count = sum(totaltrips),
+                   # start = format(min(start), "%m-%d"), #the min function here is just pulling off one of multiple values of the same date
+                   # end = format(min(end), "%m-%d"), 
+                   edges = dplyr::n()) %>% 
+  dplyr::mutate("Mean Count per Day" = round(count/365,2), 
+                "Included in Analysis" = ifelse(trailname %in% allTrail$trailname, "Yes", "No"))
+
+knitr::kable(strava_table, 
+              booktabs = T,
+             format = table_out_format,
+             caption = "Total Number of Strava Counts (2021)")
+
+```
+
+Figures \@ref(fig:strava-bytrailname-high) and
+\@ref(fig:strava-bytrailname-low) show time series plots for daily trail
+use counts (maximum number of trips over all edges in a trail) separated
+by trail (fill color indicates trail name).
+
+```{r strava-bytrailname-high, eval = T, fig.align = "center", out.width = "100%", fig.cap="Timeseries plots of daily Strava trip counts over time in the Bridger Mountains along high use trails. The following trails are not included in the analysis: New World Gulch."}
+
+knitr::include_graphics(path = here(paste0("output/figures/Strava_day_TS_bytrip_high.", image_out_format)))
+```
+
+```{r strava-bytrailname-low, eval = T, fig.align = "center", out.width = "100%", fig.cap="Timeseries plots of daily Strava trip counts over time in the Bridger Mountains along high use trails. The following trails are not included in the analysis: Fairy Lake Shortcut, Fairy Lakeshore, Felix Canyon Rd, M Shortcut, S Fork Brackett Creek."}
+
+knitr::include_graphics(path = here(paste0("output/figures/Strava_day_TS_bytrip_low.", image_out_format)))
+```
+
+#### AllTrails Data {#ATData}
+
+AllTrails has provided number of daily searchs for each trail for
+2020-2022. A seven day preceding moving average number of search terms
+was calculated for each trail. Figures
+\@ref(fig:alltrails-bytrailname-high) and
+\@ref(fig:alltrails-bytrailname-low) show time series plots for daily
+trail searches (7-day moving average) separated by trail (fill color
+indicates trail name).
+
+```{r alltrails-bytrailname-high, eval = T, fig.align = "center", out.width = "100%", fig.cap="Timeseries plots of daily AllTrails trail searches as a moving average over time in the Bridger Mountains along high use trails."}
+
+knitr::include_graphics(path = here(paste0("output/figures/allTrails_search_TS_high.", image_out_format)))
+```
+
+```{r alltrails-bytrailname-low, eval = T, fig.align = "center", out.width = "100%", fig.cap="Timeseries plots of daily AllTrails trail searches as a moving average over time in the Bridger Mountains along low use trails."}
+
+knitr::include_graphics(path = here(paste0("output/figures/allTrails_search_TS_low.", image_out_format)))
+```
+
+### Weather Covariates
+
+The following weather covariates are available on a daily basis:
+
+1.  Precipitation (in.)
+2.  Temperature Max (degrees Fahrenheit)
+3.  Temperature Min (degrees Fahrenheit)
+4.  Mean Air Quality (AQI)
+5.  Mean PM_25 Concentration (micrograms per cubic meter)
+
+These data do not vary spatially only temporally (i.e. the resolution is
+not fine enough to parse out different weather between trails on a given
+day). Figure \@ref(fig:covariate-plots) shows each covariate over time
+for 2021. Clear collinearity between several covariates (e.g. Min and
+Max Air Temperature) is apparent, and is considered when selecting
+covariates for inclusion in analysis.
+<!-- Missing data (number of days): -->
+
+<!--  * Precipitation: `r length(which(is.na(weather$precipitation_in) ==T))` -->
+
+<!--  * Max Temp: `r length(which(is.na(weather$temp_max_f) ==T))` -->
+
+<!--  * Min Temp: `r length(which(is.na(weather$temp_min_f) ==T))` -->
+
+<!--  * AQI: `r length(which(is.na(weather$temp_min_f) ==T))` -->
+
+<!--  * Particulate Matter: `r length(which(is.na(weather$temp_min_f) ==T))` -->
+
+```{r covariate-plots, eval = T, fig.align = "center", out.width = "100%", fig.cap = "Weather covariate values over time."}
+
+knitr::include_graphics(here::here(paste0("output/figures/weatherplots.", image_out_format)))
+
+```
+
+### Trail Characteristics
+
+The following characteristics are provided at the trail level.
+
+-   Latitude/Longitude (of trailhead and camera location)
+-   Time/Distance from Bozeman, MT
+-   Parking lot size (as three-level factor)
+-   Description/Class (4-level factor of development)
+-   Motorized vehicle use (3-level factor)
+-   Indicators for use of the following:
+    -   Dirt bikes
+    -   ATVS
+    -   Hiking
+    -   Pack/Saddle
+    -   Bicycle
+
+Table \@ref(tab:table-char) provides an overview of these summaries.
+
+```{r table-char, eval = T}
+characteristics_table <- trail_char %>% 
+  dplyr::select(
+    # "trailnumber",
+                "trailname" ,
+                "subsectionname",
+                # "latitude",
+                # "longitude",
+                "parkinglot",
+                "trail_description",
+                "open_for_motor_vehicles",
+                "total_traveltime"#, 
+                # "total_miles"
+                ) 
+
+colnames(characteristics_table) <- 
+  c("Name", 
+    "Subsection", 
+    # "Latitude", 
+    # "longitude", 
+    "Lot Size", 
+    "Developed", 
+    "Moterized Vehicle Use",
+    "Drive Time (mins)"#, 
+    # "Drive Distance"
+    )
+ 
+characteristics_table$`Drive Time (mins)` <- round(characteristics_table$`Drive Time (mins)`, 2)
+
+kableExtra::landscape(knitr::kable(characteristics_table, 
+              booktabs = T,
+             format = table_out_format,
+             caption = "Bridger Mountain Trail Characteristics (2021)"))
+
+```

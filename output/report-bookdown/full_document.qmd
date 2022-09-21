@@ -1,0 +1,97 @@
+---
+title: "Statistical Analysis: Predicting Trail Use"
+output:
+  pdf_document:default
+
+---
+
+```{r knitr_setup, include=FALSE, purl=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      message=FALSE, 
+                      warning=FALSE, 
+                      # cache=TRUE,
+                      autodep=TRUE,
+                      # fig.path = here::here("output/figures/"),
+                      #to handle renaming figures without indices.
+                      #From:https://github.com/yihui/knitr/issues/505
+                      fig.process = function(x) {
+                        x2 = sub('-\\d+([.][a-z]+)$', '\\1', x)
+                        if (file.rename(x, x2)) x2 else x
+                        }
+                      )
+```
+
+```{r setup, include=FALSE, cache=FALSE}
+####Setup ####
+#all the packages needed for this tutorial are listed here
+library(mgcv)
+library(MASS)
+library(stringr)
+library(gamm4)
+library(tidyr)
+library(ggplot2)
+library(ggthemes)
+library(viridis)
+library(cowplot)
+library(kableExtra)
+library(docxtools)
+library(knitr)
+library(tibble)
+library(dplyr)
+library(gratia)
+library(latex2exp)
+library(here)
+
+#Set the default theme for ggplot objects to theme_bw()
+theme_set(theme_bw())
+theme_update(panel.grid = element_blank())
+
+```
+
+```{r setup_tables, include=FALSE, purl=FALSE}
+#This code is for configuring latex tables. It is not needed for general script
+#usage.
+table_out_format <- "latex"
+# table_out_format <- "html"
+image_out_format <- "pdf"
+```
+
+#Executive Summary
+
+
+```{r child = '01-Introduction.Rmd'}
+```
+\FloatBarrier
+```{r child = '02-DataSummary.Rmd'}
+```
+<!-- \FloatBarrier -->
+<!-- ```{r child = '03-Overview_GAMM.Rmd'} -->
+<!-- ``` -->
+<!-- \FloatBarrier -->
+<!-- ```{r child = '04-Analyze_MidCottonwood_GAMM.Rmd'} -->
+<!-- ``` -->
+
+<!-- \FloatBarrier -->
+<!-- ```{r child = '05-Analyze_AllTrails_GAM.Rmd'} -->
+<!-- ``` -->
+
+
+<!-- \FloatBarrier -->
+<!-- ```{r child = '06-PredictionTradeOffs.Rmd'} -->
+<!-- ``` -->
+
+<!-- <!-- # (APPENDIX) Appendix {-} --> -->
+
+<!-- \FloatBarrier -->
+<!-- ```{r child = '07-Analyze_AllTrails_GAM.Rmd'} -->
+<!-- ``` -->
+
+
+<!-- \FloatBarrier -->
+<!-- ```{r child = '08-SpatialGAMM.Rmd'} -->
+<!-- ``` -->
+
+
+<!-- \FloatBarrier -->
+
+<!-- # Bibliography -->

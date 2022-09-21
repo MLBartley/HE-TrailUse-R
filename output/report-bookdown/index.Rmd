@@ -1,0 +1,21 @@
+---
+title: "Statistical Analysis: Predicting Trail Use "
+author: "Dr. Meridith L. Bartley"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+geometry: margin=2.5cm
+documentclass: book
+bibliography: [book.bib, packages.bib]
+biblio-style: apalike
+link-citations: yes
+description: "This is a minimal example of using
+  the bookdown package to write a book."
+header-includes:
+   - \AtBeginDocument{\renewcommand{\chaptername}{Section}}
+---
+
+# Executive Summary
+
+This report outlines a statistical analysis for predicting recreational trail use in the Bridger Mountains located near Bozeman, MT, USA. Headwaters Economics, in collaboration with U.S. Forest Service (USFS), [NAME] (GVSA), and Montana Fish Wildlife and Parks (FWP) have monitored trail use in the Bridger Mountains since 2021. In this report we present a modeling framework for modeling of nonlinear functional relationships between covariates and outcomes where the shape of the function itself varies between different grouping levels. We used the available data on 21 trails and trail subsections to fit several potential hierarchical generalized additive mixture models. These models varied in how much inter-trail variation was allowed when implementing a global soother in the model and in how we accounted for temporal autocorrelation.  
+
+To be added: Results from this analysis. But also, what do we want to highlight from this report for other stakeholders/interested groups? 
