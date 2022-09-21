@@ -14,7 +14,7 @@
 ##      each subsequent segment count is included in previous ones. 
 ## ---------------------------
 
-source("scripts/01-LoadData.R") #loads and cleans data
+source(here("scripts/01-LoadData.R")) #loads and cleans data
 
 # load packages -----------------------------------------------------------
 library(devtools) #useful for installing packages from github
@@ -149,7 +149,18 @@ ggsave(filename = here::here("output/figures/MaxTempDaily.png"),
        width = width,
        dpi = dpi)
 
+ggsave(filename = here::here("output/figures/MaxTempDaily.pdf"), 
+       plot = MaxTempDaily, 
+       height = height, 
+       width = width,
+       dpi = dpi)
+
 ggsave(filename = here::here("output/figures/MinTempDaily.png"), 
+       plot = MinTempDaily, 
+       height = height, 
+       width = width,
+       dpi = dpi)
+ggsave(filename = here::here("output/figures/MinTempDaily.pdf"), 
        plot = MinTempDaily, 
        height = height, 
        width = width,
@@ -160,14 +171,29 @@ ggsave(filename = here::here("output/figures/PM25Daily.png"),
        height = height, 
        width = width,
        dpi = dpi)
+ggsave(filename = here::here("output/figures/PM25Daily.pdf"), 
+       plot = PM25Daily, 
+       height = height, 
+       width = width,
+       dpi = dpi)
 
 ggsave(filename = here::here("output/figures/PrecipDaily.png"), 
        plot = PrecipDaily, 
        height = height, 
        width = width,
        dpi = dpi)
+ggsave(filename = here::here("output/figures/PrecipDaily.pdf"), 
+       plot = PrecipDaily, 
+       height = height, 
+       width = width,
+       dpi = dpi)
 
 ggsave(filename = here::here("output/figures/AQIDaily.png"), 
+       plot = AQIDaily, 
+       height = height, 
+       width = width,
+       dpi = dpi)
+ggsave(filename = here::here("output/figures/AQIDaily.pdf"), 
        plot = AQIDaily, 
        height = height, 
        width = width,
@@ -181,6 +207,11 @@ weather.plots <- gridExtra::grid.arrange(MaxTempDaily,
                                          PrecipDaily,
                                          AQIDaily, ncol =2)
 ggsave(filename = here::here("output/figures/weatherplots.png"), 
+       plot = weather.plots, 
+       height = height, 
+       width = width,
+       dpi = dpi)
+ggsave(filename = here::here("output/figures/weatherplots.pdf"), 
        plot = weather.plots, 
        height = height, 
        width = width,
@@ -250,6 +281,10 @@ ggsave(filename = here::here("output/figures/camera_locations.png"),
        height = height, 
        width = width,
        dpi = dpi)
+ggsave(filename = here::here("output/figures/camera_locations.pdf"), 
+       height = height, 
+       width = width,
+       dpi = dpi)
 
 # Strava timeseries --------------------------------------------------
 
@@ -271,6 +306,12 @@ strava_day_TSplot_trips <- strava_day %>%
 strava_day_TSplot_trips
 
 ggsave(filename = here::here("output/figures/Strava_day_TS_bytrip.png"), 
+       plot = strava_day_TSplot_trips, 
+       height = height, 
+       width = width,
+       dpi=700
+)
+ggsave(filename = here::here("output/figures/Strava_day_TS_bytrip.pdf"), 
        plot = strava_day_TSplot_trips, 
        height = height, 
        width = width,
@@ -302,6 +343,12 @@ ggsave(filename = here::here("output/figures/Strava_day_TS_bytrip_high.png"),
        width = width,
        dpi=700
 )
+ggsave(filename = here::here("output/figures/Strava_day_TS_bytrip_high.pdf"), 
+       plot = strava_day_TS_trips_high, 
+       height = height, 
+       width = width,
+       dpi=700
+)
 
 strava_day_TS_trips_low <- strava_day %>% 
   dplyr::group_by(timeframe, trailname) %>% 
@@ -323,6 +370,12 @@ strava_day_TS_trips_low <- strava_day %>%
 strava_day_TS_trips_low
 
 ggsave(filename = here::here("output/figures/Strava_day_TS_bytrip_low.png"), 
+       plot = strava_day_TS_trips_low, 
+       height = height, 
+       width = width,
+       dpi=700
+)
+ggsave(filename = here::here("output/figures/Strava_day_TS_bytrip_low.pdf"), 
        plot = strava_day_TS_trips_low, 
        height = height, 
        width = width,
@@ -431,6 +484,10 @@ ggsave(filename = here("output/figures/Counter_byID_TS_highuse.png"),
        height = height, 
        width = width,
        dpi = dpi)
+ggsave(filename = here("output/figures/Counter_byID_TS_highuse.pdf"), 
+       height = height, 
+       width = width,
+       dpi = dpi)
 
 #daily aggregated
 count_ID_TSplot_low <- trail_count %>% 
@@ -459,6 +516,10 @@ count_ID_TSplot_low <- trail_count %>%
 count_ID_TSplot_low
 
 ggsave(filename = here("output/figures/Counter_byID_TS_lowuse.png"), 
+       height = height, 
+       width = width,
+       dpi = dpi)
+ggsave(filename = here("output/figures/Counter_byID_TS_lowuse.pdf"), 
        height = height, 
        width = width,
        dpi = dpi)
@@ -517,6 +578,10 @@ ggsave(filename = here("output/figures/Counter_bySubSection_TS_highuse.png"),
        height = height, 
        width = width,
        dpi = dpi)
+ggsave(filename = here("output/figures/Counter_bySubSection_TS_highuse.pdf"), 
+       height = height, 
+       width = width,
+       dpi = dpi)
 
 #daily aggregated
 count_subsection_TSplot_low <- trail_count %>% 
@@ -545,6 +610,10 @@ count_subsection_TSplot_low <- trail_count %>%
 count_subsection_TSplot_low
 
 ggsave(filename = here("output/figures/Counter_bySubsection_TS_lowuse.png"), 
+       height = height, 
+       width = width,
+       dpi = dpi)
+ggsave(filename = here("output/figures/Counter_bySubsection_TS_lowuse.pdf"), 
        height = height, 
        width = width,
        dpi = dpi)
@@ -600,6 +669,10 @@ ggsave(filename = here("output/figures/Counter_byTrail_TS_highuse.png"),
        height = height, 
        width = width,
        dpi = dpi)
+ggsave(filename = here("output/figures/Counter_byTrail_TS_highuse.pdf"), 
+       height = height, 
+       width = width,
+       dpi = dpi)
 
 count_day_TSplot_low <- trail_count %>% 
   # dplyr::filter(trailname %in% c("Bridger Ridge", 
@@ -627,6 +700,10 @@ count_day_TSplot_low <- trail_count %>%
 count_day_TSplot_low
 
 ggsave(filename = here("output/figures/Counter_byTrail_TS_lowuse.png"), 
+       height = height, 
+       width = width,
+       dpi = dpi)
+ggsave(filename = here("output/figures/Counter_byTrail_TS_lowuse.pdf"), 
        height = height, 
        width = width,
        dpi = dpi)
@@ -658,18 +735,18 @@ count_month_TSplot <- trail_count %>%
 
 allTrails_day_TS_high <- allTrails_search %>% 
   dplyr::group_by(trailname) %>% 
-  dplyr::filter(max(moving_avg) > 25, 
+  dplyr::filter(max(moving_avg7) > 25, 
                 year == 2021) %>% 
   dplyr::ungroup() %>% 
-  ggplot(aes(x = date, y = moving_avg)) +
+  ggplot(aes(x = date, y = num_views)) +
   geom_area(aes(fill = factor(trailname)),
             alpha = .8, position = "stack") +
   facet_wrap(~trailname, ncol = 3) +
   scale_fill_manual(name = "Trails", values = colors) +
   guides(fill = 'none') +
   # ylim(0, 1000) +
-  labs(y = "Count ",
-       title = "AllTrails Trail Searchs (7-day preceeding moving average)",
+  labs(y = "Number of Views ",
+       title = "AllTrails Trail Searchs",
        subtitle = "2021",
        fill = "Trail Name")
 
@@ -681,21 +758,27 @@ ggsave(filename = here::here("output/figures/allTrails_search_TS_high.png"),
        width = width,
        dpi=dpi
 )
+ggsave(filename = here::here("output/figures/allTrails_search_TS_high.pdf"), 
+       plot = allTrails_day_TS_high, 
+       height = height, 
+       width = width,
+       dpi=dpi
+)
 
 allTrails_day_TS_low <- allTrails_search %>% 
   dplyr::group_by(trailname) %>% 
-  dplyr::filter(max(moving_avg) <= 25, 
+  dplyr::filter(max(moving_avg7) <= 25, 
                 year == 2021) %>% 
   dplyr::ungroup() %>% 
-  ggplot(aes(x = date, y = moving_avg)) +
+  ggplot(aes(x = date, y = num_views)) +
   geom_area(aes(fill = factor(trailname)),
             alpha = .8, position = "stack") +
   facet_wrap(~trailname, ncol = 3) +
   scale_fill_manual(name = "Trails", values = colors) +
   guides(fill = 'none') +
   # ylim(0, 1000) +
-  labs(y = "Count ",
-       title = "AllTrails Trail Searchs (7-day preceeding moving average)",
+  labs(y = "Number of Views ",
+       title = "AllTrails Trail Searchs",
        subtitle = "2021",
        fill = "Trail Name")
 
@@ -707,6 +790,14 @@ ggsave(filename = here::here("output/figures/allTrails_search_TS_low.png"),
        width = width,
        dpi=dpi
 )
+ggsave(filename = here::here("output/figures/allTrails_search_TS_low.pdf"), 
+       plot = allTrails_day_TS_low, 
+       height = height, 
+       width = width,
+       dpi=dpi
+)
+
+
 
 # plot Strava/Counter overlap  --------------------------------------------
 
@@ -774,6 +865,11 @@ ggsave(filename = here("output/figures/hourly_bydayofweek.png"),
        width = width,
        dpi = dpi)
 
+ggsave(filename = here("output/figures/hourly_bydayofweek.pdf"), 
+       height = height, 
+       width = width,
+       dpi = dpi)
+
 trail_hourly %>% 
   group_by(hour, wday, trailname) %>%
   summarise(total_count = sum(count, na.rm = TRUE)) %>%
@@ -799,6 +895,10 @@ trail_hourly %>%
        subtitle = "Data: 2021") 
 
 ggsave(filename = here("output/figures/hourly_bydayofweek_highuse.png"), 
+       height = height, 
+       width = width,
+       dpi = dpi)
+ggsave(filename = here("output/figures/hourly_bydayofweek_highuse.pdf"), 
        height = height, 
        width = width,
        dpi = dpi)
@@ -828,6 +928,10 @@ trail_hourly %>%
        subtitle = "Data: 2021") 
 
 ggsave(filename = here("output/figures/hourly_bydayofweek_lowuse.png"), 
+       height = height, 
+       width = width,
+       dpi = dpi)
+ggsave(filename = here("output/figures/hourly_bydayofweek_lowuse.pdf"), 
        height = height, 
        width = width,
        dpi = dpi)
@@ -923,14 +1027,16 @@ MidCotton_TS <- singleTrail %>%
   #                  total_trips = max.count) %>%
   ggplot(aes(x = date, y = max.camera)) +
   geom_area(aes(fill = factor(trailname)), 
-            alpha = .8, position = "stack") +
+            alpha = .5, position = "stack") +
   scale_fill_manual(values = colors) +
-  geom_line(aes(x = date, y = max.count)) +
+  geom_line(aes(x = date, y = max.count), color = "#FC4C02") +
+  geom_line(aes(x = date, y = num_views), color = "#548823") +
+  # geom_line(aes(x = date, y = moving_avg7), color = "forestgreen") +
   guides(fill = 'none') +
   # ylim(0, 1000) +
   labs(
     y = "Count ",
-    title = "Middle Cottonwood Daily Trail Traffic (by camera counts and Strava trips)",
+    title = "Middle Cottonwood Daily Trail Traffic",
     subtitle = "2021",
     fill = "Trail Name"
   )
@@ -939,6 +1045,12 @@ MidCotton_TS
 
 ggsave(
   filename = here::here("output/figures/MiddleCottonwood_TS.png"),
+  plot = MidCotton_TS, 
+  height = height, 
+  width = width,
+  dpi = dpi)
+ggsave(
+  filename = here::here("output/figures/MiddleCottonwood_TS.pdf"),
   plot = MidCotton_TS, 
   height = height, 
   width = width,

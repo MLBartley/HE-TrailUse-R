@@ -39,6 +39,15 @@ unique(allTrail_search$trailname)
 
 sub.number <- length(unique(allTrail_search$subsectionname))
 
+
+# visualize relationship with trail use -----------------------------------
+
+ggplot(allTrail_search, aes(num_views,
+                        max.camera)) +
+  geom_point(aes(color = trailname)) +
+  facet_wrap(~subsectionF, ncol = 3) +
+  scale_color_manual(values = colors)
+
 # Run GS/GI-AR1 model with Search Only ---------------------------------------
 
 gamm_modGS_AR1_searchOnly <- gamm(max.camera ~ 
@@ -450,3 +459,192 @@ anova(
   gamm_modGS_AR1_Both$lme#,
   # gamm_modGS_AR1_te$lme
   )
+
+
+
+# Compare with Middle Cottonwood Only -------------------------------------
+
+## AT Only - views
+
+gamm_mod2_ATViews <- gamm(max.camera ~ s(yday, bs = "cc") + 
+                    s(month, k = 3) +
+                    s(wday, 
+                      bs = "cc", k = 7) +
+                    s(daily_aqi_value) +
+                    s(temp_max_f) +
+                    s(precipitation_in, k = 9) +
+                    # max.count,
+                      num_views,
+                  data = singleTrail,    
+                  knots = list(yday = c(0,365)),
+                  method = "REML", 
+                  family = poisson)
+
+save(gamm_mod2_ATViews,
+     file = here("output/models/singleT_gamm2_ATViews.rda"),
+     compress='xz')
+
+# AT Only - moving average
+
+gamm_mod2_ATavg <- gamm(max.camera ~ s(yday, bs = "cc") + 
+                            s(month, k = 3) +
+                            s(wday, 
+                              bs = "cc", k = 7) +
+                            s(daily_aqi_value) +
+                            s(temp_max_f) +
+                            s(precipitation_in, k = 9) +
+                            # max.count,
+                            moving_avg,
+                          data = singleTrail,    
+                          knots = list(yday = c(0,365)),
+                          method = "REML", 
+                          family = poisson)
+
+save(gamm_mod2_ATavg,
+     file = here("output/models/singleT_gamm2_ATavg.rda"),
+     compress='xz')
+
+## Both = AT Views and Strava
+
+gamm_mod2_Both <- gamm(max.camera ~ s(yday, bs = "cc") + 
+                          s(month, k = 3) +
+                          s(wday, 
+                            bs = "cc", k = 7) +
+                          s(daily_aqi_value) +
+                          s(temp_max_f) +
+                          s(precipitation_in, k = 9) +
+                          max.count+
+                          num_views,
+                        data = singleTrail,    
+                        knots = list(yday = c(0,365)),
+                        method = "REML", 
+                        family = poisson)
+
+save(gamm_mod2_Both,
+     file = here("output/models/singleT_gamm2_Both.rda"),
+     compress='xz')
+
+## ts gamm diagnostics ####
+
+with(singleTrail, 
+     tsDiagGamm(gamm_mod2, 
+                timevar = yday,
+                observed = max.camera))
+with(singleTrail, 
+     tsDiagGamm(gamm_mod2_Both, 
+                timevar = yday,
+                observed = max.camera))
+
+
+## compare anova ####
+anova(gamm_mod2$lme, 
+      gamm_mod2_ATViews$lme, 
+      gamm_mod2_ATavg$lme, 
+      gamm_mod2_Both$lme)
+
+## plot predictions
+
+
+p_gamm2 <- as_tibble(predict(gamm_mod2$gam, predict.MidCot, 
+                             se.fit = TRUE, type = "response")) %>%
+  rename(fit_Strava = fit, se_Strava = se.fit)
+p_gamm2_Both <- as_tibble(predict(gamm_mod2_AR1$gam, predict.MidCot, 
+                                se.fit = TRUE, type = "response")) %>%
+  rename(fit_Both = fit, se_Both = se.fit)
+
+new_data_bases <- bind_cols(predict.MidCot, p_gamm2, p_gamm2_Both) %>%
+  tidyr::pivot_longer(fit_Strava:se_Both, names_sep = '_',
+                      names_to = c('variable', 'model')) %>%
+  tidyr::pivot_wider(names_from = variable, values_from = value) %>%
+  mutate(upr_ci = fit + (2 * se), lwr_ci = fit - (2 * se))
+
+
+
+ggplot(mapping = aes(x = yday, y = max.camera)) +
+  geom_ribbon(data = new_data_bases,
+              mapping = aes(ymin = lwr_ci, ymax = upr_ci, x = yday, fill = factor(model)),
+              inherit.aes = FALSE, alpha = 0.2) +
+  geom_point(data = singleTrail, aes(colour = wday)) +
+  geom_line(data = new_data_bases, aes(y = fit, x = yday, colour2 = factor(model)),
+            size = 1) %>%
+  relayer::rename_geom_aes(new_aes = c("colour" = "colour2")) +
+  scale_colour_distiller(palette = "Set1", aesthetics = "colour", name = "Day of Week") +
+  scale_colour_OkabeIto(aesthetics = "colour2", name = "Model") +
+  scale_fill_OkabeIto(name = "Model") +
+  coord_cartesian(xlim = c(min(singleTrail$yday) - 30, max(singleTrail$yday) + 30), ylim = c(0, 1000)) +
+  labs(title = "Extrapolation",
+       subtitle = "How prediction varies with different model specifications")
+
+
+
+# Compare best wrt interaction (yday/precip) ------------------------------
+
+
+gamm_mod2_Both_te <- gamm(max.camera ~
+                         # s(yday, bs = "cc") + 
+                         te(yday, precipitation_in, 
+                            bs = c("cc", "tp"), k = c(10, 9), 
+                            np = FALSE) +
+                         s(month, k = 3) +
+                         s(wday, 
+                           bs = "cc", k = 7) +
+                         s(daily_aqi_value) +
+                         s(temp_max_f) +
+                         # s(precipitation_in, k = 9) +
+                         max.count+
+                         num_views,
+                       data = singleTrail,    
+                       knots = list(yday = c(0,365)),
+                       method = "REML", 
+                       family = poisson)
+
+save(gamm_mod2_Both_te,
+     file = here("output/models/singleT_gamm2_Both_te.rda"),
+     compress='xz')
+
+with(singleTrail, 
+     tsDiagGamm(gamm_mod2_Both, 
+                timevar = yday,
+                observed = max.camera))
+
+
+## compare anova ####
+anova(gamm_mod2_Both$lme,
+      gamm_mod2_Both_te$lme)
+
+## te does worse (see AIC and QQ plot)
+
+  
+
+# What if we use fewer knots (k) for precip? ------------------------------
+gamm_mod2_Both_precip <- gamm(max.camera ~
+                            s(yday, bs = "cc") +
+                            # te(yday, precipitation_in,
+                            #    bs = c("cc", "tp"), k = c(10, 9),
+                            #    np = FALSE) +
+                            s(month, k = 3) +
+                            s(wday, 
+                              bs = "cc", k = 7) +
+                            s(daily_aqi_value) +
+                            s(temp_max_f) +
+                            s(precipitation_in, k = 5) +
+                            max.count+
+                            num_views,
+                          data = singleTrail,    
+                          knots = list(yday = c(0,365)),
+                          method = "REML", 
+                          family = poisson)
+
+anova(gamm_mod2_Both_precip$lme, 
+      gamm_mod2_Both$lme)
+
+
+with(singleTrail, 
+     tsDiagGamm(gamm_mod2_Both, 
+                timevar = yday,
+                observed = max.camera))
+with(singleTrail, 
+     tsDiagGamm(gamm_mod2_Both_precip, 
+                timevar = yday,
+                observed = max.camera))
+

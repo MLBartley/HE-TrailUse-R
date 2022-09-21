@@ -122,7 +122,7 @@ if(runall){
   gamm_modGARMA_te <- gamm(max.camera ~
                               # s(yday, bs="cc") +
                              te(yday, precipitation_in, 
-                                bs = c("cc", "tp"), k = c(10, 10), 
+                                bs = c("cc", "tp"), k = c(10, 5), 
                                 np = FALSE) + 
                               # trailnameF + 
                               s(subsectionF,
@@ -141,7 +141,7 @@ if(runall){
                             knots = list(yday = c(0,365)),
                             method = 'REML',
                             correlation = corARMA(form = ~yday|subsectionF,
-                                                  p = 2, q = 3),
+                                                  p = 1, q = 2),
                             data = allTrail, 
                             family = poisson, 
                             niterPQL = 30
@@ -788,4 +788,7 @@ anova(gamm_modGS_AR1$lme,
 
 anova(gamm_modGI_AR1$lme, 
       gamm_modGI_AR1_te$lme)
+
+anova(gamm_modG_ARMA$lme, 
+      gamm_modGARMA_te$lme)
 

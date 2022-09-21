@@ -12,6 +12,7 @@
 ##   - Data updated (trailheads/edgeID file) on July 14, 2022
 ##   - Data updated (weather - temp min/max) on August 1, 2022 
 ##   - Data updated (AllTrails search data) on August 8, 2022
+##   - Data updated (New World Gulch observations) on September 8, 2022
 ## ---------------------------
 
 # load packages -----------------------------------------------------------
@@ -64,6 +65,9 @@ trail_spatial <- sf::st_read(dsn = here("data/raw/bridger_trails_elev/"))
 allTrails_search <- readxl::read_excel(here("data/raw/alltrails_pageviews.xlsx"), 
                                        col_types = c("numeric", "text", "date", 
                                                      "numeric", "numeric", "numeric", "numeric"))
+
+##load new world gulch data
+NWG_observations <- readxl::read_excel(here("data/raw/NewWorldGulch.xlsx"))
 
 # process data ------------------------------------------------------------
 
@@ -195,11 +199,24 @@ allTrails_search <-  allTrails_search %>%
   arrange(trailnum, date) %>%
   #unsure why above creates duplicate lines but let's fix that
   distinct() %>% 
-  mutate(moving_avg = slider::slide_dbl(num_views, 
+  mutate(moving_avg7 = slider::slide_dbl(num_views, 
                                         mean, 
                                         na.rm=T,
                                         .before = 7
-                                        )) %>%
+                                        ), 
+         moving_avg3 = slider::slide_dbl(num_views, 
+                                         mean, 
+                                         na.rm=T,
+                                         .before = 3), 
+         sum_cuml7 = slider::slide_dbl(num_views, 
+                                       sum, 
+                                       na.rm=T,
+                                       .before = 7), 
+         sum_cuml3 = slider::slide_dbl(num_views, 
+                                       sum, 
+                                       na.rm=T,
+                                       .before = 3)
+         ) %>%
   # mutate(moving_avg = zoo::rollmean(num_views, k = 7, fill = NA)) %>% 
   ungroup() %>% 
   distinct()
@@ -207,6 +224,13 @@ allTrails_search <-  allTrails_search %>%
 allTrails_search[is.na(allTrails_search$subsectionname),
           'subsectionname' ] <- allTrails_search[is.na(allTrails_search$subsectionname), 
                                           'trailname' ] 
+
+### only want NWG data ####
+NWG_newdata <- NWG_observations %>% 
+  select(-c("Mt Ellis Ln")) %>% 
+  mutate(date = lubridate::as_date(Day), 
+         trailname = "New World Gulch", 
+         subsectionname = "New World Gulch")
 
 # Daily Data for GAMM analysis -----------------------------------------------
 
@@ -447,9 +471,19 @@ checkCountvsStrava <- allTrail[which(allTrail$max.camera < allTrail$max.count),]
 ## Focusing on Middle Cottenwood Trail (Trail # 586, Counter ID # 31)
 
 ## new, more efficient way to subset Middle Cottonwood data
+## add AllTrails data
 singleTrail <- allData %>% 
   dplyr::filter(trailnumber == 586) %>% 
-  tidyr::drop_na(max.camera) 
+  tidyr::drop_na(max.camera)  %>% 
+  left_join(allTrails_search %>% dplyr::select(-c("trailnum", 
+                                           # "subsectionname", 
+                                           "month",
+                                           "day",
+                                           "year")),
+            by = c("subsectionname" = "subsectionname",
+                   "trailname" = "trailname",
+                   "date" = "date")) %>% 
+  tidyr::drop_na("moving_avg7", "moving_avg3")
 
 #convert week and wday to integers now
 singleTrail$wday <- as.integer(singleTrail$wday)
@@ -474,8 +508,17 @@ predict.MidCot <- allData %>%
                   "total_traveltime", 
                   "totallength_miles"
                   ## add more if used in model
-                  ))
-  
+                  )) %>% 
+  left_join(allTrails_search %>% dplyr::select(-c("trailnum", 
+                                           # "subsectionname", 
+                                           "month",
+                                           "day",
+                                           "year")),
+            by = c(
+              # "subsectionF" = "subsectionname",
+                   "trailname" = "trailname",
+                   "date" = "date")) %>% 
+  tidyr::drop_na("moving_avg7", "moving_avg3")
 
 # add zeros into missing STRAVA days
 
@@ -587,11 +630,11 @@ ptns = st_cast(trail_spatial_summary_keep$geometry, "POINT")
 ls = st_cast(trail_spatial_summary_keep$geometry, "LINESTRING")
 
 
-mapview::mapview(trail_spatial_summary_keep$geometry,
-                 color = "red") + ptns
-
-mapview::mapview(ptns, 
-                 color = "red") 
+# mapview::mapview(trail_spatial_summary_keep$geometry,
+#                  color = "red") + ptns
+# 
+# mapview::mapview(ptns, 
+#                  color = "red") 
 
 # allTrail_locations <- trail_spatial_summary_keep[7, ] %>% 
 #   sf::st_coordinates() %>%
