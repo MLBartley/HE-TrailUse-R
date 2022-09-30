@@ -7,7 +7,7 @@ library(here)
 # source("scripts/01.02-LoadFunctions.R")
 
 ## render_book looks for "index.Rmd" in wd so we need to reset briefly
-setwd(here("output/report"))
+setwd(here("output/report-bookdown"))
 
 bookdown::render_book("index.Rmd", "bookdown::gitbook")
 bookdown::render_book("index.Rmd", "bookdown::html_document2") ##sharable

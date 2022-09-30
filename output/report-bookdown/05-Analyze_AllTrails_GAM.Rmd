@@ -52,7 +52,7 @@ options(knitr.table.format = function() {
 ## Model Checking function
 tsDiagGamm <- function(x, timevar, observed, f = 0.3, type = "normalized") {
   resi <- resid(x$lme, type = type)
-  fits <- fitted(x$lme)
+  fits <- exp(fitted(x$lme))
   on.exit(layout(1))
   layout(matrix(1:6, ncol = 3, byrow = TRUE))
   plot(resi ~ fits, ylab = "Normalized Residuals",
@@ -97,7 +97,7 @@ This joint analysis covers the following Bridger Mountain subtrails:
 
 1.  Fairy Creek
 2.  College M
-3.  Bridger
+3.  Bridger Ridge (combination of Bridger, Baldy to Bridger, Bridger to Ross Pass, M to Baldy, Ross Pass to Sacagawea Peak)
 4.  Steep Way
 5.  Sacagawea Pass
 6.  Carroll Creek
@@ -210,7 +210,6 @@ if(runall){
                       knots = list(yday = c(0,365),
                                    month = c(0, 13)),
                       method = 'REML',
-                      # correlation = corARMA(form = ~yday|subsectionF, p = 5), 
                        data = allTrail, 
                        family = poisson#, 
                       # niterPQL = 20 #argument only used in gamm, not gamm4
@@ -290,7 +289,7 @@ gamm_modG_ARMA <- gamm(max.camera ~
                                          month = c(0, 13)),
                             method = 'REML',
                             correlation = corARMA(form = ~yday|subsectionF,
-                                                  p = 2, q = 2),
+                                                  p = 1, q = 2),
                             data = allTrail, 
                             family = poisson#,
                             # niterPQL = 30
@@ -335,7 +334,7 @@ anova(gamm_modG$lme,
       gamm_modG_ARMA$lme)
 ```
 
-The summary output indicates that all of our included parametric (linear) coefficients and smooth terms are (approximately) significant. The effective degree of freedom (edf) values represents the complexity of the smooth. We can see in this output that the highest smooth complexity is for `subsectionF`. The adjusted R-sq value (which should not be employed as an absolute measure of model performance) is 0.78 for this model.
+The summary output indicates that all of our included parametric (linear) coefficients and smooth terms are (approximately) significant. The effective degree of freedom (edf) values represents the complexity of the smooth. We can see in this output that the highest smooth complexity is for `subsectionF`. The adjusted R-sq value (which should not be employed as an absolute measure of model performance) is 0.805 for this model.
 
 ```{r modG summary, eval = T, echo=T}
 summary(gamm_modG_ARMA$gam)
@@ -413,7 +412,7 @@ draw(rg)
 sum(residuals(gamm_modG_ARMA$gam, type = "pearson")^2) / df.residual(gamm_modG_ARMA$gam)
 ```
 
-Averaging over all of the variation (between trails) results in a relatively imprecise (diffuse) estimates of trail use (Figures \@ref(fig:high-pred-G) and \@ref(fig:low-pred-G)), and viewing species-specific plots of observed vs. predicted values (Figure \@ref(fig:modG-pred-observed)), it is apparent that the model fits some of the trail sections better than others. This model could potentially be improved by adding intergroup variation between trail subsections.
+Averaging over all of the variation (between trails) results in a relatively imprecise (diffuse) estimates of trail use (Figures \@ref(fig:high-pred-G) and \@ref(fig:low-pred-G)), and viewing trail-specific plots of observed vs. predicted values (Figure \@ref(fig:modG-pred-observed)), it is apparent that the model fits some of the trail sections better than others. This model could potentially be improved by adding intergroup variation between trail subsections.
 
 ```{r modelG-pred-compare, eval = F, echo = F}
 p_G_none <- as_tibble(predict(gamm_modG$gam, 
@@ -453,7 +452,8 @@ compare_modG <- ggplot(mapping = aes(x = yday, y = max.camera)) +
     coord_cartesian(xlim = c(0, 365), ylim = c(0, 1000)) +
    facet_wrap(~subsectionF, drop = T, ncol = 3) +
     labs(title = "Model G",
-         subtitle = "How prediction varies with different temporal correlation structures")
+         subtitle = "How prediction varies with different temporal correlation structures")+
+  theme(text = element_text(size=18))
 
 compare_high_G <-  ggplot(mapping = aes(x = yday, y = max.camera)) +
     geom_ribbon(data = pred_all_G %>% filter(subsectionF %in% high_use),
@@ -471,7 +471,10 @@ compare_high_G <-  ggplot(mapping = aes(x = yday, y = max.camera)) +
     coord_cartesian(xlim = c(0, 365), ylim = c(0, 1000)) +
    facet_wrap(~subsectionF, drop = T, ncol = 3) +
     labs(title = "Model G",
-         subtitle = "How prediction varies with different temporal correlation structures")
+          y = "Trail Use Count",
+         x = "Day of Year",
+         subtitle = "How prediction varies with different temporal correlation structures")+
+  theme(text = element_text(size=18))
 compare_high_G
 
 # ggsave(filename = here::here("output/figures/high_pred_compareG.pdf"),
@@ -496,7 +499,10 @@ compare_low_G <-  ggplot(mapping = aes(x = yday, y = max.camera)) +
     coord_cartesian(xlim = c(0, 365), ylim = c(0, 300)) +
    facet_wrap(~subsectionF, drop = T, ncol =3) +
     labs(title = "Extrapolation",
-         subtitle = "How prediction varies with different temporal correlation structures")
+         y = "Trail Use Count",
+         x = "Day of Year",
+         subtitle = "How prediction varies with different temporal correlation structures")+
+  theme(text = element_text(size=18))
 compare_low_G
 # ggsave(filename = here::here("output/figures/low_pred_compareG.pdf"),
 #        plot = compare_low_G,
@@ -519,7 +525,8 @@ all_pred_G <- ggplot(data=allTrail_G_pred, aes(x=yday, y=max.camera, group=subse
   geom_line(aes(y=(modG), col = trailname)) +
   geom_point(aes(color = trailname)) +
   labs(x=expression("Day of Year"),
-       y=expression("Trail use"))
+       y=expression("Trail use"))+
+  theme(text = element_text(size=18))
 
 ## turn this into two graphs with high/low trail use so scales are different and we can see low trail use subsections better
 
@@ -533,7 +540,8 @@ high_pred_G <- ggplot(data=filter(allTrail_G_pred, subsectionF %in% high_use),
   geom_point(aes(color = trailname), size = 1) +
   labs(x=expression("Day of Year"),
        y=expression("Trail use")) + 
-  theme(legend.position="bottom")
+  theme(legend.position="bottom")+
+  theme(text = element_text(size=18))
 
 ggsave(filename = here::here("output/figures/high_pred_modG.png"),
        plot = high_pred_G,
@@ -551,7 +559,8 @@ low_pred_G <- ggplot(data=filter(allTrail_G_pred, subsectionF %notin% c("NA", hi
   geom_point(aes(color = trailname), size = 1) +
   labs(x=expression("Day of Year"),
        y=expression("Trail use")) + 
-  theme(legend.position="bottom")
+  theme(legend.position="bottom")+
+  theme(text = element_text(size=18))
 
 ggsave(filename = here::here("output/figures/low_pred_modG.png"),
        plot = low_pred_G,
@@ -573,7 +582,7 @@ knitr::include_graphics(path =  here::here("output/figures/low_pred_modG.png"))
 
 Model GS is able to effectively capture the obseved pattern of trial use variation between trail subsections and shows slightly less evidence of overdispersion (Figure \@ref(fig:modGS-pred-observed)) in some trail subsections compared to Model G (note the difference in Corbly Gulch).
 
-```{r modG-pred-observed, eval = T, echo = T, fig.align ='center', out.width = "100%", fig.cap="Assuming a well-fitted model G, we would expect all trail subsections exhibiting similar patterns of dispersion around the 1-1 line (and as we are assuming the data is Poisson, the variance around the mean should equal the mean). Instead we see that variance around the predicted value is much higher for some trails such as Sacagawea Pass."}
+```{r modG-pred-observed, eval = T, echo = T, fig.align ='center', fig.height= 13, fig.width=10, fig.cap="Assuming a well-fitted model G, we would expect all trail subsections exhibiting similar patterns of dispersion around the 1-1 line (and as we are assuming the data is Poisson, the variance around the mean should equal the mean). Instead we see that variance around the predicted value is much higher for some trails such as Sacagawea Pass."}
 
 #add the predicted values from the model 
 allTrail_G_pred <- transform(allTrail_G, 
@@ -582,11 +591,12 @@ allTrail_G_pred <- transform(allTrail_G,
 
 ggplot(allTrail_G_pred, aes(x=mod_G, y=max.camera)) +
   facet_wrap(~subsectionF, ncol= 3) +
-  geom_point(alpha=0.3, aes(color = trailname)) +
+  geom_point(alpha=0.5, aes(color = trailname)) +
   scale_color_manual(name = "Trail", values = colors) +
   geom_abline() +
   theme(legend.position="none") +
-  labs(x="Predicted count", y="Observed count")
+  labs(x="Predicted count", y="Observed count")+
+  theme(text = element_text(size=18))
 ```
 
 ### Single common smoother plus group-level smoothers that have the same wiggliness (model GS)
@@ -597,26 +607,25 @@ In R we can write our model as:
 
 ```{r model GS shown, echo =T, eval =F}
 
- gamm_modGS_AR1 <- gamm(max.camera ~ 
-                           s(yday, m=2, bs="cc") +
-                           s(yday, subsectionF,
-                             m=2, bs="fs", k = 21) +
-                           # s(subsectionF, bs = "re", k= 21) +
-                           s(month, bs = "cc", k = 7) +
-                           s(wday,
-                             bs = "cc", k = 7) +
-                           s(daily_aqi_value) +
-                           s(temp_max_f) +
-                           s(precipitation_in, k = 5) +
-                          s(totallength_miles) + 
-                        total_traveltime +
-                            max.count,
-                          knots = list(yday = c(0,365),
-                                       month = c(0, 13)),
-                         data = allTrail, 
-                         method = "REML", 
-                         correlation = corAR1(form = ~yday|subsectionF),
-                         family = poisson)
+gamm_modGS <- gamm(max.camera ~ 
+                     s(yday, m=2, bs="cc") +
+                     s(yday, subsectionF,
+                       m=2, bs="fs", k = 21) +
+                     # s(subsectionF, bs = "re", k= 21) +
+                     s(month, bs = "cc", k = 7) +
+                     s(wday,
+                       bs = "cc", k = 7) +
+                     s(daily_aqi_value) +
+                     s(temp_max_f) +
+                     s(precipitation_in, k = 5) +
+                     s(totallength_miles) + 
+                     total_traveltime +
+                     max.count,
+                   knots = list(yday = c(0,365),
+                                month = c(0, 13)),
+                   data = allTrail, 
+                   method = "REML", 
+                   family = poisson)
 ```
 
 With this model specification we explicitly specifying one term for the global smoother (as in model G, above) then added a second smooth term specifying the group-level smooth terms (here, `subsectionF`), using a penalty term that tends to draw these group-level smoothers toward zero. This penalty is incorporated via the factor-smoothing basis type (`bs = "fs"`) which creates a copy of each set of basis functions for each level of the grouping variable, but only estimates one smoothing parameter for all groups (see `?mgcv::factor.smooth.interaction` for details).
@@ -671,30 +680,30 @@ if(runall){
                          # niterPQL = 20
   )
   
-  gamm_modGS_ARMA <- gamm(max.camera ~ 
-                            s(yday, bs="cc") +
-                            s(yday, subsectionF,m=2,
-                              bs="fs", k = sub.number, xt=list(bs="cc")) +
-                            # s(subsectionF, m=2, bs = "re", k = sub.number) +
-                            # trailnameF +
-                            s(month, bs = "cc", k = 7) +
-                            s(wday,
-                              bs = "cc", k = 7) +
-                            s(daily_aqi_value) +
-                            s(temp_max_f) +
-                            s(precipitation_in) +
-                            s(totallength_miles) + 
-                            total_traveltime +
-                            max.count,
-                          knots = list(yday = c(0,365),
-                                       month = c(0, 13)),
-                          data = allTrail, 
-                          method = "REML", 
-                          correlation = corARMA(form = ~yday|subsectionF, 
-                                                p = 2, q = 2),
-                          family = poisson #, 
-                          # niterPQL = 20
-  )
+  # gamm_modGS_ARMA <- gamm(max.camera ~ 
+  #                           s(yday, bs="cc") +
+  #                           s(yday, subsectionF,m=2,
+  #                             bs="fs", k = sub.number, xt=list(bs="cc")) +
+  #                           # s(subsectionF, m=2, bs = "re", k = sub.number) +
+  #                           # trailnameF +
+  #                           s(month, bs = "cc", k = 7) +
+  #                           s(wday,
+  #                             bs = "cc", k = 7) +
+  #                           s(daily_aqi_value) +
+  #                           s(temp_max_f) +
+  #                           s(precipitation_in) +
+  #                           s(totallength_miles) + 
+  #                           total_traveltime +
+  #                           max.count,
+  #                         knots = list(yday = c(0,365),
+  #                                      month = c(0, 13)),
+  #                         data = allTrail, 
+  #                         method = "REML", 
+  #                         correlation = corARMA(form = ~yday|subsectionF, 
+  #                                               p = 2, q = 2),
+  #                         family = poisson #, 
+  #                         # niterPQL = 20
+  # )
 
 save(gamm_modGS, file=here("output/models/allT_subsection_gamm_GS.rda"),
      compress='xz')
@@ -702,13 +711,13 @@ save(gamm_modGS, file=here("output/models/allT_subsection_gamm_GS.rda"),
 save(gamm_modGS_AR1, file=here("output/models/allT_subsection_gamm_GS_AR1.rda"),
      compress='xz')
 
-save(gamm_modGS_ARMA, file=here("output/models/allT_subsection_gamm_GS_ARMA.rda"),
-     compress='xz')
+# save(gamm_modGS_ARMA, file=here("output/models/allT_subsection_gamm_GS_ARMA.rda"),
+#      compress='xz')
 }
 
 load(here("output/models/allT_subsection_gamm_GS.rda"))
 load(here("output/models/allT_subsection_gamm_GS_AR1.rda"))
-load(here("output/models/allT_subsection_gamm_GS_ARMA.rda"))
+# load(here("output/models/allT_subsection_gamm_GS_ARMA.rda"))
 
 ```
 
@@ -722,44 +731,50 @@ arma_res_GS$coef
 
 ```{r modGS-anova}
 anova(gamm_modGS$lme, 
-      gamm_modGS_AR1$lme, 
-      gamm_modGS_ARMA$lme)
+      gamm_modGS_AR1$lme#, 
+      # gamm_modGS_ARMA$lme
+      )
 
 ```
 
-Model GS with an ARMA correlation structure has been selected, but the summary does not seem to work on this model fit object. However, all other diagnostic plots and predictions work.
+Model GS without any temporal correlation structure has been selected, but the summary does not seem to work on this model fit object. However, all other diagnostic plots and predictions work.
 
 ```{r modGS summary, eval = F}
-summary(gamm_modGS_ARMA$gam)
+summary(gamm_modGS$gam)
 ```
 
-Diagnostic plots for time series data show there still is temporal autocorrelation left in the model.
+Diagnostic plots for time series data show that this model accounts for the temporal autocorrelation in the data. 
 
-```{r modGS-tsDiag, eval = T}
+```{r modGS-tsDiag1, eval = T, fig.align='center', out.width="100%", fig.cap="Time series diagnostic plots for Model GS."}
 # gratia::appraise(gamm_modGS_ARMA$gam)
 
-with(allTrail_G, tsDiagGamm(gamm_modGS_ARMA, timevar = yday,
+with(allTrail_G, tsDiagGamm(gamm_modGS, timevar = yday,
                           observed = max.camera))
+```
 
+```{r modGS-tsDiag2, eval = T, fig.align='center', out.width="100%", fig.cap="Temporal autocorerlation diagnostic plots for Model GS."}
 # 
 layout(matrix(1:2, ncol = 2))
-acf(residuals(gamm_modGS_ARMA$lme, type = "normalized"))
-pacf(residuals(gamm_modGS_ARMA$lme, type = "normalized"))
+acf(residuals(gamm_modGS$lme, type = "normalized"),
+        lag.max = 36, main = "ACF")
+
+pacf(residuals(gamm_modGS$lme, type = "normalized"),
+         lag.max = 36, main = "pACF")
 layout(1)
 ```
 
-Figure \@ref(fig:modelGS-draw) shows the fitted smoothers for `gamm_modGS_ARMA_sub`. The plots of group-specific smoothers (bottom left) indicate that trail subsections differ not only in average (log) trail use (which would correspond to each trail having a straight line at different levels for the group-level smoother), but differ slightly in the shape of their functional responses. Figures \@ref(fig:high-pred-GS) and \@ref(fig:low-pred-GS) shows how the global and group-specific smoothers combine to predict trail use for individual trails. We see that, unlike in the single global smoother case above, none of the curves deviate from the data systematically. Some trails with notable improvement in prediction include Corbly Gulch and Middle Cottonwood. Sacagawea Pass still seems to have the highest deviation between observed and predicted values.
+Figure \@ref(fig:modelGS-draw) shows the fitted smoothers for `gamm_modGS`. The plots of group-specific smoothers (bottom left) indicate that trail subsections differ not only in average (log) trail use (which would correspond to each trail having a straight line at different levels for the group-level smoother), but differ slightly in the shape of their functional responses. Figures \@ref(fig:high-pred-GS) and \@ref(fig:low-pred-GS) shows how the global and group-specific smoothers combine to predict trail use for individual trails. We see that, unlike in the single global smoother case above, none of the curves deviate from the data systematically. Some trails with notable improvement in prediction include Corbly Gulch and Middle Cottonwood. Sacagawea Pass still seems to have the highest deviation between observed and predicted values.
 
-```{r modelGS-draw, eval= T,  fig.width=6, fig.height=3, dev.args=list(pointsize=10), out.width="\\linewidth", echo=FALSE, fig.cap="Global function (\\texttt{s(yday)}) and group-specific deviations from the global function (\\texttt{s(yday, subsection)}) for \\texttt{gamm\\_modGS\\_ARMA\\_sub)}. "}
+```{r modelGS-draw, eval= T, fig.align='center', out.width="100%", echo=FALSE, fig.cap="Global function (\\texttt{s(yday)}) and group-specific deviations from the global function (\\texttt{s(yday, subsection)}) for \\texttt{gamm\\_modGS)}. "}
 #gratia draw() plot 
-gratia::draw(gamm_modGS_ARMA)
+gratia::draw(gamm_modGS)
 ```
 
 ```{r modelGS-predict, echo=FALSE, eval = T}
-gamm_modGS_AR1_pred <- predict(gamm_modGS_AR1$gam, se.fit=TRUE, type = "response")
+gamm_modGS_pred <- predict(gamm_modGS$gam, se.fit=TRUE, type = "response")
 allTrail_GS <- transform(allTrail_G, 
-                 modGS = gamm_modGS_AR1_pred$fit, 
-                 modGS_se = gamm_modGS_AR1_pred$se.fit)
+                 modGS = gamm_modGS_pred$fit, 
+                 modGS_se = gamm_modGS_pred$se.fit)
 all_pred_GS <- ggplot(data=allTrail_GS, aes(x=yday, y=max.camera, group=subsectionF)) +
   facet_wrap(~subsectionF) +
   geom_ribbon(aes(ymin=(modGS-2*modGS_se),
@@ -767,7 +782,8 @@ all_pred_GS <- ggplot(data=allTrail_GS, aes(x=yday, y=max.camera, group=subsecti
   geom_line(aes(y=(modGS))) +
   geom_point() +
   labs(x=expression("Day of Year"),
-       y=expression("Trail use"))
+       y=expression("Trail use"))+
+  theme(text = element_text(size=18))
 
 ## turn this into two graphs with high/low trail use so scales are different and we can see low trail use subsections better
 
@@ -780,7 +796,8 @@ high_pred_GS <- ggplot(data=filter(allTrail_GS, subsectionF %in% high_use),
   geom_point(aes(col = trailname)) +
   labs(x=expression("Day of Year"),
        y=expression("Trail use")) + 
-    theme(legend.position="bottom")
+    theme(legend.position="bottom")+
+  theme(text = element_text(size=18))
 
 ggsave(filename = here::here("output/figures/high_pred_modGS.png"),
        plot = high_pred_GS,
@@ -797,7 +814,8 @@ low_pred_GS <- ggplot(data=filter(allTrail_GS, subsectionF %notin% high_use),
   geom_point(aes(col = trailname)) +
   labs(x=expression("Day of Year"),
        y=expression("Trail use")) + 
-  theme(legend.position="bottom")
+  theme(legend.position="bottom")+
+  theme(text = element_text(size=18))
 
 ggsave(filename = here::here("output/figures/low_pred_modGS.png"),
        plot = low_pred_GS,
@@ -819,20 +837,21 @@ knitr::include_graphics(path =  here::here("output/figures/high_pred_modGS.png")
 knitr::include_graphics(path =  here::here("output/figures/low_pred_modGS.png"))
 ```
 
-```{r modGS-pred-observed, eval = T, echo = T, fig.align='center', out.width = "100%", fig.cap="Assuming a well-fitted model GS, we would expect all trail subsections exhibiting similar patterns of dispersion around the 1-1 line (and as we are assuming the data is Poisson, the variance around the mean should equal the mean)."}
+```{r modGS-pred-observed, eval = T, echo = T, fig.align='center', fig.height = 13, fig.width=10, fig.cap="Assuming a well-fitted model GS, we would expect all trail subsections exhibiting similar patterns of dispersion around the 1-1 line (and as we are assuming the data is Poisson, the variance around the mean should equal the mean)."}
 
 #add the predicted values from the model 
 allTrail_GS_pred <- transform(allTrail_G, 
-                      mod_GS = predict(gamm_modGS_AR1$gam, 
+                      mod_GS = predict(gamm_modGS$gam, 
                                       type = "response"))
 
 ggplot(allTrail_GS_pred, aes(x=mod_GS, y=max.camera)) +
   facet_wrap(~subsectionF, ncol= 3) +
-  geom_point(alpha=0.3, aes(color = trailname)) +
+  geom_point(alpha=0.5, aes(color = trailname)) +
   scale_color_manual(name = "Trail", values = colors) +
   geom_abline() +
   theme(legend.position="none") +
-  labs(x="Predicted count", y="Observed count")
+  labs(x="Predicted count", y="Observed count")+
+  theme(text = element_text(size=18))
 ```
 
 ```{r modelGS-pred-compare, eval = F, echo = F}
@@ -846,15 +865,17 @@ p_GS_AR1 <- as_tibble(predict(gamm_modGS_AR1$gam,
                             se.fit = TRUE, 
                             type = "response")) %>%
     rename(fit_AR1 = fit, se_AR1 = se.fit)
-p_GS_ARMA <- as_tibble(predict(gamm_modGS_ARMA$gam, 
-                            predict.All, 
-                            se.fit = TRUE, 
-                            type = "response")) %>%
-    rename(fit_ARMA = fit, se_ARMA = se.fit)
+# p_GS_ARMA <- as_tibble(predict(gamm_modGS_ARMA$gam, 
+#                             predict.All, 
+#                             se.fit = TRUE, 
+#                             type = "response")) %>%
+#     rename(fit_ARMA = fit, se_ARMA = se.fit)
 
 
-pred_all_GS <- bind_cols(predict.All, p_GS_none, p_GS_AR1, p_GS_ARMA) %>%
-    tidyr::pivot_longer(fit_none:se_ARMA, names_sep = '_',
+pred_all_GS <- bind_cols(predict.All, p_GS_none, p_GS_AR1
+                         # , p_GS_ARMA
+                         ) %>%
+    tidyr::pivot_longer(fit_none:se_AR1, names_sep = '_',
                  names_to = c('variable', 'correlation')) %>%
     tidyr::pivot_wider(names_from = variable, values_from = value) %>%
     mutate(upr_ci = fit + (2 * se), lwr_ci = fit - (2 * se))
@@ -1116,44 +1137,45 @@ anova(gamm_modGI$lme,
 The summary now includes all the different day of year (`yday`) by trail subsection (`subsectionF`) parameters. 
 ```{r modelGI-summary, eval = T}
 
-summary(gamm_modGI_AR1$gam)
+summary(gamm_modGI$gam)
 ```
 
-Figure \@ref(fig:modelGI-draw) shows a subsample of the group-specific smoothers from this model. Some trail subsections (e.g., East Bridger South) have very similar shapes to the global smoother. Others do differ from this trend with lower trail use earlier in the year and higher in later times (e.g., Baldy to Bridger) or a mix of variations from the global trend (e.g., Corbly Gulch, Sacagawea Pass, Steep Way).
+Figure \@ref(fig:modelGI-draw) shows a subsample of the group-specific smoothers from this model. Some trail subsections (e.g., East Bridger South) have very similar shapes to the global smoother. Others do differ from this trend with lower trail use earlier in the year and higher in later times (e.g., College M) or a mix of variations from the global trend (e.g., Corbly Gulch, Sacagawea Pass, Steep Way).
 
 ```{r modelGI-draw, eval =T, fig.align='center', fig.cap="Subsection of partial effect plots for model \\emph{GI}."}
 # itsadug::check_resid(gamm_modGI_AR1$gam)
 
-gratia::draw(gamm_modGI_AR1, select = c(1, 2, 7, 8, 19, 20))
+gratia::draw(gamm_modGI, select = c(1, 5, 6, 7, 18, 19))
 # gratia::appraise(bam_modGI_sub)
 ```
 
-Figures \@ref(fig:modelGI-tsDiag1) and \@ref(fig:modelGI-tsDiag2)  shows that model GI is the first and only model to fully capture the temporal autocorrelation (through the AR1 structure). There is only slight evidence for overdispersion (Figures \@ref(fig:modelGI-rootogram) and \@ref(fig:modGI-pred-observed)) which seems most likely due to a slightly zero-inflated distribution.
+Figures \@ref(fig:modelGI-tsDiag1) and \@ref(fig:modelGI-tsDiag2)  shows that model GI is the first and only model to fully capture the temporal autocorrelation (through the AR1 structure). There is only slight evidence for overdispersion (Figures \@ref(fig:GIrootogram) and \@ref(fig:modGI-pred-observed)) which seems most likely due to a slightly zero-inflated distribution.
 
 ```{r modelGI-tsDiag1, eval = T, fig.align='center',  out.width = "100%", fig.cap="Times series diagnosis plots for model \\emph{GI}."}
-with(allTrail_G, tsDiagGamm(gamm_modGI_AR1, timevar = yday,
+with(allTrail_G, tsDiagGamm(gamm_modGI, timevar = yday,
                           observed = max.camera))
 ```
 
-```{r, modelGI-tsDiag2, eval = T, fig.align='center', fig.cap="Times series ACF/pACF diagnosis plots for model \\emph{GI}."}
+```{r modelGI-tsDiag2, eval = T, fig.align='center', fig.cap="Times series ACF/pACF diagnosis plots for model \\emph{GI}."}
 
 layout(matrix(1:2, ncol = 2))
-acf(resid(gamm_modGI_AR1$lme, type = "normalized"),
+acf(resid(gamm_modGI$lme, type = "normalized"),
     lag.max = 36, main = "ACF")
-pacf(resid(gamm_modGI_AR1$lme, type = "normalized"),
+pacf(resid(gamm_modGI$lme, type = "normalized"),
      lag.max = 36, main = "pACF")
 layout(1)
 
 ```
 
-```{r modGI-rootogram, eval = T, echo = T, fig.align='center', out.width = "100%", fig.cap="Rootogram for checking for overdispersion."}
 
-rg <- gratia::rootogram(gamm_modGI_AR1$gam)
+```{r GIrootogram, eval = T, echo = T, fig.align='center', out.width= "100%", fig.cap="Rootogram for checking overdispersion in model GI."}
+
+rg <- gratia::rootogram(gamm_modGI$gam)
 draw(rg)
 ```
 
 ```{r}
-sum(residuals(gamm_modGI_AR1$gam, type = "pearson")^2) / df.residual(gamm_modGI_AR1$gam)
+sum(residuals(gamm_modGI$gam, type = "pearson")^2) / df.residual(gamm_modGI$gam)
 
 
 ```
@@ -1200,24 +1222,25 @@ allTrail <- allTrail %>%
 # layout(1)
 ```
 
-```{r modGI-pred-observed, eval = T, echo = T, fig.cap="Assuming a well-fitted model GI, we would expect all trail subsections exhibiting similar patterns of dispersion around the 1-1 line (and as we are assuming the data is Poisson, the variance around the mean should equal the mean)."}
+```{r modGI-pred-observed, eval = T, echo = T, fig.height=13, fig.width=10, fig.cap="Assuming a well-fitted model GI, we would expect all trail subsections exhibiting similar patterns of dispersion around the 1-1 line (and as we are assuming the data is Poisson, the variance around the mean should equal the mean)."}
 
 #add the predicted values from the model 
 allTrail_GI_pred <- transform(allTrail_G, 
-                      mod_GI = predict(gamm_modGI_AR1$gam, 
+                      mod_GI = predict(gamm_modGI$gam, 
                                       type = "response"))
 
 ggplot(allTrail_GI_pred, aes(x=mod_GI, y=max.camera)) +
   facet_wrap(~subsectionF, ncol= 3) +
-  geom_point(alpha=0.3, aes(color = trailname)) +
+  geom_point(alpha=0.5, aes(color = trailname)) +
   scale_color_manual(name = "Trail", values = colors) +
   geom_abline() +
   theme(legend.position="none") +
-  labs(x="Predicted count", y="Observed count")
+  labs(x="Predicted count", y="Observed count")+
+  theme(text = element_text(size=18))
 ```
 
 ```{r modelGI-predict, eval = T, echo=FALSE}
-gamm_modGI_AR1_pred <- predict(gamm_modGI_AR1$gam, se.fit=TRUE, type = "response")
+gamm_modGI_AR1_pred <- predict(gamm_modGI$gam, se.fit=TRUE, type = "response")
 allTrail_GI <- transform(allTrail_G, 
                  modGI = gamm_modGI_AR1_pred$fit, 
                  modGI_se = gamm_modGI_AR1_pred$se.fit)
@@ -1228,7 +1251,8 @@ all_pred_GI <- ggplot(data=allTrail_GI, aes(x=yday, y=max.camera, group=subsecti
   geom_line(aes(y=(modGI))) +
   geom_point() +
   labs(x=expression("Day of Year"),
-       y=expression("Trail use"))
+       y=expression("Trail use"))+
+  theme(text = element_text(size=18))
 
 ## turn this into two graphs with high/low trail use so scales are different and we can see low trail use subsections better
 
@@ -1242,7 +1266,8 @@ high_pred_GI <- ggplot(data=filter(allTrail_GI, subsectionF %in% high_use),
   ylim(0, 800) +
   labs(x=expression("Day of Year"),
        y=expression("Trail use")) + 
-  theme(legend.position="bottom")
+  theme(legend.position="bottom")+
+  theme(text = element_text(size=18))
   
 ggsave(filename = here::here("output/figures/high_pred_modGI.png"),
        plot = high_pred_GI,
@@ -1260,7 +1285,8 @@ low_pred_GI <- ggplot(data=filter(allTrail_GI, subsectionF %notin% high_use),
   ylim(0,200) +
   labs(x=expression("Day of Year"),
        y=expression("Trail use")) + 
-  theme(legend.position="bottom")
+  theme(legend.position="bottom")+
+  theme(text = element_text(size=18))
 
 ggsave(filename = here::here("output/figures/low_pred_modGI.png"),
        plot = low_pred_GI,
@@ -1289,6 +1315,8 @@ knitr::include_graphics(path =  here::here("output/figures/low_pred_modGI.png"))
 
 Up until this point we have looked at predictions for in-sample data. Effectively interpolating with our predictions. To examine the usefulness of these models for forecasting (i.e. predicting trail use in the near future) we may look at how these models handle temporal extrapolation (i.e. prediction outside of the range of data used to fit the models). We discussed in Section \@ref(MidCotPred) that extrapolation in the GA(M)M framework can be tricky due to how the model uses splines to learn from the data via the basis functions.
 
+### In-Sample Trail Use Predictions
+
 Figures \@ref(fig:high-compare-pred) and \@ref(fig:low-compare-pred) both show predicted trail use for the best model within each G, GS, and GI for the entire year of 2021. Observed trail use counts are plotted (colored by day of week). Both Models GS and GI show improvement over Model G, which is to be expected due to increase variability between trail subsections. Some trail subsections (e.g. Steep Way) still show unreasonably high predictions (and large error ribbons), however trails with a longer duration of observations (e.g. Baldy to Bridger) show improvement. Several model specification choices have improved these predictions over past iterations of models (not shown). For example, the use of cyclic cubic splines for time predictor variables (`bs= "cc"`) allows information from winter observations late in the year to inform predictions for early in the year. Also, restricting the number of knots for `precipitation_in` (now $k=5$ when before it was allowed to default to $k=10$) has removed some odd jumps in predictions on days with high precipitation. One notable difficulty for these models across all trails is the ability to predict higher than typical trail use days.
 
 ```{r compare model type predictions, eval = T}
@@ -1297,12 +1325,12 @@ p_G <- as_tibble((predict(gamm_modG_ARMA$gam,
                           se.fit = TRUE, 
                           type = "response"))) %>% 
     rename(fit_G = fit, se_G = se.fit, )
-p_GS <- as_tibble(predict(gamm_modGS_AR1$gam, 
+p_GS <- as_tibble(predict(gamm_modGS$gam, 
                             predict.All, 
                             se.fit = TRUE, 
                             type = "response")) %>%
     rename(fit_GS = fit, se_GS = se.fit)
-p_GI <- as_tibble(predict(gamm_modGI_AR1$gam, 
+p_GI <- as_tibble(predict(gamm_modGI$gam, 
                             predict.All, 
                             se.fit = TRUE, 
                             type = "response")) %>%
@@ -1329,7 +1357,10 @@ compare_models <- ggplot(mapping = aes(x = yday, y = max.camera)) +
     coord_cartesian(xlim = c(0, 365), ylim = c(0, 1000)) +
    facet_wrap(~subsectionF, drop = T, ncol = 3) +
     labs(title = "Extrapolation",
-         subtitle = "How prediction varies with different model specifications")
+          x = "Day of Year", 
+         y = "Trail Use Count",
+         subtitle = "How prediction varies with different model specifications")+
+  theme(text = element_text(size=18))
 
 compare_high <-  ggplot(mapping = aes(x = yday, y = max.camera)) +
     geom_ribbon(data = new_data_bases %>% filter(subsectionF %in% high_use),
@@ -1346,7 +1377,10 @@ compare_high <-  ggplot(mapping = aes(x = yday, y = max.camera)) +
     coord_cartesian(xlim = c(0, 365), ylim = c(0, 1000)) +
    facet_wrap(~subsectionF, drop = T, ncol = 3) +
     labs(title = "Extrapolation",
-         subtitle = "How prediction varies with different model specifications")
+          x = "Day of Year", 
+         y = "Trail Use Count",
+         subtitle = "How prediction varies with different model specifications")+
+  theme(text = element_text(size=18))
 
 ggsave(filename = here::here("output/figures/high_pred_compare.png"),
        plot = compare_high,
@@ -1369,7 +1403,10 @@ compare_low <-  ggplot(mapping = aes(x = yday, y = max.camera)) +
     coord_cartesian(xlim = c(0, 365), ylim = c(0, 300)) +
    facet_wrap(~subsectionF, drop = T, ncol =3) +
     labs(title = "Extrapolation",
-         subtitle = "How prediction varies with different model specifications")
+          x = "Day of Year", 
+         y = "Trail Use Count",
+         subtitle = "How prediction varies with different model specifications")+
+  theme(text = element_text(size=18))
 
 ggsave(filename = here::here("output/figures/low_pred_compare.png"),
        plot = compare_low,
@@ -1399,7 +1436,10 @@ for(s in subsection.unique){
     coord_cartesian(xlim = c(0, 365), ylim = c(0, 1000)) +
    # facet_wrap(~subsectionF, drop = T, ncol = 3) +
     labs(title = paste0("Extrapolation: ", s),
-         subtitle = "How prediction varies with different model specifications")
+         x = "Day of Year", 
+         y = "Trail Use Count",
+         subtitle = "How prediction varies with different model specifications")+
+  theme(text = element_text(size=18))
 
 ggsave(filename = here::here(paste0("output/figures/pred_compare_",
                                     s, ".png")),
@@ -1416,14 +1456,16 @@ knitr::include_graphics(path =  here::here("output/figures/high_pred_compare.png
 
 ```
 
-```{r low-pred-compare, eval = T, fig.align = 'center', out.width = "100%", fig.cap="Predicted trail use count values (lines) versus observed trail use (points) for each low-use trail subsection, based on each model (\\emph{G}, \\emph{GS}, and \\emph{GI})."}
+```{r low-compare-pred, eval = T, fig.align = 'center', out.width = "100%", fig.cap="Predicted trail use count values (lines) versus observed trail use (points) for each low-use trail subsection, based on each model (\\emph{G}, \\emph{GS}, and \\emph{GI})."}
 
 knitr::include_graphics(path =  here::here("output/figures/low_pred_compare.png"))
 ```
 
-To be added: comparison of Middle Cottonwood predicitons for single trail model vs this joint model. Currently the single trail model also uses AllTrails data which has duplicate search view numbers for certain days. This messes with my code that combines all predictions for plotting. When fixed the plots will show that models that share data across subtrails improve predictions over models with individual trail data.
+### Single Trail vs All Trail Model Predictions
 
-```{r compare Middle Cottonwood predictions,  out.width = "100%", fig.cap="Comparison of model predictions when fit with only Middle Cottonwood data versus model fit with all available trail data."}
+In Section \@ref(MidCot), we conduced a GAM analysis using only the Middle Cottonwood trail data. In Figure \@ref(fig:compareMC) we are now able to compare year-round predictions using models fit with just this single trail dataset (blue line) versus the model GI build with all available trail use data (orange line). We can see the improvement tahat our joint model provides by leveraging data across multiple trails. 
+
+```{r compareMC, eval = T, fig.align='center', out.width = "100%", fig.cap="Comparison of model predictions when fit with only Middle Cottonwood data versus model fit with all available trail data."}
 load(file = here("output/models/singleT_gamm2.rda"))
 
 p_single <- as_tibble(predict(gamm_mod2$gam, 
@@ -1431,8 +1473,8 @@ p_single <- as_tibble(predict(gamm_mod2$gam,
                                  se.fit = TRUE, 
                                  type = "response")) %>%
     rename(fit_single = fit, se_single = se.fit)
-p_all <- as_tibble(predict(gamm_modGI_AR1$gam, 
-                            predict.All %>% filter(trailnumber == 586), 
+p_all <- as_tibble(predict(gamm_modGI$gam, 
+                            predict.MidCot, 
                             se.fit = TRUE, 
                             type = "response")) %>%
     rename(fit_all = fit, se_all = se.fit)
@@ -1460,8 +1502,14 @@ ggplot(mapping = aes(x = yday, y = max.camera)) +
     scale_fill_OkabeIto(name = "Data Used") +
     coord_cartesian(xlim = c(0, 365), ylim = c(0, 1000)) +
     labs(title = "Extrapolation",
-         subtitle = "How prediction varies with data used to fit model")
+         x = "Day of Year",
+         y = "Trail Use Counts",
+         subtitle = "How prediction varies with data used to fit model") +
+    theme(text = element_text(size=18))
+
 ```
+
+### Out of Sample Trail Use Predictions
 
 Figure \@ref(fig:predict-newtrails) shows predictions from the top model within each category for trails in Bridger Mountains without deployed camera counters. All other covariate data is available for the year 2021. 
 
@@ -1477,7 +1525,7 @@ p_G_new <- as_tibble(predict(gamm_modG_ARMA$gam,
                             type = "response")) %>%
     rename(fit_G = fit, se_G = se.fit)
 
-p_GS_new <- as_tibble(predict(gamm_modGS_AR1$gam, 
+p_GS_new <- as_tibble(predict(gamm_modGS$gam, 
                             predict.New, 
                             exclude = c("s(subsectionF)", 
                                         "s(yday,subsectionF)"),
@@ -1485,10 +1533,11 @@ p_GS_new <- as_tibble(predict(gamm_modGS_AR1$gam,
                             type = "response")) %>%
     rename(fit_GS = fit, se_GS = se.fit)
 
-p_GI_new <- as_tibble(predict(gamm_modGI_AR1$gam, 
+p_GI_new <- as_tibble(predict(gamm_modGI$gam, 
                             predict.New, 
                             exclude = c("s(subsectionF)", 
-                                        "s(yday):subsectionFBaldy to Bridger",
+                                        "s(yday):subsectionFBridger Ridge - All",
+                                        # "s(yday):subsectionFBaldy to Bridger",
                                         "s(yday):subsectionFBenchmark Rd",
                                         # "s(yday):subsectionFBridger", 
                                         # "s(yday):subsectionFBridger to Ross Pass",
@@ -1542,12 +1591,107 @@ compare_models_newtrails <- ggplot(mapping = aes(x = yday, y = max.count)) +
     coord_cartesian(xlim = c(0, 365), ylim = c(0, 1000)) +
    facet_wrap(~subsectionF, drop = T, ncol = 3) +
     labs(title = "Extrapolation at new trails",
-         subtitle = "How prediction varies with different model specifications")
+         y = "Trail Use Counts", 
+         x = "Day of Year",
+         subtitle = "How prediction varies with different model specifications") +
+    theme(text = element_text(size=18))
+
 
 compare_models_newtrails
 ```
 
-To be added (hopefully) animated plots of prediction values and residuals plotted spatially. Currently these animations are super cursed and are not yet up and running.
+### Hold-out Sample Trail Use Predictions
+
+Our goal to select the model that has the best predictive ability across various trail types. This can be checked by holding some fraction of the data out (e.g., a single trail subsection) prior to the analysis and comparing how well different models fit that data. To this end, we have left out the New World Gulch trail and fit our selected model for each type (G, GS, GI) to these out-of-sample data. Figure \@ref(fig:NWG-pred) shows predictions from the top model within each category for the New World Gulch trail. Camera counter observations are available for this trail and were left out of the analysis to provide a means for examining predictive ability when applying model fits to new trails. All other covariate data is available for the year 2021. 
+
+```{r compare NWG predictions, eval = T}
+p_G_NWG <- as_tibble((predict(gamm_modG_ARMA$gam, 
+                          NWG_2021, 
+                          se.fit = TRUE, 
+                          type = "response"))) %>% 
+    rename(fit_G = fit, se_G = se.fit, )
+p_GS_NWG <- as_tibble((predict(gamm_modGS$gam, 
+                            NWG_2021, 
+                              exclude = c("s(subsectionF)",
+                                        "s(yday,subsectionF)"),
+                            se.fit = TRUE, 
+                            type = "response"))) %>%
+    rename(fit_GS = fit, se_GS = se.fit)
+p_GI_NWG <- as_tibble(predict(gamm_modGI$gam, 
+                            NWG_2021, 
+                            exclude = c("s(subsectionF)", 
+                                        "s(yday):subsectionFBridger Ridge - All",
+                                        # "s(yday):subsectionFBaldy to Bridger",
+                                        "s(yday):subsectionFBenchmark Rd",
+                                        # "s(yday):subsectionFBridger", 
+                                        # "s(yday):subsectionFBridger to Ross Pass",
+                                        "s(yday):subsectionFCarroll Creek",
+                                        "s(yday):subsectionFCollege M",
+                                        "s(yday):subsectionFCollege M to Sypes",
+                                        "s(yday):subsectionFCorbly Gulch",
+                                        "s(yday):subsectionFEast Bridger North",
+                                        "s(yday):subsectionFEast Bridger South",
+                                        "s(yday):subsectionFFairy Creek",
+                                        "s(yday):subsectionFHorsethief Mountain",
+                                        "s(yday):subsectionFJohnson Canyon Jeep Trail",
+                                        "s(yday):subsectionFLower Shafthouse",
+                                        # "s(yday):subsectionFM to Baldy",
+                                        "s(yday):subsectionFMiddle Cottonwood",
+                                        "s(yday):subsectionFNorth Cottonwood Access",
+                                        "s(yday):subsectionFNorth Cottonwood to Johnson Canyon",
+                                        "s(yday):subsectionFRaptor View",
+                                        "s(yday):subsectionFRoss Pass",
+                                        # "s(yday):subsectionFRoss Pass to Sacagawea Peak",
+                                        "s(yday):subsectionFSacagawea Pass",
+                                        "s(yday):subsectionFSteep Way",
+                                        "s(yday):subsectionFSypes Canyon",
+                                        "s(yday):subsectionFTruman Gulch" ),
+                            se.fit = TRUE, 
+                            type = "response")) %>%
+    rename(fit_GI = fit, se_GI = se.fit)
+
+
+new_data_NWG <- bind_cols(NWG_2021, p_G_NWG, p_GS_NWG, p_GI_NWG) %>%
+    tidyr::pivot_longer(fit_G:se_GI, names_sep = '_',
+                 names_to = c('variable', 'model')) %>%
+    tidyr::pivot_wider(names_from = variable, values_from = value) %>%
+    mutate(upr_ci = fit + (2 * se), lwr_ci = fit - (2 * se))
+
+compare_NWG <- ggplot(mapping = aes(x = yday, y = max.camera)) +
+    geom_ribbon(data = new_data_NWG,
+                mapping = aes(ymin = lwr_ci, ymax = upr_ci,
+                              x = yday, fill = factor(model)),
+                inherit.aes = FALSE, alpha = 0.2) +
+    geom_point(data = NWG_2021, aes(colour = as.factor(wday))) +
+    geom_line(data = new_data_NWG, aes(y = fit, x = yday, colour2 = factor(model)),
+              size = 1) %>%
+    relayer::rename_geom_aes(new_aes = c("colour" = "colour2")) +
+    scale_colour_brewer(palette = "Set1", aesthetics = "colour", 
+                        name = "Day of Week") +
+    scale_colour_OkabeIto(aesthetics = "colour2", name = "Model") +
+    scale_fill_OkabeIto(name = "Model") +
+    # coord_cartesian(xlim = c(0, 365), ylim = c(0, 1000)) +
+    labs(title = "New World Gulch",
+         y = "Trail Use Counts",
+         x = "Day of Year", 
+         subtitle = "How well do predictions compare with hold out data")+
+    theme(text = element_text(size=18))
+
+
+ggsave(filename = here::here("output/figures/NWG_pred_compare.png"),
+       plot = compare_NWG,
+       height = 8.5, 
+       width = 13,
+       dpi=700)
+```
+
+```{r NWG-pred, eval = T, fig.align = 'center', out.width = "100%", fig.cap="Predicted trail use count values (lines) versus observed trail use (points) for New World Gulch trail (hold out data not included in model fit), based on each model (\\emph{G}, \\emph{GS}, and \\emph{GI})."}
+
+knitr::include_graphics(path =  here::here("output/figures/NWG_pred_compare.png"))
+```
+
+
+<!-- To be added (hopefully) animated plots of prediction values and residuals plotted spatially. Currently these animations are super cursed and are not yet up and running. -->
 
 ```{r gganimate}
 cameras_sf <- st_as_sf(cameras, coords = c("counter_long", "counter_lat"), 
@@ -1673,8 +1817,8 @@ Comparing models based on AIC is a robust approach to comparing the different mo
 
 ```{r AIC_table, eval = T, echo=FALSE,  fig.width=4, fig.height=6, message=FALSE, warning=FALSE, cache=TRUE}
 AIC_table <- AIC(gamm_modG_ARMA$lme,
-                 gamm_modGS_AR1$lme,
-                 gamm_modGI_AR1$lme)%>%
+                 gamm_modGS$lme,
+                 gamm_modGI$lme)%>%
   tibble::rownames_to_column(var= "Model")%>%
   # mutate(data_source = rep(c("CO2","bird_data"), each =5))%>%
   # group_by(data_source)%>%
@@ -1693,9 +1837,7 @@ kable(AIC_table,
   kable_styling(full_width = FALSE)
 ```
 
-Our goal to select the model that has the best predictive ability across various trail types. This can be checked by holding some fraction of the data out (e.g., a single trail subsection) prior to the analysis and comparing how well different models fit that data. To this end, we have left out the New World Gulch trail and fit our selected model for each type (G, GS, GI) to these out-of-sample data. To evaluate how well each model fits this new data, we calculated the total deviance of the out-of-sample data. The deviance is equal to two times the sum of the difference between the log-likelihood of the out-of-sample data (as predicted by each model) and a saturated model that has one predictor for each data point, all multiplied by the scale parameter for the family of interest. It can be interpreted similarly to the residual sum of squares for a simple linear regression (Wood, 2017a, p. 109).
-
-To be added: get predictions for New World Gulch (currently missing trail characteristic data which is needed).
+ To evaluate how well each model fits the data, we calculated the total deviance of the in-sample data. The deviance is equal to two times the sum of the difference between the log-likelihood of the in-sample data (as predicted by each model) and a saturated model that has one predictor for each data point, all multiplied by the scale parameter for the family of interest. It can be interpreted similarly to the residual sum of squares for a simple linear regression (Wood, 2017a, p. 109).
 
 Table \@ref(tab:deviance-kable) shows that both models GS and GI are better at predicting in-sample fits for all trail subsections in this analysis. While this provides additional evidence for including inter-group variability in our model, it does contradict our AIC findings. 
 
@@ -1712,7 +1854,7 @@ save(gam_mod0, file=here("output/models/allT_subsection_gamm_mod0.rda"),
      compress='xz')
 #Correlations between fitted and observed values for all subsections:
 #\n is in variable titles to add a line break in the printed table.
-mod0.pred <- (as.tibble(predict(gam_mod0, allTrail, type="response"))) 
+mod0.pred <- (as_tibble(predict(gam_mod0, allTrail, type="response"))) 
 colnames(mod0.pred) <- c("mod0")
 
 modG.pred <- as_tibble((predict(gamm_modG_ARMA$gam, 
@@ -1720,12 +1862,12 @@ modG.pred <- as_tibble((predict(gamm_modG_ARMA$gam,
                           se.fit = F, 
                           type = "response"))) %>% 
     rename(modG = value)
-modGS.pred <- as_tibble(predict(gamm_modGS_AR1$gam, 
+modGS.pred <- as_tibble(predict(gamm_modGS$gam, 
                            allTrail, 
                           se.fit = F, 
                             type = "response")) %>%
     rename(modGS = value)
-modGI.pred <- as_tibble(predict(gamm_modGI_AR1$gam, 
+modGI.pred <- as_tibble(predict(gamm_modGI$gam, 
                            allTrail, 
                           se.fit = F, 
                             type = "response")) %>%

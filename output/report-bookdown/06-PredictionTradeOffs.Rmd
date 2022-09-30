@@ -65,8 +65,8 @@ get_deviance <- function(model, y_pred, y_obs, weights = NULL){
 ```{r deviance_highlow, eval = T, echo=FALSE, message=FALSE}
 
 load(here("output/models/allT_subsection_gamm_G-ARMA.rda"))
-load(here("output/models/allT_subsection_gamm_GS_AR1.rda"))
-load(file=here("output/models/allT_subsection_gamm_GI-AR1.rda"))
+load(here("output/models/allT_subsection_gamm_GS.rda"))
+load(file=here("output/models/allT_subsection_gamm_GI.rda"))
 
 
 # we need to compare how well this model fits with a null model. here we'll use an
@@ -86,12 +86,12 @@ modG.pred <- as_tibble((predict(gamm_modG_ARMA$gam,
                           se.fit = F, 
                           type = "response"))) %>% 
     rename(modG = value)
-modGS.pred <- as_tibble(predict(gamm_modGS_AR1$gam, 
+modGS.pred <- as_tibble(predict(gamm_modGS$gam, 
                            allTrail, 
                           se.fit = F, 
                             type = "response")) %>%
     rename(modGS = value)
-modGI.pred <- as_tibble(predict(gamm_modGI_AR1$gam, 
+modGI.pred <- as_tibble(predict(gamm_modGI$gam, 
                            allTrail, 
                           se.fit = F, 
                             type = "response")) %>%
@@ -151,7 +151,7 @@ A secondary aim of this report is to assess tradeoffs in predictive accuracy for
 
 Due to variation in trail use across the network of trails in the Bridger Mountains we anticipate different levels of predictive ability between trails of high and low use. To provide a comparison for predictive accuracy, we first assign trails (at the subsection level) to be a "high" or "low" use trail based on expert input by Headwaters Economics. The following categories were determined:
 
-High Use: Baldy to Bridger, Bridger, Bridger to Ross Pass, College M, M to Baldy, Middle Cottonwood, Sypes Canyon, Ross Pass to Sacagawea Peak, Sacagawea Pass, Steep Way
+High Use: Bridger Ridge (combination of Baldy to Bridger, Bridger, Bridger to Ross Pass, M to Baldy, and Ross Pass to Sacagawea Peak), College M, Middle Cottonwood, Sypes Canyon, Sacagawea Pass, Steep Way
 
 Low Use: Fairy Creek, Horsethief Mountain, Carroll Creek, Raptor View, College M to Sypes, Truman Gulch, East Bridger South, East Bridger North, Lower Shafthouse, Corbly Gulch, North Cottonwood to Johnson Canyon, North Cottonwood Access, Johnson Canyon Jeep Trail, Benchmark Rd
 
@@ -175,7 +175,7 @@ knitr::kable(test_summary_highlow,
 
 ## Places with different types of use 
 
-We also want to investigate how prediction accuracy differs in areas of varying trail use (e.g., do motorized trails differ in important ways from non-motorized trails?). 
+We also want to investigate how prediction accuracy differs in areas of varying trail use. Of primary concern is do motorized trails differ in important ways from non-motorized trails?. The concern is that the lack of Strava use by motorized trail recreational users would affect the predictive ability of our model(s), however this effect is hard to parse out from overall trail use. 
 
 ### Motor Vehicle Use
 
@@ -241,83 +241,119 @@ knitr::kable(test_summary_motorized,
   row_spec(2:3, italic = FALSE)
   
 ```
-### Parking Lot Size
+<!-- ### Parking Lot Size -->
 
-```{r deviance_parking, eval = T, echo=FALSE, message=FALSE}
-test_summary_parking =  bind_cols(allTrail, mod0.pred,
-                          modG.pred, modGS.pred, 
-                          modGI.pred) %>% 
-  tidyr::drop_na(daily_aqi_value) %>%
-  group_by(parkinglot)%>%
-  summarise(
-    `Intercept only` = format(get_deviance(gam_mod0, mod0, max.camera), 
-                              scientific = FALSE, 
-                              digits=3),
-    
-    `Model G` = format(get_deviance(gamm_modG_ARMA$gam, modG, max.camera), 
-                       scientific = FALSE, 
-                       digits=3),
-    `Model GS` = format(get_deviance(gamm_modGS_AR1$gam, modGS, max.camera), 
-                       scientific = FALSE, 
-                       digits=3),
-    `Model GI` = format(get_deviance(gamm_modGI_AR1$gam, modGI, max.camera), 
-                       scientific = FALSE, 
-                       digits=3)
-    ) %>% 
-  data.frame()
+<!-- ```{r deviance_parking, eval = T, echo=FALSE, message=FALSE} -->
+<!-- test_summary_parking =  bind_cols(allTrail, mod0.pred, -->
+<!--                           modG.pred, modGS.pred,  -->
+<!--                           modGI.pred) %>%  -->
+<!--   tidyr::drop_na(daily_aqi_value) %>% -->
+<!--   group_by(parkinglot)%>% -->
+<!--   summarise( -->
+<!--     `Intercept only` = format(get_deviance(gam_mod0, mod0, max.camera),  -->
+<!--                               scientific = FALSE,  -->
+<!--                               digits=3), -->
 
-#make numeric
-test_summary_parking$Intercept.only <- as.numeric(test_summary_parking$Intercept.only )
-test_summary_parking$Model.G <- as.numeric(test_summary_parking$Model.G )
-test_summary_parking$Model.GS <- as.numeric(test_summary_parking$Model.GS )
-test_summary_parking$Model.GI <- as.numeric(test_summary_parking$Model.GI )
+<!--     `Model G` = format(get_deviance(gamm_modG_ARMA$gam, modG, max.camera),  -->
+<!--                        scientific = FALSE,  -->
+<!--                        digits=3), -->
+<!--     `Model GS` = format(get_deviance(gamm_modGS_AR1$gam, modGS, max.camera),  -->
+<!--                        scientific = FALSE,  -->
+<!--                        digits=3), -->
+<!--     `Model GI` = format(get_deviance(gamm_modGI_AR1$gam, modGI, max.camera),  -->
+<!--                        scientific = FALSE,  -->
+<!--                        digits=3) -->
+<!--     ) %>%  -->
+<!--   data.frame() -->
 
-##need to average over # of observations
-parking_n =  bind_cols(allTrail, mod0.pred,
-                          modG.pred, modGS.pred, 
-                          modGI.pred) %>% 
-  tidyr::drop_na(daily_aqi_value) %>%
-  group_by(parkinglot)%>%
-  summarise(n = n()) %>% 
-  data.frame()
+<!-- #make numeric -->
+<!-- test_summary_parking$Intercept.only <- as.numeric(test_summary_parking$Intercept.only ) -->
+<!-- test_summary_parking$Model.G <- as.numeric(test_summary_parking$Model.G ) -->
+<!-- test_summary_parking$Model.GS <- as.numeric(test_summary_parking$Model.GS ) -->
+<!-- test_summary_parking$Model.GI <- as.numeric(test_summary_parking$Model.GI ) -->
 
-##adjust tibble
-test_summary_parking[1, -1] <- round(as.data.frame(test_summary_parking)[1, -1]/parking_n[1, 2], 2)
+<!-- ##need to average over # of observations -->
+<!-- parking_n =  bind_cols(allTrail, mod0.pred, -->
+<!--                           modG.pred, modGS.pred,  -->
+<!--                           modGI.pred) %>%  -->
+<!--   tidyr::drop_na(daily_aqi_value) %>% -->
+<!--   group_by(parkinglot)%>% -->
+<!--   summarise(n = n()) %>%  -->
+<!--   data.frame() -->
 
-test_summary_parking[2, -1] <- round(as.data.frame(test_summary_parking)[2, -1]/parking_n[2, 2], 2)
+<!-- ##adjust tibble -->
+<!-- test_summary_parking[1, -1] <- round(as.data.frame(test_summary_parking)[1, -1]/parking_n[1, 2], 2) -->
 
-test_summary_parking[3, -1] <- round(as.data.frame(test_summary_parking)[3, -1]/parking_n[3, 2], 2)
+<!-- test_summary_parking[2, -1] <- round(as.data.frame(test_summary_parking)[2, -1]/parking_n[2, 2], 2) -->
+
+<!-- test_summary_parking[3, -1] <- round(as.data.frame(test_summary_parking)[3, -1]/parking_n[3, 2], 2) -->
+
+<!-- ``` -->
+
+<!-- ```{r deviance_parking_kable, eval= T, echo=FALSE, message=FALSE} -->
+<!-- colnames(test_summary_parking) <- c("Parking Lot Size", "Intercept Only", "Model G", "Model GS", "Model GI") -->
+<!-- knitr::kable(test_summary_parking,  -->
+<!--       format = table_out_format,  -->
+<!--       # caption="test", -->
+<!--       # Predictive ability for models \\emph{G}, \\emph{GS}, and \\emph{GI} applied to the Bridger Mountain trail use dataset. Deviance values represent the total deviance of model predictions from observations. Intercept only results are for a null model with only subsection-level random effect intercepts included. -->
+<!--       booktabs = TRUE, -->
+<!--       escape = FALSE)%>% -->
+<!--   add_header_above(c(" " = 1, "Total deviance" = 3), -->
+<!--                    escape = FALSE)%>% -->
+<!--   kable_styling(full_width = FALSE) %>% -->
+<!--   row_spec(2:3,italic = FALSE) %>% -->
+<!--   row_spec(2:3, italic = FALSE) -->
+
+<!-- ``` -->
+
+ 
+
+## An analysis of the change in predictive accuracy as the number of trail counters used changes.
+
+The GAMM model applied does not allow for multiple measures per unit time. In an ideal world trail counters would be deployed at as many different trails for as long as possible. Longer deployment times would help to model season and annual trends. It is possible that with more temporal data coverage we could use simpler models (i.e. a gam or gamm approach without the need for temporal autocorrelation structure) that would save on computation time).
+  
+<!-- * Need to talk about forecasting (or temporal extrapolation). If we want to forecast in the future for a specific date or time frame we really need prior observations on those intervals (i.e. previous years). This is not unique to GAM models, predicting beyond the range of observed samples is tough.  -->
+
+## Can we identify trails that are "closest" to global smooth trend as ideal candidates for year-round cameras?
+
+For both models GS and GI we are able to examine the trail-specific deviations from the global functions. In Figure \@ref(fig:GS-globaldeviations) we can see that individual trail subsections are most likely to deviate most on the far ends of our temporal coverage. The trail subsections most closely align with the global trend (i.e. a partial effect of 0) between day of year 200 and 250, which coincides with the time frame with the most overlapping trail cameras deployed. 
+
+```{r GS-globaldeviations, eval = T, fig.align='center', out.width= "100%", fig.cap="Group-specific deviations from the global function (s(yday,subsectionF)) for Model GS."}
+load(file=here("output/models/allT_subsection_gamm_GS.rda"))
+
+gratia::draw(gamm_modGS, select = 2)
+
+```
+Figure \@ref(fig:GI-globaldeviations) shows the group-specific smoothers from model GI. Note that these deviations are often most intense in temporal regions beyond the counter observation deployment period (see the "rug" tick marks at the bottom of each plot for data availability). This reinforces that increased data temporal coverage is needed to improve our understanding of inter-trail variability. 
+
+The trail subsections that most align with the global smoother (differing only in intercept) are:
+
+* East Bridger North
+* Sypes Canyon
+* Horsethief Mountain
+
+The trail subsections that differ the most from the global smoother are:
+
+* College M
+* Rapter View
+* Sacagawea Pass
+* Steep Way
+* Truman Gulch
+
+Some of these highly different trails are known to be high-use trails (e.g. College M, Sacagawea Pass, Steep Way). 
+
+```{r GI-globaldeviations, eval = T, fig.align='center', out.width="100%", fig.cap="Functional relationships for the trail use data estimated for model GI. s(<single term>): the global smoothers; subsectionF: trail-specific random effect intercepts. The remaining plots are the trail-specific smoothers, indicating how the functional response of that trail differs from the global smoother."}
+load(file=here("output/models/allT_subsection_gamm_GI.rda"))
+  
+  gratia::draw(gamm_modGI, select = c(1:12))
+  gratia::draw(gamm_modGI, select = c(13:24))
+    gratia::draw(gamm_modGI, select = c(25:29))
+
+
+
 
 ```
 
-```{r deviance_parking_kable, eval= T, echo=FALSE, message=FALSE}
-colnames(test_summary_parking) <- c("Parking Lot Size", "Intercept Only", "Model G", "Model GS", "Model GI")
-knitr::kable(test_summary_parking, 
-      format = table_out_format, 
-      # caption="test",
-      # Predictive ability for models \\emph{G}, \\emph{GS}, and \\emph{GI} applied to the Bridger Mountain trail use dataset. Deviance values represent the total deviance of model predictions from observations. Intercept only results are for a null model with only subsection-level random effect intercepts included.
-      booktabs = TRUE,
-      escape = FALSE)%>%
-  add_header_above(c(" " = 1, "Total deviance" = 3),
-                   escape = FALSE)%>%
-  kable_styling(full_width = FALSE) %>%
-  row_spec(2:3,italic = FALSE) %>%
-  row_spec(2:3, italic = FALSE)
-  
-```
- 
- 
-
-3. An analysis of the change in predictive accuracy as the number of trail counters used
-changes.
-
-* The GAMM model applied does not allow for multiple measures per unit time. In an ideal world trail counters would be deployed at as many different trails for as long as possible. Longer deployment times would help to model season and annual trends. It is possible that with more temporal data coverage we could use simpler models (i.e. a gam or gamm approach without the need for temporal autocorrelation structure) that would save on computation time).
-  
-* Need to talk about forecasting (or temporal extrapolation). If we want to forecast in the future for a specific date or time frame we really need prior observations on those intervals (i.e. previous years). This is not unique to GAM models, predicting beyond the range of observed samples is tough. 
-
-
-
-*Can we identify trails that are "closest" to global smooth trend as ideal condidates for year-round cameras?
 
 
   

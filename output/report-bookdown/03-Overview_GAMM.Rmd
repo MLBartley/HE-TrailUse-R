@@ -210,14 +210,15 @@ the Bridger Mountains, we might be interested in understand how the
 relationship between trail use and various predictor variables differ
 between different trails (or subsections of trails).
 
-Model structure for HGAMs varies depending on choices concerning global
-smoothers and how group-specific smoothers vary. Figure \@ref(fig:HGAM),
-originally published in @pedersen2019hierarchical, shows the five types
-of models possible. In our application to all trail data in the Bridger
-Mountains (see Section \@ref(AllTrailsAnalysis)) we focus on the three
-possible models that all include some form of a global smoother term, as
-models without this term are not well suited for prediction for trails
-not included as part of the training dataset.
+Model structure for hierarchical generalized additive models (HGAMs)
+varies depending on choices concerning global smoothers and how
+group-specific smoothers vary. Figure \@ref(fig:HGAM), originally
+published in @pedersen2019hierarchical, shows the five types of models
+possible. In our application to all trail data in the Bridger Mountains
+(see Section \@ref(AllTrailsAnalysis)) we focus on the three possible
+models that all include some form of a global smoother term, as models
+without this term are not well suited for prediction for trails not
+included as part of the training dataset.
 
 ```{r HGAM, eval = T, fig.cap="Alternate types of functional variation f(x) that can be fitted with HGAMs. Figure reproduced from: Pedersen EJ, Miller DL, Simpson GL, Ross N. 2019. Hierarchical generalized additive models in ecology: an introduction with mgcv. PeerJ 7:e6876 DOI: 10.7717/peerj.6876/fig-4"}
 

@@ -44,15 +44,16 @@ options(knitr.table.format = function() {
 #add subsection (trailname only ) to AT search data
 
 allTrail_search <- allTrail %>% 
-  filter(subsectionname %in% unique(allTrails_search$subsectionname)) %>% 
-  left_join(allTrails_search %>% select(-c("trailnum", 
-                                           # "subsectionname", 
-                                           "month",
-                                           "day",
-                                           "year")),
-            by = c("subsectionname" = "subsectionname",
-                   "trailname" = "trailname",
-                   "date" = "date")) 
+  dplyr::filter(subsectionname %in% unique(allTrails_search$subsectionname)) %>% 
+  dplyr::left_join(allTrails_search %>% 
+                     dplyr::select(-c("trailnum", 
+                                      # "subsectionname", 
+                                      "month",
+                                      "day",
+                                      "year")),
+                   by = c("subsectionname" = "subsectionname",
+                          "trailname" = "trailname",
+                          "date" = "date")) 
 
 allTrail_search[is.na(allTrail_search$num_views), "num_views"] <- 0
 
@@ -108,7 +109,7 @@ An overview of the available AllTrials data is presented in Section \@ref(ATData
 
 We start with exploring some visualizations of different data transformations. Figure \@ref{fig:AT-vis-views} shows potential linear relationships between the different trail subsections and the untransformed number of views for each. While not all trail subsections exhibit evidence for a linear relationship (or non-linear) we do see evidence for a positive relationship with Sacagawea Pass and Sypes Way. Additional data (days of year or different trail subsections) could still hold more evidence for this relationship. 
 
-```{r AT-vis-views, eval = T, fig.cap="Scatterplot of trail use camera counts and AllTrails number of search views. Linear relationship fit (line) plotted in black."}
+```{r AT-vis-views, eval = T, fig.align='center', out.width="100%", fig.cap="Scatterplot of trail use camera counts and AllTrails number of search views. Linear relationship fit (line) plotted in black."}
 
 # visualize relationship with trail use -----------------------------------
 
@@ -122,7 +123,7 @@ ggplot(allTrail_search, aes(num_views,
 ```
 We started our exploration of potential data transformations with a 7-day moving average that takes the preceding 7 days to average over. This assumes the recreational users might be conducting trail searches in the week leading up to a trail use event. Figure \@ref(fig:AT-vis-moving7) shows the relationship between trail use by camera counter and AllTrails searches as this 7 day moving average. There is not any increase in the number or strength of linear relationships for any of the trail subsections. Sypes Canyon no longer has quite as prominent of a positive linear relationship between the two variables. Using a shorter time frame for the moving average does not seem to provide any improvement (not shown). 
 
-```{r AT-vis-moving7,  eval = T, fig.cap="Scatterplot of trail use camera counts and AllTrails search views represented as a moving average of the number of views for the preceding seven days. Linear relationship fit (line) plotted in black."}
+```{r AT-vis-moving7,  eval = T, fig.align='center', out.width = "100%", fig.cap="Scatterplot of trail use camera counts and AllTrails search views represented as a moving average of the number of views for the preceding seven days. Linear relationship fit (line) plotted in black."}
 
 ggplot(allTrail_search, aes(moving_avg7,
                         max.camera)) +
@@ -143,9 +144,9 @@ ggplot(allTrail_search, aes(moving_avg3,
   theme(legend.position="bottom")
 ```
 
-We also explored using the cumulative sum of the previous $n$ days. Figure \@ref(fig:sumcum3) shows that this approach can show a different linear relationship compared to non-transformed search views. Both Steep Way and Middle Cottonwood now show evidence of *negative* linear relationships between camera counts and search views. 
+We also explored using the cumulative sum of the previous $n$ days. Figure \@ref(fig:cumulative3) shows that this approach can show a different linear relationship compared to non-transformed search views. Both Steep Way and Middle Cottonwood now show evidence of *negative* linear relationships between camera counts and search views. 
 
-```{r, sumcum3, fig.align='center',  out.width = "100%",fig.cap="Scatterplot of trail use camera counts and AllTrails search views represented as a moving average of the number of views for the preceding three days. Linear relationship fit (line) plotted in black."}
+```{r cumulative3, eval= T, fig.align='center', out.width="100%", fig.cap="Scatterplot of trail use camera counts and AllTrail search views represented as a moving average of the number of views for the preceding three days. Linear relationship fit (line) plotted in black. "}
 ggplot(allTrail_search, aes(sum_cuml3,
                         max.camera)) +
   geom_point(aes(color = trailname)) +
@@ -325,7 +326,7 @@ load(file = here("output/models/allT_subsection_gamm_GI-AR1_StravaOnly.rda"))
 ```
 
 ## Comparing Models
-We compared models using `anova` and the model with only the raw AllTrails search view counts had the lowest AIC. 
+We compared models using `anova` and the model with both the AllTrails search view counts as a 3 day moving average and the Strava trip counts had the lowest AIC. 
 
 ```{r ATStrava-anova, eval = T}
 load(file=here("output/models/allT_subsection_gamm_GI-AR1.rda"))
@@ -344,6 +345,7 @@ anova(gamm_modGI_AR1_searchOnly_raw$lme,
        gamm_modGI_AR1_Both_MA3$lme, 
       gamm_modGI_AR1_StravaOnly$lme)
 ```
+
 ```{r predict.df, eval = T}
 
 # might need to subset predict.All data 
@@ -354,7 +356,7 @@ predict.search <- predict.All %>%
   #                  "trailname" = "trailname",
   #                  "date" = "date", 
   #                  "trailnumber" = "trailnumber")) %>% 
-  left_join(allTrails_search %>% select(-c("trailnum", 
+  left_join(allTrails_search %>% dplyr::select(-c("trailnum", 
                                            # "subsectionname", 
                                            "month",
                                            "day",
@@ -441,6 +443,7 @@ test_summary =  bind_cols(allTrail_search,
                        digits=3)
     )
 ```
+
 ```{r ATdeviance-kable, eval= T, echo=FALSE, message=FALSE}
 test_summary%>%
   #need to specify this to ensure that species names are italized in the table

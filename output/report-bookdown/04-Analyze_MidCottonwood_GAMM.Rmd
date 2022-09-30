@@ -35,7 +35,7 @@ knitr::opts_chunk$set(echo = F,
 ## Model Checking function
 tsDiagGamm <- function(x, timevar, observed, f = 0.3, type = "normalized") {
   resi <- resid(x$lme, type = type)
-  fits <- fitted(x$lme)
+  fits <- exp(fitted(x$lme))
   on.exit(layout(1))
   layout(matrix(1:6, ncol = 3, byrow = TRUE))
   plot(resi ~ fits, ylab = "Normalized Residuals",
@@ -102,32 +102,98 @@ We also examine the relationship between our response variable (max.camera, or t
 
 ```{r covariates, eval = T, fig.align='center',  out.width = "100%", fig.cap = "Relationship of select covariates to trail use for Middle Cottonwood."}
 p1 <- ggplot(singleTrail, aes(yday, max.camera)) +
-  geom_point()
+  geom_point()+
+    guides(fill = 'none') +
+  # ylim(0, 1000) +
+  labs(
+    y = "Camera Count ",
+    x = "Date", 
+    title = "Traffic by Day of Year",
+    subtitle = "2021" ) +
+  theme(text = element_text(size=18))
 
-p2 <- ggplot(singleTrail, aes(wday, max.camera)) +
-  geom_point()
+singleTrail$wday2 <- lubridate::wday(singleTrail$date, label = T)
+
+p2 <- ggplot(singleTrail, aes(wday2, max.camera)) +
+  geom_point()+
+    guides(fill = 'none') +
+  # ylim(0, 1000) +
+  labs(
+    y = "Camera Count ",
+    x = "Day of Week", 
+    title = "Traffic by Day of Week",
+    subtitle = "2021" ) +
+  theme(text = element_text(size=18))
 
 p3 <- ggplot(singleTrail, aes(week, max.camera)) +
-  geom_point()
+  geom_point()+
+    guides(fill = 'none') +
+  # ylim(0, 1000) +
+  labs(
+    y = "Camera Count ",
+    x = "Week of Year", 
+    title = "Traffic by Week of Year",
+    subtitle = "2021" ) +
+  theme(text = element_text(size=18))
 
 p4 <- ggplot(singleTrail, aes(precipitation_in, max.camera)) +
-  geom_point()
+  geom_point()+
+    guides(fill = 'none') +
+  # ylim(0, 1000) +
+  labs(
+    y = "Camera Count",
+    x = "Precipitation (in)", 
+    title = "Traffic versus Precipitation",
+    subtitle = "2021" ) +
+  theme(text = element_text(size=18))
 
 # p5 <- ggplot(singleTrail, aes(temp_min_f, max.camera)) +
 #   geom_point()
 
 p5 <- ggplot(singleTrail, aes(temp_max_f, max.camera)) +
-  geom_point()
+  geom_point()+
+    guides(fill = 'none') +
+  # ylim(0, 1000) +
+  labs(
+    y = "Camera Count",
+    x = "Maximum Daily Temperature (F)", 
+    title = "Traffic vs Temperature",
+    subtitle = "2021" ) +
+  theme(text = element_text(size=18))
 
 p6 <- ggplot(singleTrail, aes(daily_aqi_value, max.camera)) +
-  geom_point()
+  geom_point()+
+    guides(fill = 'none') +
+  # ylim(0, 1000) +
+  labs(
+    y = "Camera Count",
+    x = "Daily Air Quality Index", 
+    title = "Traffic vs AQI",
+    subtitle = "2021" ) +
+  theme(text = element_text(size=18))
 
 p7 <-  ggplot(singleTrail, aes(max.count, max.camera)) +
-  geom_point()
+  geom_point()+
+    guides(fill = 'none') +
+  # ylim(0, 1000) +
+  labs(
+    y = "Camera Count",
+    x = "Strava Trip Count", 
+    title = "Traffic vs Strava Trail Use",
+    subtitle = "2021" ) +
+  theme(text = element_text(size=18))
 
 p8 <- ggplot(singleTrail, aes(num_views,
                               max.camera)) +
-  geom_point()
+  geom_point()+
+    guides(fill = 'none') +
+  # ylim(0, 1000) +
+  labs(
+    y = "Camera Count",
+    x = "AllTrails Daily Searchs (# of Views)", 
+    title = "Traffic vs AllTrails Search Frequency",
+    subtitle = "2021" ) +
+  theme(text = element_text(size=18))
 
 # ggplot(singleTrail, aes(total_traveltime, max.camera)) +
 #   geom_point()
@@ -135,13 +201,15 @@ p8 <- ggplot(singleTrail, aes(num_views,
 # ggplot(singleTrail, aes(totallength_miles, max.camera)) +
 #   geom_point()
 
-ggpubr::ggarrange(p1, p2, 
+plot <- ggpubr::ggarrange(p1, p2, 
           p3, p4, 
           p5, p6,
           p7, p8,
-          ncol = 2, nrow = 4)
+          ncol = 2, nrow = 4
+            )
 
-
+ggpubr::annotate_figure(plot, top = ggpubr::text_grob("Middle Cottonwood Trail Traffic", 
+                size = 20))
 ```
 
 ## Model Options
@@ -226,7 +294,7 @@ save(gam_mod,
 
 In the above code we fit a `gam` which is non-linear in `yday`, `wday`, and `month` but we also include `max.count` (Strava number of trips) and `num_views` (AllTrails searches) as linear terms. Note that these variable does not have the `s` prefix indicating a (spline based) smoothing term. 
 
-We specified basis functions for the day of year (`yday`) and day of week variable (`wday`). The code `bs="cc"` indicates that we are selecting a cyclic cubic regression spline, which is a penalized cubic regression spine whose ends match up. In the context of day of week we know that Sunday/Saturday would be the 'ends' that 'match' together. If we do not specify any, the default basis function is thin plate splines. They are the default smooth for `s` terms because there is a defined sense in which they are the optimal smoother of any given basis dimension/rank ([@R-Wood5]). One key advantage of this approach is that it avoids the knot placement problems of conventional regression spline modelling.
+We specified basis functions for the day of year (`yday`) and day of week variable (`wday`). The code `bs="cc"` indicates that we are selecting a cyclic cubic regression spline, which is a penalized cubic regression spine whose ends match up. In other words, this specification ensures that use on December 31 would follow a similar pattern as use on January 1 of the following year. In the context of day of week we know that Sunday/Saturday would be the 'ends' that 'match' together. If we do not specify any, the default basis function is thin plate splines. They are the default smooth for `s` terms because there is a defined sense in which they are the optimal smoother of any given basis dimension/rank ([@R-Wood5]). One key advantage of this approach is that it avoids the knot placement problems of conventional regression spline modelling.
 
 We have also specified the number of knots, $k$, for both wday and month. If we do not specify $k$ then the default is 10. In both of these cases this results in the following errors:
 
@@ -386,7 +454,7 @@ If we model temporal autocorrelation through temporal terms in the model (as we 
 
 Autocorrelation is meant to capture either temporal or spatial dependence in a model. With a `ga(m)m` approach we consider both autocorrelation and a moving average (MA) process. An autoregressive process (AR($n$)) is one in which the previous $n$ points influence the current observations. A moving average (MA) process is one in which the current value is an average of preceding white noise. We are most interested in the main (fixed) effects of our model, while any autocorrelation is ancillary, but necessary to include. 
 
-For optimal choose of AR(p) and MA(q) orders `auto.arima` function, from the **forecast** package [@R-forecast, @R-forecast2], is used on (normalized) residuals from the model fits. It automatically chooses optimal orders of ARMA (in our case) based on AIC criterion. As we can use just ARMA models in gamm, so nonstationarity isn’t allowed, we set an argument stationary = TRUE.
+For optimal choice of AR(p) and MA(q) orders `auto.arima` function, from the **forecast** package [@R-forecast, @R-forecast2], is used on (normalized) residuals from the model fits. It automatically chooses optimal orders of ARMA (in our case) based on AIC criterion. As we can use just ARMA models in gamm, so nonstationarity isn’t allowed, we set an argument stationary = TRUE.
 
 <!-- https://stats.stackexchange.com/questions/316396/built-a-covariance-matrix-for-gam-using-magic-and-magic-post-proc-now-how-to-ca -->
 
@@ -459,7 +527,7 @@ Even with the use of `auto.arima` we must still examine diagnostic plots (in thi
 
 ### Why not a Classic Time Series Analysis?
 
-While both times series regression and GAM's can both be applied to temporal data, the two models are fundamentally different. Time series regression makes an assumption of a stationary series, while GAM deals with the trend internally with smoothing. With GAM, the estimated smoother is detrending the data and the (stationary) residuals are subjected to an ARMA model. The use of GAMs is useful when one is interested in estimating the trends in time series data and those trends are, in general, non-linear. In classical time series modelling, the interest is in modelling data as stochastic trends using lagged versions of the response and/or current and lagged versions of a white noise process.
+While both times series regression and GAM's can both be applied to temporal data, the two models are fundamentally different. Time series regression makes an assumption of a stationary series, while GAM deals with the trend internally with smoothing. With GAM, the estimated smoother is detrending the data and the (stationary) residuals are subjected to an ARMA model. The use of GAMs is useful when one is interested in estimating the trends in time series data and those trends are, in general, non-linear. In classical time series modelling, the interest is in modelling data as stochastic trends using lagged versions of the response and/or current and lagged versions of a white noise process. For trail use data, GAM is most appropriate because these data are not stationary (i.e. mean and variance of trail use does change over time and is expected to change from year to year) and we have the added benefit of understanding how specific trends (e.g. seasonal, annual, etc.) are contributing to trail use over time. 
 <!-- https://stats.stackexchange.com/questions/381509/time-series-analysis-via-generalized-additive-models-model-assumptions-and-stat -->
 <!-- https://jacolienvanrij.com/Tutorials/GAMM.html#analysis -->
 
@@ -483,13 +551,13 @@ summary(gamm_mod2$gam)
 ```
 The first part of the summary describes the model we fit. The "Family" component tells us the model assumes a Poisson distribution of our response, and the "Link" of "log" shows that the model transforms the predictions. 
 
-The next section describes the parametric terms of our model, referring to the linear terms in the model. This section may be familiar from linear modeling. It shows the coefficients for the linear terms in the model, their values, errors, test statistics, and p-values. Asterisks next to the p-values indicate statistical significance. In this case, the model intercept is significant, and the fixed effect of max.count (the number of aggregated/binned Strava trip counts) is also significant at the 0 level. However, the fixed effect of num_views (trail name searches in AllTrails) is not significant for Middle Cottonwood. 
+The next section describes the parametric terms of our model, referring to the linear terms in the model. This section may be familiar from linear modeling. It shows the coefficients for the linear terms in the model, their values, errors, test statistics, and p-values. Asterisks next to the p-values indicate statistical significance. In this case, the model intercept is significant, and the fixed effect of max.count (the number of aggregated/binned Strava trip counts) is also significant at the 0.01 level. However, the fixed effect of num_views (trail name searches in AllTrails) is not significant for Middle Cottonwood. 
 
-The next section covers smooth terms. For these smooths the summary for coefficients is not printed. This is because each smooth has coefficients for each basis function. Instead, the first column reads edf, which stands for effective degrees of freedom. This value represents the complexity of the smooth. An edf of 1 is equivalent to a straight line. An edf of 2 is equivalent to a quadratic curve, and so on, with higher edfs describing more wiggly curves. In our summary, all included smooth terms are significant at the 0.001 level. Note that the 'month' term has an edf of 1, indicating the smooth is equivalent to a straight line. The day of year term ('yday') has the highest edf (8.338) and thus highest wiggliness. These edf values (and wiggliness) for each smoothing term may be compared to the corresponding partial effects plot in Figure \@ref(fig:MCdraw).
+The next section covers smooth terms. For these smooths the summary for coefficients is not printed. This is because each smooth has coefficients for each basis function. Instead, the first column reads edf, which stands for effective degrees of freedom. This value represents the complexity of the smooth. An edf of 1 is equivalent to a straight line. An edf of 2 is equivalent to a quadratic curve, and so on, with higher edfs describing more wiggly curves. In our summary, all included smooth terms are significant at the 0.001 level. Note that the 'month' term has an edf of 1, indicating the smooth is equivalent to a straight line. The max daily temperature term ('temp_max_f') has the highest edf (6.485) and thus highest wiggliness. These edf values (and wiggliness) for each smoothing term may be compared to the corresponding partial effects plot in Figure \@ref(fig:MCdraw).
 
 The terms to the right of the EDF column have to do with significance testing for smooths. The Ref.df and F columns are test statistics used in an ANOVA test to test overall significance of the smooth. The result of this test is the p-value to the right. It's important to note that these values are approximate, and it's important to visualize your model to check them.
 
-The R-sq(adj.) does not a straight-forward interpretation of a measure of "proportion of variance explained" in nonlinear regression, and thus can not be employed as an absolute measure of model performance. Deviance explained should be a more generalized measurement of goodness of fit especially for non-gaussian models (such as we have here).
+The R-sq(adj.) does not correspond to    a straight-forward interpretation of a measure of "proportion of variance explained" in nonlinear regression, and thus can not be employed as an absolute measure of model performance. Deviance explained should be a more generalized measurement of goodness of fit especially for non-gaussian models (such as we have here).
 
 The scale estimate is $\hat{\phi}$ , i.e. this is the value of $\phi$ estimated during model fitting. For the Poisson and Binomial families/distributions, by definition $\phi$=1, but for other distributions this is not the case, including the Gaussian. In the Gaussian case, $\hat{\phi}$  is the residual standard error squared.
 
@@ -507,7 +575,7 @@ After examining the summary, we should visualize our results.  This may be accom
 gratia::draw(gamm_mod2, residuals = T)
 ```
 
-The plots (Figure \@ref(fig:MCdraw) generated by **gratia**'s draw()  (or **mgcv**'s plot() in base R graphics) function are partial effect plots. These may help diagnose problems with the model, such as oversmoothing. These plots show the component effect of each of the smooth or linear terms in the model, which add up to the overall prediction (summed effect). We often want to show data alongside model predictions. These plots aid in this by (1) including covariate values along the bottom axis of the plots and (2) plotting partial residuals (here in light blue) on the plots. Partial residuals are the difference between the partial effect and the data, after all other partial effects have been accounted for. These plots also include shading representing 95% confidence interval for the mean shape of the effect.
+The plots (Figure \@ref(fig:MCdraw) generated by **gratia**'s draw()  (or **mgcv**'s plot() in base R graphics) function are partial effect plots. These may help diagnose problems with the model, such as oversmoothing (e.g. if $k$ is too small and the trend line isn't allowed enough flexibility then we might not capture the appropriate "wiggliness"). These plots show the component effect of each of the smooth or linear terms in the model, which add up to the overall prediction (summed effect). We often want to show data alongside model predictions. These plots aid in this by (1) including covariate values along the bottom axis of the plots and (2) plotting partial residuals (here in light blue) on the plots. Partial residuals are the difference between the partial effect and the data, after all other partial effects have been accounted for. These plots also include shading representing 95% confidence interval for the mean shape of the effect.
 
 #### GAM Check
 
@@ -515,7 +583,7 @@ Running gam.check() on a model provides several outputs, in both the console and
 
 Below, we see a table of basis checking results. This shows a statistical test for patterns in model residuals, which should be random. Each line reports the test results for one smooth. It shows the k value or number of basis functions, the effective degrees of freedom, a test statistic, and p-value.
 
-Here, small p-values indicate that residuals are not randomly distributed. This often means there are not enough basis functions.
+Here, small p-values indicate that residuals are not randomly distributed. This often means there are not enough basis functions (i.e. $k$ is too low).
 
 This is an approximate test. Always visualize your results too, and compare the k and edf values in addition to looking at the p-value.
 
@@ -527,7 +595,7 @@ gam.check(gamm_mod2$gam)
 layout(1)
 ```
 
-Each of these plot outputs gives a different way of looking at your model residuals. These plots show the results from the original, poorly fit model. On the top-left is a Q-Q plot, which compares the model residuals to a normal distribution. A well-fit model's residuals will be close to a straight line. On bottom left is a histogram of residuals. We would expect this to have a symmetrical bell shape. On top-right is a plot of residual values. These should be evenly distributed around zero. Finally, on the bottom-right is plot of response against fitted values. A perfect model would form a straight line. We don't expect a perfect model, but we do expect the pattern to cluster around the 1-to-1 line.
+Each of these plot outputs gives a different way of looking at your model residuals. These plots show the results from the original, poorly fit model. On the top-left is a Q-Q plot, which compares the model residuals to a normal distribution. A well-fit model's residuals will be close to a straight line. On the upper-right is a histogram of residuals. We would expect this to have a symmetrical bell shape. On bottom-left is a plot of residual values. These should be evenly distributed around zero. Finally, on the bottom-right is plot of response against fitted values. A perfect model would form a straight line. We don't expect a perfect model, but we do expect the pattern to cluster around the 1-to-1 line.
 
 #### Appraise
 
@@ -581,7 +649,7 @@ Looking at Figure \@ref(rootogram) we see the main features of the rootogram:
 * on the y-axis we have the square root of the observed or expected count — the square root transformation allows for departures from expectations to be seen even at small frequencies,
 * a reference line is drawn at a height of 0.
 
-Because this is a hanging rootogram, we can think of the rootogram as relating to the fitted counts — if a bar doesn’t reach the zero line then the model over predicts a particular count bin, and if the bar exceeds the zero line it under predicts.
+Because this is a hanging rootogram, we can think of the rootogram as relating to the fitted counts — if a bar doesn’t reach the zero line then the model over predicts a particular count bin, and if the bar exceeds the zero line it under predicts. Here, the model is shown to under predict trail use, however not to a degree that we want to change our underlying model assumption of a Poisson distribution. 
 
 ```{r}
 sum(residuals(gamm_mod2$gam, type = "pearson")^2) / df.residual(gamm_mod2$gam)
@@ -591,7 +659,7 @@ sum(residuals(gamm_mod2$gam, type = "pearson")^2) / df.residual(gamm_mod2$gam)
 
 #### Identifying AR and MA using ACF and PACF Plots {#ACF}
 
-There are two visualizations of the residuals that can help you model autocorrelations: the ACF graph and the PACF. In general, ACF lets you assess the moving average component of the model and PACF lets you identify the autoregressive component. The p,q parameters can be estimated from the sharp cut off in the (P)ACF graphs. 
+There are two visualizations of the residuals that can help you model autocorrelations: the autocorrelation function (ACF) graph and the partial autocorrelation function (PACF) graph. In general, ACF lets you assess the moving average component of the model and PACF lets you identify the autoregressive component. The p,q parameters can be estimated from the sharp cut off in the (P)ACF graphs. 
 
 <!-- https://towardsdatascience.com/identifying-ar-and-ma-terms-using-acf-and-pacf-plots-in-time-series-forecasting-ccb9fd073db8 -->
 

@@ -1,0 +1,202 @@
+# New World Gulch Hold-out Data
+
+In this section we quickly examine what New World Gulch trial use predictions look like if we'd included this subsection when fitting models (G, GS, GI)
+
+```{r setup, eval = T}
+library(colorblindr)
+library(cowplot)
+library(dplyr)
+library(forecast)
+library(here)
+library(gganimate)
+library(ggplot2)
+library(gratia)
+library(itsadug)
+library(lubridate)
+library(magrittr)
+library(marginaleffects)
+library(mgcv)
+library(transformr)
+library(xtable)
+
+source(here("scripts/01-LoadData.R"))
+
+allTrail_NWG <- rbind(allTrail, NWG_2021 %>% dplyr::select(-c("Day")))
+
+# runall = T
+runall = F
+```
+
+```{r rerun models with NWG, eval = T}
+
+if(runall){
+  gamm_modG_ARMA_NWG <- gamm(max.camera ~
+                              s(yday, bs="cc") +
+                              s(subsectionF,
+                                bs="re",
+                                k=sub.number) +
+                              s(month, k = 7) +
+                              s(wday,
+                                bs = "cc", k = 7) +
+                              s(daily_aqi_value) +
+                              s(temp_max_f) +
+                              s(precipitation_in, k = 5) +
+                               s(totallength_miles) + 
+                        total_traveltime +
+                              max.count,
+                            knots = list(yday = c(0,365),
+                                         month = c(0, 13)),
+                            method = 'REML',
+                            correlation = corARMA(form = ~yday|subsectionF,
+                                                  p = 2, q = 2),
+                            data = allTrail_NWG, 
+                            family = poisson#,
+                            # niterPQL = 30
+  )
+  
+    save(gamm_modG_ARMA_NWG, file=here("output/models/allT_NWG_subsection_gamm_G-ARMA.rda"),
+     compress='xz')
+    
+    gamm_modGS_NWG <- gamm(max.camera ~ 
+                           s(yday, bs="cc") +
+                           s(yday, subsectionF, m=2,
+                             bs="fs", xt=list(bs="cc")) +
+                           s(month, bs = "cc", k = 7) +
+                           s(wday,
+                             bs = "cc", k = 7) +
+                           s(daily_aqi_value) +
+                           s(temp_max_f) +
+                           s(precipitation_in, k = 5) +
+                           s(totallength_miles) + 
+                           total_traveltime +
+                           max.count,
+                         knots = list(yday = c(0,365),
+                                      month = c(0, 13)),
+                         data = allTrail_NWG, 
+                         method = "REML", 
+                         # correlation = corAR1(form = ~yday|subsectionF),
+                         family = poisson#, 
+                         # niterPQL = 20
+  )
+    
+    save(gamm_modGS_NWG, 
+         file=here("output/models/allT_NWG_subsection_gamm_GS.rda"),
+         compress='xz')
+    
+    gamm_modGI_NWG <- gamm(max.camera ~
+                           s(yday, m=2, bs="cc") +
+                           s(yday, by = subsectionF,
+                             m=1, bs="cc") +
+                           s(subsectionF,
+                             bs="re",
+                             k=sub.number) +
+                           s(month, bs = "cc",  k = 7) +
+                           s(wday,
+                             bs = "cc", k = 7) +
+                           s(daily_aqi_value) +
+                           s(temp_max_f) +
+                           s(precipitation_in, k = 5) +
+                          s(totallength_miles) + 
+                        total_traveltime +
+                            max.count,
+                          knots = list(yday = c(0,365),
+                                       month = c(0, 13)),
+                           # correlation = corAR1(form = ~yday|subsectionF),
+                         data = allTrail_NWG,
+                         family = poisson)
+    
+    save(gamm_modGI_NWG, 
+         file=here("output/models/allT_NWG_subsection_gamm_GI.rda"),
+         compress='xz')
+}
+
+load(file=here("output/models/allT_NWG_subsection_gamm_G-ARMA.rda"))
+load(file=here("output/models/allT_NWG_subsection_gamm_GS.rda"))
+load(file=here("output/models/allT_NWG_subsection_gamm_GI.rda"))
+
+```
+
+
+```{r compare in-sample NWG predictions, eval = T}
+p_G_NWG <- as_tibble((predict(gamm_modG_ARMA_NWG$gam, 
+                          NWG_2021, 
+                          se.fit = TRUE, 
+                          type = "response"))) %>% 
+    rename(fit_G = fit, se_G = se.fit, )
+p_GS_NWG <- as_tibble((predict(gamm_modGS_NWG$gam, 
+                            NWG_2021, 
+                              # exclude = c("s(subsectionF)", 
+                              #           "s(yday,subsectionF)"),
+                            se.fit = TRUE, 
+                            type = "response"))) %>%
+    rename(fit_GS = fit, se_GS = se.fit)
+p_GI_NWG <- as_tibble(predict(gamm_modGI_NWG$gam, 
+                            NWG_2021, 
+                            exclude = c("s(subsectionF)",
+                                        "s(yday):subsectionFBaldy to Bridger",
+                                        "s(yday):subsectionFBenchmark Rd",
+                                        "s(yday):subsectionFCarroll Creek",
+                                        "s(yday):subsectionFCollege M",
+                                        "s(yday):subsectionFCollege M to Sypes",
+                                        "s(yday):subsectionFCorbly Gulch",
+                                        "s(yday):subsectionFEast Bridger North",
+                                        "s(yday):subsectionFEast Bridger South",
+                                        "s(yday):subsectionFFairy Creek",
+                                        "s(yday):subsectionFHorsethief Mountain",
+                                        "s(yday):subsectionFJohnson Canyon Jeep Trail",
+                                        "s(yday):subsectionFLower Shafthouse",
+                                        "s(yday):subsectionFMiddle Cottonwood",
+                                        "s(yday):subsectionFNorth Cottonwood Access",
+                                        "s(yday):subsectionFNorth Cottonwood to Johnson Canyon",
+                                        "s(yday):subsectionFRaptor View",
+                                        "s(yday):subsectionFRoss Pass",
+                                        "s(yday):subsectionFSacagawea Pass",
+                                        "s(yday):subsectionFSteep Way",
+                                        "s(yday):subsectionFSypes Canyon",
+                                        "s(yday):subsectionFTruman Gulch" ),
+                            se.fit = TRUE, 
+                            type = "response")) %>%
+    rename(fit_GI = fit, se_GI = se.fit)
+
+
+new_data_NWG <- bind_cols(NWG_2021, p_G_NWG, p_GS_NWG, p_GI_NWG) %>%
+    tidyr::pivot_longer(fit_G:se_GI, names_sep = '_',
+                 names_to = c('variable', 'model')) %>%
+    tidyr::pivot_wider(names_from = variable, values_from = value) %>%
+    mutate(upr_ci = fit + (2 * se), lwr_ci = fit - (2 * se))
+
+compare_NWG <- ggplot(mapping = aes(x = yday, y = max.camera)) +
+    geom_ribbon(data = new_data_NWG,
+                mapping = aes(ymin = lwr_ci, ymax = upr_ci,
+                              x = yday, fill = factor(model)),
+                inherit.aes = FALSE, alpha = 0.2) +
+    geom_point(data = NWG_2021, aes(colour = as.factor(wday))) +
+    geom_line(data = new_data_NWG, aes(y = fit, x = yday, colour2 = factor(model)),
+              size = 1) %>%
+    relayer::rename_geom_aes(new_aes = c("colour" = "colour2")) +
+    scale_colour_brewer(palette = "Set1", aesthetics = "colour", 
+                        name = "Day of Week") +
+    scale_colour_OkabeIto(aesthetics = "colour2", name = "Model") +
+    scale_fill_OkabeIto(name = "Model") +
+    # coord_cartesian(xlim = c(0, 365), ylim = c(0, 1000)) +
+    labs(title = "New World Gulch",
+         subtitle = "How well do predictions compare with hold out data")
+
+ggsave(filename = here::here("output/figures/NWG_insample_pred_compare.png"),
+       plot = compare_NWG,
+       height = 8.5, 
+       width = 13,
+       dpi=700)
+```
+
+
+```{r include holdout NWG prediction plot, eval = T, fig.align='center', out.width= "100%", fig.cap="Predictions for New World Gulch when included in model fit."}
+
+knitr::include_graphics(path = here("output/figures/NWG_insample_pred_compare.png"))
+```
+
+
+```{r compare with holdout NWG, eval = T, fig.align='center', out.width= "100%", fig.cap="Predictions for New World Gulch when excluded from model fit."}
+knitr::include_graphics(path =  here::here("output/figures/NWG_pred_compare.png"))
+```
+

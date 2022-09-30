@@ -16,6 +16,28 @@ header-includes:
 
 # Executive Summary
 
-This report outlines a statistical analysis for predicting recreational trail use in the Bridger Mountains located near Bozeman, MT, USA. Headwaters Economics, in collaboration with U.S. Forest Service (USFS), [NAME] (GVSA), and Montana Fish Wildlife and Parks (FWP) have monitored trail use in the Bridger Mountains since 2021. In this report we present a modeling framework for modeling of nonlinear functional relationships between covariates and outcomes where the shape of the function itself varies between different grouping levels. We used the available data on 21 trails and trail subsections to fit several potential hierarchical generalized additive mixture models. These models varied in how much inter-trail variation was allowed when implementing a global soother in the model and in how we accounted for temporal autocorrelation.  
+This report outlines a statistical analysis for predicting recreational trail use in the Bridger Mountains located near Bozeman, MT, USA. Headwaters Economics, in collaboration with U.S. Forest Service (USFS), Gallatin Valley Snowmobile Association (GVSA), and Montana Fish Wildlife and Parks (FWP) have monitored trail use in the Bridger Mountains since 2021. In this report we present a modeling framework for modeling of nonlinear functional relationships between covariates and outcomes where the shape of the function itself varies between different grouping levels. We used the available data on 21 trails and trail subsections to fit several potential hierarchical generalized additive mixture models (HGAMs). Covariates included data obtained through partnerships with Strava Metro and AllTrails as well as easy-to-obtain trail characteristics and weather data. These models varied in how much inter-trail variation was allowed when implementing a global soother in the model and in how we accounted for temporal autocorrelation.
 
-To be added: Results from this analysis. But also, what do we want to highlight from this report for other stakeholders/interested groups? 
+To determine the best model for trail use data in terms of estimation/prediction we fit the following types of hierarchical generalized additive mixture models:
+
+  1. Global Smoothing Model (Model G)
+  2. Single common smoother plus group-level smoothers that have the same wiggliness (Model GS)
+  3. Single common smoother plus group-level smoothers with differing wiggliness (Model GI).
+  
+Within each of these models we explored different ways to account for temporal autocorrelation:
+
+  1. No temporal correlation structure
+  2. AR1 temporal autocorrelation structure
+  3. ARMA temporal autocorrelation structure.
+
+We found that through visual examination and comparing deviance of predictions vs observed trail use counts that both models GS and GI seem to show evidence of improvement over model G. Model G required an ARMA(1,2) temporal structure for the best fit, however, we found that for these models (GS and GI) that we were able to account for temporal autocorrelation without added correlation structure on the residuals. However, it is unknown that this will remain true with additional trails and years of observations added. In Section \@ref(Spatial), we provide an overview of an alternative model, a spatial network GAM, that allows for focusing on spatial autocorrelation instead of temporal. While we prioritized examining temporal autocorrelation in this report due to early work showing a greater need compared to spatial correlation, understanding the value of both approaches will be helpful for future work. 
+
+With our top models in each type (G, GS, GI) we also explored predictions for (1) each trail included in our analysis, but for the entire year of 2021 and (2) out of sample trails (i.e. trails without camera counters deployed) for the entire year of 2021. Temporal extrapolation is particularly tricky with temporal (time series) data. HGAM models tend to under-predict trail use, especially on unusually high trial use days (e.g. holidays, first week of classes at local university, etc.). However, multiple years of trail use observation via trail cameras could improve upon these repeated "special events". Even with these caveats, the use of HGAMs for modeling and predicting trail use in the Bridger Mountains (and other trail networks) provides valuable insight on individual trends (e.g. weekly, annual, precipitation, etc.) that pair well with an overall understanding of trail use on global and individual trail scales. 
+
+We provide the following recommendations for future observations periods and analyses.
+
+1. It is better to have cameras deployed for longer periods of times. Year-round data for even a subset of trails will help improve predictions across all trails. 
+2. Subsections within a trail seem to capture similar data. Cameras spread across more trails may provide more information than multiple camera counters deployed along a single trail. 
+3. Multiple years of data would provide valuable information about annual trends and be helpful in forecasting trail use into the future. 
+4. If spatiotemporal correlation structure is available for future analysis then it would be helpful to consider the spatial network node/edge designations in tandem with camera placement. 
+
