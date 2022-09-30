@@ -270,9 +270,8 @@ trail_spatial %>%
   labs(title='Bridger Mountains Trail Camera Locations') +
   labs(x = "Longitude", y = "Latitude", size = 20) +
   labs(color='Trails') +
-  theme(axis.text = element_text(size = rel(1.25)),
-        axis.title = element_text(size = rel(1.25)),
-        plot.title = element_text(size = rel(2))) #+  
+  theme(text = element_text(size=18)) +  
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5))
 
 # theme_void() #+
 # theme(legend.position = 'bottom')
@@ -299,9 +298,11 @@ strava_day_TSplot_trips <- strava_day %>%
   guides(fill = 'none') +
   # ylim(0, 1000) +
   labs(y = "Count ",
+       x = "Date",
        title = "Strava Daily Trail Traffic (by trip)",
        subtitle = "2021",
-       fill = "Trail Name")
+       fill = "Trail Name") +
+  theme(text = element_text(size=18))
 
 strava_day_TSplot_trips
 
@@ -331,9 +332,12 @@ strava_day_TS_trips_high <- strava_day %>%
   guides(fill = 'none') +
   # ylim(0, 1000) +
   labs(y = "Count ",
+       x = "Date",
        title = "Strava Daily Trail Traffic (by trip)",
        subtitle = "2021",
-       fill = "Trail Name")
+       fill = "Trail Name") +
+  theme(text = element_text(size=18))
+
 
 strava_day_TS_trips_high
 
@@ -363,9 +367,12 @@ strava_day_TS_trips_low <- strava_day %>%
   guides(fill = 'none') +
   # ylim(0, 1000) +
   labs(y = "Count ",
+       x = "Date",
        title = "Strava Daily Trail Traffic (by trip)",
        subtitle = "2021",
-       fill = "Trail Name")
+       fill = "Trail Name") + 
+  theme(text = element_text(size=18))
+
 
 strava_day_TS_trips_low
 
@@ -391,9 +398,12 @@ strava_day_TSplot_people <- strava_day %>%
   guides(fill = 'none') +
   # ylim(0, 1000) +
   labs(y = "Count ",
+       x = "Date", 
        title = "Strava Daily Trail Traffic (by people)",
        subtitle = "2021",
-       fill = "Trail Name")
+       fill = "Trail Name") +
+  theme(text = element_text(size=18))
+
 strava_day_TSplot_people
 
 #monthly aggregated
@@ -409,9 +419,12 @@ strava_month_TSplot_trips <- strava_month %>%
   #              name = "Month",
   #              date_breaks = "Daily") +
   labs(y = "Count ",
+       x = "Month",
        title = "Strava Monthly Trail Traffic (by trips)",
        subtitle = "2021",
-       fill = "Trail Name")
+       fill = "Trail Name") +
+  theme(text = element_text(size=18))
+
 
 strava_month_TSplot_people <- strava_month %>% 
   dplyr::group_by(timeframe, trailname) %>% 
@@ -425,9 +438,12 @@ strava_month_TSplot_people <- strava_month %>%
   #              name = "Month",
   #              date_breaks = "Daily") +
   labs(y = "Count ",
+       x = "Month",
        title = "Strava Monthly Trail Traffic (by people)",
        subtitle = "2021",
-       fill = "Trail Name")
+       fill = "Trail Name") +
+  theme(text = element_text(size=18))
+
 
 
 # Counter TS by counterid --------------------------------------------
@@ -474,9 +490,12 @@ count_ID_TSplot_high <- trail_count %>%
   #              name = "Month",
   #              date_breaks = "Daily") +
   labs(y = "Count ",
+       x = "Date", 
        title = "Counter Daily Trail Traffic",
        subtitle = "2021: High Use Trails",
-       fill = "Trail Name")
+       fill = "Trail Name") +
+  theme(text = element_text(size=18))
+
 
 count_ID_TSplot_high
 
@@ -509,9 +528,12 @@ count_ID_TSplot_low <- trail_count %>%
   #              name = "Month",
   #              date_breaks = "Daily") +
   labs(y = "Count ",
+       x = "Date", 
        title = "Counter Daily Trail Traffic",
        subtitle = "2021: Low Use Trails",
-       fill = "Trail Name") 
+       fill = "Trail Name") +
+  theme(text = element_text(size=18))
+
 
 count_ID_TSplot_low
 
@@ -568,9 +590,12 @@ count_subsection_TSplot_high <- trail_count %>%
   #              name = "Month",
   #              date_breaks = "Daily") +
   labs(y = "Count ",
+       x = "Date",
        title = "Counter Daily Trail Traffic",
        subtitle = "2021: High Use Trails",
-       fill = "Trail Name")
+       fill = "Trail Name") +
+  theme(text = element_text(size=18))
+
 
 count_subsection_TSplot_high
 
@@ -603,9 +628,12 @@ count_subsection_TSplot_low <- trail_count %>%
   #              name = "Month",
   #              date_breaks = "Daily") +
   labs(y = "Count ",
+       x = "Date", 
        title = "Counter Daily Trail Traffic",
        subtitle = "2021: Low Use Trails",
-       fill = "Trail Name")
+       fill = "Trail Name") + 
+  theme(text = element_text(size=18))
+
 
 count_subsection_TSplot_low
 
@@ -637,7 +665,9 @@ count_day_TSplot <- trail_count %>%
   labs(y = "Count ",
        title = "Counter Daily Trail Traffic",
        subtitle = "2021",
-       fill = "Trail Name")
+       fill = "Trail Name") + 
+  theme(text = element_text(size=18))
+
 
 # separate out bridger ridge and Sac Pass (high traffic #s)
 count_day_TSplot_high <- trail_count %>% 
@@ -661,7 +691,9 @@ count_day_TSplot_high <- trail_count %>%
   labs(y = "Count ",
        title = "Counter Daily Trail Traffic",
        subtitle = "2021",
-       fill = "Trail Name")
+       fill = "Trail Name") +
+  theme(text = element_text(size=18))
+
 
 count_day_TSplot_high
 
@@ -695,7 +727,9 @@ count_day_TSplot_low <- trail_count %>%
   labs(y = "Count ",
        title = "Counter Daily Trail Traffic",
        subtitle = "2021",
-       fill = "Trail Name")
+       fill = "Trail Name") + 
+  theme(text = element_text(size=18))
+
 
 count_day_TSplot_low
 
@@ -727,7 +761,9 @@ count_month_TSplot <- trail_count %>%
   labs(y = "Count ",
        title = " Monthly Bridger Trail Traffic",
        subtitle = "2021 Counter Data",
-       fill = "Trail Name")
+       fill = "Trail Name") +
+  theme(text = element_text(size=18))
+
 
 
 
@@ -746,9 +782,12 @@ allTrails_day_TS_high <- allTrails_search %>%
   guides(fill = 'none') +
   # ylim(0, 1000) +
   labs(y = "Number of Views ",
+       x = "Date",
        title = "AllTrails Trail Searchs",
        subtitle = "2021",
-       fill = "Trail Name")
+       fill = "Trail Name") +
+  theme(text = element_text(size=18))
+
 
 allTrails_day_TS_high
 
@@ -778,9 +817,12 @@ allTrails_day_TS_low <- allTrails_search %>%
   guides(fill = 'none') +
   # ylim(0, 1000) +
   labs(y = "Number of Views ",
+       x = "Date",
        title = "AllTrails Trail Searchs",
        subtitle = "2021",
-       fill = "Trail Name")
+       fill = "Trail Name") + 
+  theme(text = element_text(size=18))
+
 
 allTrails_day_TS_low
 
@@ -826,7 +868,9 @@ strava_count_join %>%
   labs(x = "Date",
        title = "Bridger Trail Traffic and Strava Use",
        subtitle = "Summer 2021",
-       fill = "none") #+ 
+       fill = "none") +
+  theme(text = element_text(size=18))
+
 # labs(
 # title = "<span style='font-size:14pt'> Seattle <span style='color:#00688b;'>Bike Traffic</span> and
 # <span style='color:#8b3e2f;'>COVID 19 Cases</span> 
@@ -858,7 +902,9 @@ trail_hourly %>%
   # scale_color_manual(values=seattlePalette) +
   guides(color='none', fill = 'none') + 
   labs(title = "Bridgers Trail Traffic Patterns by Hour and Weekday",
-       subtitle = "Data: 2021") 
+       subtitle = "Data: 2021")  +
+  theme(text = element_text(size=18))
+
 
 ggsave(filename = here("output/figures/hourly_bydayofweek.png"), 
        height = height, 
@@ -892,7 +938,9 @@ trail_hourly %>%
   # scale_color_manual(values=seattlePalette) +
   guides(color='none', fill = 'none') + 
   labs(title = "Bridgers Trail Traffic Patterns by Hour and Weekday",
-       subtitle = "Data: 2021") 
+       subtitle = "Data: 2021") +
+  theme(text = element_text(size=18))
+
 
 ggsave(filename = here("output/figures/hourly_bydayofweek_highuse.png"), 
        height = height, 
@@ -925,7 +973,9 @@ trail_hourly %>%
   # scale_color_manual(values=seattlePalette) +
   guides(color='none', fill = 'none') + 
   labs(title = "Bridgers Trail Traffic Patterns by Hour and Weekday",
-       subtitle = "Data: 2021") 
+       subtitle = "Data: 2021") +
+  theme(text = element_text(size=18))
+
 
 ggsave(filename = here("output/figures/hourly_bydayofweek_lowuse.png"), 
        height = height, 
@@ -961,7 +1011,9 @@ trail_count_weather %>%
   scale_y_continuous(name = "Count") + 
   geom_jitter(alpha = 0.5) + 
   labs(title = "Comparison of Daily Bridger Trail Traffic to Weather",
-       color = "Daily Precipitation \n over 0.2 Inches") 
+       color = "Daily Precipitation \n over 0.2 Inches") +
+  theme(text = element_text(size=18))
+
 
 trail_count_weather %>%
   group_by(date, wet) %>%
@@ -971,7 +1023,9 @@ trail_count_weather %>%
   scale_y_continuous(name = "Count") + 
   geom_jitter(alpha = 0.5) + 
   labs(title = "Comparison of Daily Bridger Trail Traffic to Air Quality",
-       color = "Daily Precipitation \n over 0.2 Inches") 
+       color = "Daily Precipitation \n over 0.2 Inches") +
+  theme(text = element_text(size=18))
+
 
 ## weekends
 trail_count_weather$wday <- lubridate::wday(trail_count_weather$date, label = T)
@@ -988,7 +1042,9 @@ trail_count_weather %>%
   scale_y_continuous(name = "Count") + 
   geom_jitter(alpha = 0.5) + 
   labs(title = "Comparison of Daily Bridger Trail Traffic to Max Temperature",
-       color = "Day of Week is Weekend") 
+       color = "Day of Week is Weekend") +
+  theme(text = element_text(size=18))
+
 
 ## trail use
 trail_count_char <- trail_count %>%
@@ -1006,7 +1062,9 @@ trail_count_char %>%
   scale_y_continuous(name = "Count") + 
   geom_jitter(alpha = 0.5) + 
   labs(title = "Comparison of Daily Bridger Trail Traffic to Travel Distance",
-       color = "Parking Lot Size") 
+       color = "Parking Lot Size") +
+  theme(text = element_text(size=18))
+
 
 trail_count_char %>% 
   ggplot(aes(x = traveltime, y = count, color = factor(parking))) +
@@ -1015,7 +1073,9 @@ trail_count_char %>%
   scale_y_continuous(name = "Count") + 
   geom_jitter(alpha = 0.5) + 
   labs(title = "Comparison of Daily Bridger Trail Traffic to Travel Time",
-       color = "Parking Lot Size") 
+       color = "Parking Lot Size") +
+  theme(text = element_text(size=18))
+
 
 
 
@@ -1029,17 +1089,19 @@ MidCotton_TS <- singleTrail %>%
   geom_area(aes(fill = factor(trailname)), 
             alpha = .5, position = "stack") +
   scale_fill_manual(values = colors) +
-  geom_line(aes(x = date, y = max.count), color = "#FC4C02") +
-  geom_line(aes(x = date, y = num_views), color = "#548823") +
+  geom_line(aes(x = date, y = max.count), color = "#FC4C02", size = 2) +
+  geom_line(aes(x = date, y = num_views), color = "#548823", size = 2) +
   # geom_line(aes(x = date, y = moving_avg7), color = "forestgreen") +
   guides(fill = 'none') +
   # ylim(0, 1000) +
   labs(
     y = "Count ",
+    x = "Date", 
     title = "Middle Cottonwood Daily Trail Traffic",
     subtitle = "2021",
     fill = "Trail Name"
-  )
+  ) +
+  theme(text = element_text(size=18))
 
 MidCotton_TS
 

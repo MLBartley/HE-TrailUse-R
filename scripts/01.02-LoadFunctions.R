@@ -3,7 +3,7 @@
 ## Model Checking function
 tsDiagGamm <- function(x, timevar, observed, f = 0.3, type = "normalized") {
   resi <- resid(x$lme, type = type)
-  fits <- fitted(x$lme)
+  fits <- exp(fitted(x$lme))
   on.exit(layout(1))
   layout(matrix(1:6, ncol = 3, byrow = TRUE))
   plot(resi ~ fits, ylab = "Normalized Residuals",
