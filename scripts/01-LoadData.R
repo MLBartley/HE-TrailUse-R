@@ -15,6 +15,7 @@
 ##   - Data updated (AllTrails search data) on August 8, 2022
 ##   - Data updated (New World Gulch observations) on September 8, 2022
 ##   - Data updated (NWG trail characteristics) on September 22, 2022
+##   - Data updated (Strava subsection delineation) on September 30, 2022
 ## ---------------------------
 
 # load packages -----------------------------------------------------------
@@ -113,6 +114,7 @@ strava_year[which(strava_year$trailname == "E Bridger South"), "trailname"] <- "
 
 # College M is listed inconsistantly with "Bridger Foothills" as the trail name
 # for trail number 511
+## listed as "College M" at trailname level in trail_char
 
 strava_day[which(strava_day$trailnumber == 511), "trailname"] <- "College M"
 strava_year[which(strava_year$trailnumber == 511), "trailname"] <- "College M"
@@ -157,6 +159,11 @@ strava_year$timeframe <- paste(strava_year$timeframe, "-01-01", sep="")
 strava_year$timeframe <- lubridate::as_date(strava_year$timeframe)
 strava_year$year <- lubridate::year(strava_year$timeframe)
 
+## add trailnames as subsectionnames for Strava-day
+strava_day[is.na(strava_day$subsectionname),
+          'subsectionname' ] <- strava_day[is.na(strava_day$subsectionname), 
+                                          'trailname' ] 
+
 ## weather_update make date a date class
 weather_updateTemps$DATE <- lubridate::mdy(weather_updateTemps$DATE)
 
@@ -165,11 +172,11 @@ trail_spatial$ID <- as.numeric(trail_spatial$ID)
 
 ### add subsection names to  Strava data with join_IDs ####
 
-strava_day <- strava_day %>% 
-  dplyr::left_join(join_IDs, by = c("trailnumber" = "TrailNumber", 
-                             "edge_uid" = "edge_uid", 
-                             "trailname" = "TrailName")) %>% 
-  dplyr::rename(subsectionname = SubsectionName)
+# strava_day2 <- strava_day %>%
+#   dplyr::left_join(join_IDs, by = c("trailnumber" = "TrailNumber",
+#                              "edge_uid" = "edge_uid",
+#                              "trailname" = "TrailName")) %>%
+#   dplyr::rename(subsectionname = SubsectionName)
 
 ## add subsection name from trail name if NA
 trail_count[is.na(trail_count$subsectionname),
@@ -240,8 +247,8 @@ allTrails_search[is.na(allTrails_search$subsectionname),
 
 
 ## separate Corbly Gulch cameras 
-# trail_count[which(trail_count$counterid == 26), "subsectionname"] <- "Corbly Gulch 1"
-# trail_count[which(trail_count$counterid == 27), "subsectionname"] <- "Corbly Gulch 2"
+trail_count[which(trail_count$counterid == 26), "subsectionname"] <- "Lower"
+trail_count[which(trail_count$counterid == 27), "subsectionname"] <- "Upper"
 
 
 
@@ -272,25 +279,28 @@ allCount[is.na(allCount$subsectionname),
 allStrava <- strava_day %>%
   dplyr::group_by(timeframe, trailname, subsectionname) %>% 
   dplyr::mutate(max.count = max(totaltrips)) %>% 
-  dplyr::select(-c(totaltrips, totalpeople, edge_uid, 'Segment with trail counter')) %>% 
+  dplyr::select(-c(totaltrips, totalpeople, edge_uid#,
+                   # 'Segment with trail counter'
+                   )) %>% 
   dplyr::distinct()
 
 ##Note: Horsethief Mountain and Benchmark Rd do not have ANY Strava data so 
 # they aren't included in allStrava at this point. Adding now. 
 allStrava[nrow(allStrava) + 1,] = list(lubridate::date("2021-01-01"), 523,
                                        "Horsethief Mountain", 
+                                       "Horsethief Mountain",
                                     lubridate::wday("2021-01-01", label = T),
-                                    "Horsethief Mountain", 0)
+                                     0)
 
 allStrava[nrow(allStrava) + 1,] = list(lubridate::date("2021-01-01"),
-                                       6984, "Benchmark Rd", 
-                                    lubridate::wday("2021-01-01", label = T),
-                                    "Benchmark Rd", 0)
+                                       6984, 
+                                       "Benchmark Rd", 
+                                       "Benchmark Rd",
+                                       lubridate::wday("2021-01-01", label = T),
+                                       0)
 
 
-allStrava[is.na(allStrava$subsectionname),
-          'subsectionname' ] <- allStrava[is.na(allStrava$subsectionname), 
-                                          'trailname' ] 
+
 ## Add in a Time variable
 allStrava$yday <- lubridate::yday(allStrava$timeframe)
 
@@ -351,6 +361,11 @@ allTrailChar <- trail_char %>%
 allTrailChar[is.na(allTrailChar$subsectionname),
           'subsectionname' ] <- allTrailChar[is.na(allTrailChar$subsectionname), 
                                           'trailname' ] 
+
+## duplicate "Corbly Gulch" for each subsection ("Lower", "Upper")
+allTrailChar[nrow(allTrailChar) + 1, ] <- allTrailChar %>% filter(trailname == "Corbly Gulch")
+
+allTrailChar[which(allTrailChar$trailname == "Corbly Gulch"), "subsectionname"] <- c("Upper", "Lower")
 
 #### Combine Camera Counts, Strava Counts, Weather, Trail Characteristics ####
 
@@ -431,7 +446,7 @@ allData$week <- as.integer(allData$week)
 
 combineBridgerRidger <- allData %>% 
   dplyr::filter(trailname == "Bridger Ridge",
-                subsectionname %notin% c("Steep Way")) %>% 
+                subsectionname %notin% c("Steep Way", "M to Baldy")) %>% 
   dplyr::group_by(date) %>% 
   dplyr::summarize(max.camera = max(max.camera, na.rm = T),
                    max.count = max(max.count, na.rm=T),
@@ -490,7 +505,7 @@ allTrail <- allData %>%
   dplyr::filter(subsectionname %notin% c("Bridger",
                                          "Baldy to Bridger",
                                          "Bridger to Ross Pass",
-                                         "M to Baldy", 
+                                         # "M to Baldy", 
                                          "Ross Pass to Sacagawea Peak"#, 
                                          ## remove when spatial fixed
                                          # "Johnson Canyon Jeep Trail"
@@ -508,7 +523,7 @@ subsection.excluded.name <- unique(allData$subsectionname)[subsection.excluded.n
 nrow(allCount %>% filter(subsectionname %notin% c("Bridger",
                                                   "Baldy to Bridger",
                                                   "Bridger to Ross Pass",
-                                                  "M to Baldy", 
+                                                  # "M to Baldy", 
                                                   "Ross Pass to Sacagawea Peak"))) == nrow(allTrail)
 
 ## Add in a Time variable
@@ -641,7 +656,7 @@ predict.All <- allData %>%
   distinct()
 
 ### New Trails (not in model) ####
-subsection.excluded.name <- subsection.excluded.name[-c(1:6, 8)]
+subsection.excluded.name <- subsection.excluded.name[-c(1:5, 7)]
 
 predict.New <- allData %>% 
   dplyr::filter(subsectionname %in% subsection.excluded.name)  %>%
@@ -756,7 +771,7 @@ allTrail_weekly <- allData_weekly %>%
   ## remove non-independent ("duplicate') sections of Bridger Ridge
   dplyr::filter(subsectionname %notin% c("Baldy to Bridger",
                                          "Bridger to Ross Pass",
-                                         "M to Baldy", 
+                                         # "M to Baldy", 
                                          "Ross Pass to Sacagawea Peak", 
                                          "Johnson Canyon Jeep Trail"))
 
