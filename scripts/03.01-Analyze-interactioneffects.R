@@ -6,7 +6,8 @@
 ## Author: Dr. Meridith L. Bartley
 ## Date Created: 2022-09-01
 ## ---------------------------
-## Notes:
+## Notes: Not included in final report. Keeping file for
+## potential future applications.
 ##   
 ##
 ## ---------------------------

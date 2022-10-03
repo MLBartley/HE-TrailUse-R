@@ -8,7 +8,9 @@
 ## Author: Dr. Meridith L. Bartley
 ## Date Created: 2022-09-01
 ## ---------------------------
-## Notes:
+## Notes: This document is defunct. Please refer to 
+##  "output/report/00-AllTrailsUtility.Rmd for analysis
+## and "scripts/02-EDA.R" for plotting. 
 ##   
 ##
 ## ---------------------------
