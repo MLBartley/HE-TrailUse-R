@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.9.8)  10 SEP 2022 11:55
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.9.26)  3 OCT 2022 10:38
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -148,7 +148,9 @@ File: color.cfg 2016/01/02 v1.6 sample color configuration
 )
 Package xcolor Info: Driver file: pdftex.def on input line 227.
 (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/graphics-def/pdftex.def
-File: pdftex.def 2020/10/05 v1.2a Graphics/color driver for pdftex
+File: pdftex.def 2022/09/22 v1.2b Graphics/color driver for pdftex
+\stockwidth=\dimen148
+\stockheight=\dimen149
 ) (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/graphics/mathcolor.ltx)
 Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1353.
 Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1357.
@@ -170,14 +172,14 @@ Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
 \Gm@cnth=\count272
 \Gm@cntv=\count273
 \c@Gm@tempcnt=\count274
-\Gm@bindingoffset=\dimen148
-\Gm@wd@mp=\dimen149
-\Gm@odd@mp=\dimen150
-\Gm@even@mp=\dimen151
-\Gm@layoutwidth=\dimen152
-\Gm@layoutheight=\dimen153
-\Gm@layouthoffset=\dimen154
-\Gm@layoutvoffset=\dimen155
+\Gm@bindingoffset=\dimen150
+\Gm@wd@mp=\dimen151
+\Gm@odd@mp=\dimen152
+\Gm@even@mp=\dimen153
+\Gm@layoutwidth=\dimen154
+\Gm@layoutheight=\dimen155
+\Gm@layouthoffset=\dimen156
+\Gm@layoutvoffset=\dimen157
 \Gm@dimlist=\toks24
 ) (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/fancyvrb/fancyvrb.sty
 Package: fancyvrb 2022/06/06 4.5 verbatim text (tvz,hv)
@@ -190,10 +192,10 @@ Package: fancyvrb 2022/06/06 4.5 verbatim text (tvz,hv)
 ) (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/framed/framed.sty
 Package: framed 2011/10/22 v 0.96: framed or shaded text with page breaks
 \OuterFrameSep=\skip52
-\fb@frw=\dimen156
-\fb@frh=\dimen157
-\FrameRule=\dimen158
-\FrameSep=\dimen159
+\fb@frw=\dimen158
+\fb@frh=\dimen159
+\FrameRule=\dimen160
+\FrameSep=\dimen161
 ) (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/tools/longtable.sty
 Package: longtable 2021-09-01 v4.17 Multi-page Table package (DPC)
 \LTleft=\skip53
@@ -201,7 +203,7 @@ Package: longtable 2021-09-01 v4.17 Multi-page Table package (DPC)
 \LTpre=\skip55
 \LTpost=\skip56
 \LTchunksize=\count278
-\LTcapwidth=\dimen160
+\LTcapwidth=\dimen162
 \LT@head=\box54
 \LT@firsthead=\box55
 \LT@foot=\box56
@@ -214,28 +216,28 @@ Package: longtable 2021-09-01 v4.17 Multi-page Table package (DPC)
 \LT@p@ftn=\toks25
 ) (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/booktabs/booktabs.sty
 Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
-\heavyrulewidth=\dimen161
-\lightrulewidth=\dimen162
-\cmidrulewidth=\dimen163
-\belowrulesep=\dimen164
-\belowbottomsep=\dimen165
-\aboverulesep=\dimen166
-\abovetopsep=\dimen167
-\cmidrulesep=\dimen168
-\cmidrulekern=\dimen169
-\defaultaddspace=\dimen170
+\heavyrulewidth=\dimen163
+\lightrulewidth=\dimen164
+\cmidrulewidth=\dimen165
+\belowrulesep=\dimen166
+\belowbottomsep=\dimen167
+\aboverulesep=\dimen168
+\abovetopsep=\dimen169
+\cmidrulesep=\dimen170
+\cmidrulekern=\dimen171
+\defaultaddspace=\dimen172
 \@cmidla=\count283
 \@cmidlb=\count284
-\@aboverulesep=\dimen171
-\@belowrulesep=\dimen172
+\@aboverulesep=\dimen173
+\@belowrulesep=\dimen174
 \@thisruleclass=\count285
 \@lastruleclass=\count286
-\@thisrulewidth=\dimen173
+\@thisrulewidth=\dimen175
 ) (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/tools/array.sty
 Package: array 2022/03/10 v2.5f Tabular extension package (FMi)
-\col@sep=\dimen174
+\col@sep=\dimen176
 \ar@mcellbox=\box59
-\extrarowheight=\dimen175
+\extrarowheight=\dimen177
 \NC@list=\toks26
 \extratabsurround=\skip57
 \backup@length=\skip58
@@ -244,8 +246,8 @@ Package: array 2022/03/10 v2.5f Tabular extension package (FMi)
 Package: calc 2017/05/25 v4.3 Infix arithmetic (KKT,FJ)
 \calc@Acount=\count287
 \calc@Bcount=\count288
-\calc@Adimen=\dimen176
-\calc@Bdimen=\dimen177
+\calc@Adimen=\dimen178
+\calc@Bdimen=\dimen179
 \calc@Askip=\skip59
 \calc@Bskip=\skip60
 LaTeX Info: Redefining \setlength on input line 80.
@@ -258,7 +260,7 @@ Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
 ) (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/mdwtools/footnote.sty
 Package: footnote 1997/01/28 1.13 Save footnotes around boxes
 \fn@notes=\box61
-\fn@width=\dimen178
+\fn@width=\dimen180
 ) (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/graphics/graphicx.sty
 Package: graphicx 2021/09/16 v1.2d Enhanced LaTeX Graphics (DPC,SPQR)
 (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/graphics/graphics.sty
@@ -270,22 +272,22 @@ File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
 )
 Package graphics Info: Driver file: pdftex.def on input line 107.
 )
-\Gin@req@height=\dimen179
-\Gin@req@width=\dimen180
+\Gin@req@height=\dimen181
+\Gin@req@width=\dimen182
 ) (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/subfig/subfig.sty
 Package: subfig 2005/06/28 ver: 1.3 subfig package
 (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/caption/caption.sty
 Package: caption 2022/03/01 v3.6b Customizing captions (AR)
 (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/caption/caption3.sty
 Package: caption3 2022/03/17 v2.3b caption3 kernel (AR)
-\caption@tempdima=\dimen181
-\captionmargin=\dimen182
-\caption@leftmargin=\dimen183
-\caption@rightmargin=\dimen184
-\caption@width=\dimen185
-\caption@indent=\dimen186
-\caption@parindent=\dimen187
-\caption@hangindent=\dimen188
+\caption@tempdima=\dimen183
+\captionmargin=\dimen184
+\caption@leftmargin=\dimen185
+\caption@rightmargin=\dimen186
+\caption@width=\dimen187
+\caption@indent=\dimen188
+\caption@parindent=\dimen189
+\caption@hangindent=\dimen190
 Package caption Info: Standard document class detected.
 )
 \c@caption@flags=\count291
@@ -296,7 +298,7 @@ Package: ltcaption 2021/01/08 v1.4c longtable captions (AR)
 ))
 \c@KVtest=\count293
 \sf@farskip=\skip62
-\sf@captopadj=\dimen189
+\sf@captopadj=\dimen191
 \sf@capskip=\skip63
 \sf@nearskip=\skip64
 \c@subfigure=\count294
@@ -322,8 +324,8 @@ Package: tabu 2019/01/11 v2.9 - flexible LaTeX tabulars (FC+tabu-fixed)
 Package: varwidth 2009/03/30 ver 0.92;  Variable-width minipages
 \@vwid@box=\box62
 \sift@deathcycles=\count300
-\@vwid@loff=\dimen190
-\@vwid@roff=\dimen191
+\@vwid@loff=\dimen192
+\@vwid@roff=\dimen193
 )
 \c@taburow=\count301
 \tabu@nbcols=\count302
@@ -331,15 +333,15 @@ Package: varwidth 2009/03/30 ver 0.92;  Variable-width minipages
 \tabu@Xcol=\count304
 \tabu@alloc=\count305
 \tabu@nested=\count306
-\tabu@target=\dimen192
-\tabu@spreadtarget=\dimen193
-\tabu@naturalX=\dimen194
-\tabucolX=\dimen195
-\tabu@Xsum=\dimen196
-\extrarowdepth=\dimen197
-\abovetabulinesep=\dimen198
-\belowtabulinesep=\dimen199
-\tabustrutrule=\dimen256
+\tabu@target=\dimen194
+\tabu@spreadtarget=\dimen195
+\tabu@naturalX=\dimen196
+\tabucolX=\dimen197
+\tabu@Xsum=\dimen198
+\extrarowdepth=\dimen199
+\abovetabulinesep=\dimen256
+\belowtabulinesep=\dimen257
+\tabustrutrule=\dimen258
 \tabu@thebody=\toks27
 \tabu@footnotes=\toks28
 \tabu@box=\box63
@@ -357,9 +359,9 @@ Package floatrow Info: Modified float package code loaded on input line 455.
 Package floatrow Info: Modified rotfloat package code loaded on input line 473.
 \FR@everyfloat=\toks30
 \flrow@foot=\insert252
-\FB@wd=\dimen257
-\FBo@wd=\dimen258
-\FBc@wd=\dimen259
+\FB@wd=\dimen259
+\FBo@wd=\dimen260
+\FBc@wd=\dimen261
 \FBo@ht=\skip68
 \FBc@ht=\skip69
 \FBf@ht=\skip70
@@ -375,7 +377,7 @@ Package floatrow Info: Modified rotfloat package code loaded on input line 473.
 \Zhsize=\skip76
 \sZhsize=\skip77
 \flrow@rowbox=\box69
-\FR@Zunitlength=\dimen260
+\FR@Zunitlength=\dimen262
 \c@FBcnt=\count312
 \FPOScnt=\count313
 \LTleft=\skip78
@@ -388,16 +390,16 @@ Package: lineno 2005/11/02 line numbers on paragraphs v4.41
 \linenopenalty=\count314
 \output=\toks32
 \linenoprevgraf=\count315
-\linenumbersep=\dimen261
-\linenumberwidth=\dimen262
+\linenumbersep=\dimen263
+\linenumberwidth=\dimen264
 \c@linenumber=\count316
 \c@pagewiselinenumber=\count317
 \c@LN@truepage=\count318
 \c@internallinenumber=\count319
 \c@internallinenumbers=\count320
-\quotelinenumbersep=\dimen263
-\bframerule=\dimen264
-\bframesep=\dimen265
+\quotelinenumbersep=\dimen265
+\bframerule=\dimen266
+\bframesep=\dimen267
 \bframebox=\box70
 LaTeX Info: Redefining \\ on input line 3056.
 ) (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/pdflscape/pdflscape.sty
@@ -413,7 +415,7 @@ Package: natbib 2010/09/13 8.31b (PWD, AO)
 LaTeX Info: Redefining \cite on input line 694.
 \c@NAT@ctr=\count321
 ) (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/hyperref/hyperref.sty
-Package: hyperref 2022-06-20 v7.00s Hypertext links for LaTeX
+Package: hyperref 2022-09-22 v7.00t Hypertext links for LaTeX
 (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty
 Package: ltxcmds 2020-05-10 v1.25 LaTeX kernel commands for general use (HO)
 ) (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
@@ -447,11 +449,11 @@ Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
 ))
 \c@section@level=\count322
 )
-\@linkdim=\dimen266
+\@linkdim=\dimen268
 \Hy@linkcounter=\count323
 \Hy@pagecounter=\count324
 (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/hyperref/pd1enc.def
-File: pd1enc.def 2022-06-20 v7.00s Hyperref: PDFDocEncoding definition (HO)
+File: pd1enc.def 2022-09-22 v7.00t Hyperref: PDFDocEncoding definition (HO)
 Now handling font encoding PD1 ...
 ... no UTF-8 mapping file for font encoding PD1
 ) (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/generic/intcalc/intcalc.sty
@@ -461,7 +463,7 @@ Package: etexcmds 2019/12/15 v1.7 Avoid name clashes with e-TeX commands (HO)
 )
 \Hy@SavedSpaceFactor=\count325
 (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/hyperref/puenc.def
-File: puenc.def 2022-06-20 v7.00s Hyperref: PDF Unicode definition (HO)
+File: puenc.def 2022-09-22 v7.00t Hyperref: PDF Unicode definition (HO)
 Now handling font encoding PU ...
 ... no UTF-8 mapping file for font encoding PU
 )
@@ -472,29 +474,29 @@ Package hyperref Info: Hyper index ON on input line 4170.
 Package hyperref Info: Plain pages OFF on input line 4177.
 Package hyperref Info: Backreferencing OFF on input line 4182.
 Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
-Package hyperref Info: Bookmarks ON on input line 4408.
+Package hyperref Info: Bookmarks ON on input line 4410.
 \c@Hy@tempcnt=\count326
 (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/url/url.sty
 \Urlmuskip=\muskip17
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
-LaTeX Info: Redefining \url on input line 4746.
-\XeTeXLinkMargin=\dimen267
+LaTeX Info: Redefining \url on input line 4748.
+\XeTeXLinkMargin=\dimen269
 (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/generic/bitset/bitset.sty
 Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
 (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty
 Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO)
 ))
 \Fld@menulength=\count327
-\Field@Width=\dimen268
-\Fld@charsize=\dimen269
-Package hyperref Info: Hyper figures OFF on input line 6024.
-Package hyperref Info: Link nesting OFF on input line 6029.
-Package hyperref Info: Hyper index ON on input line 6032.
-Package hyperref Info: backreferencing OFF on input line 6039.
-Package hyperref Info: Link coloring OFF on input line 6044.
-Package hyperref Info: Link coloring with OCG OFF on input line 6049.
-Package hyperref Info: PDF/A mode OFF on input line 6054.
+\Field@Width=\dimen270
+\Fld@charsize=\dimen271
+Package hyperref Info: Hyper figures OFF on input line 6027.
+Package hyperref Info: Link nesting OFF on input line 6032.
+Package hyperref Info: Hyper index ON on input line 6035.
+Package hyperref Info: backreferencing OFF on input line 6042.
+Package hyperref Info: Link coloring OFF on input line 6047.
+Package hyperref Info: Link coloring with OCG OFF on input line 6052.
+Package hyperref Info: PDF/A mode OFF on input line 6057.
 (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/base/atbegshi-ltx.sty
 Package: atbegshi-ltx 2021/01/10 v1.0c Emulation of the original atbegshi
 package with kernel methods
@@ -505,7 +507,7 @@ package with kernel methods
 )
 Package hyperref Info: Driver (autodetected): hpdftex.
 (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/hyperref/hpdftex.def
-File: hpdftex.def 2022-06-20 v7.00s Hyperref driver for pdfTeX
+File: hpdftex.def 2022-09-22 v7.00t Hyperref driver for pdfTeX
 (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/base/atveryend-ltx.sty
 Package: atveryend-ltx 2020/08/19 v1.0a Emulation of the original atveryend package
 with kernel methods
@@ -643,11 +645,11 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 
 ] (./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains.toc
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 4.
+(Font)              <10> on input line 2.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 4.
+(Font)              <7> on input line 2.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 4.
+(Font)              <5> on input line 2.
 [3])
 \tf@toc=\write5
 \openout5 = `Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains.toc'.
@@ -656,576 +658,572 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 Section 1.
 [5
 
-] [6
-
-]
+] [6]
 Section 2.
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 156.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 204.
 (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-) [7] [8
+) [7
+
+] [8
 
 ]
 Section 3.
-<../figures/camera_locations.pdf, id=264, 939.51pt x 614.295pt>
+<../figures/camera_locations.pdf, id=297, 939.51pt x 614.295pt>
 File: ../figures/camera_locations.pdf Graphic file (type pdf)
 <use ../figures/camera_locations.pdf>
-Package pdftex.def Info: ../figures/camera_locations.pdf  used on input line 227.
+Package pdftex.def Info: ../figures/camera_locations.pdf  used on input line 280.
 (pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/location-test-1.pdf, id=265, 471.7625pt x 325.215pt>
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/location-test-1.pdf, id=298, 471.7625pt x 325.215pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/location-test-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/location-test-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/location-test-1.pdf  used on input line 236.
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/location-test-1.pdf  used on input line 289.
 (pdftex.def)             Requested size: 471.76852pt x 325.21916pt.
 [9] [10 <../figures/camera_locations.pdf>] [11 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/location-test-1.pdf>]
-<../figures/Counter_bySubSection_TS_highuse.pdf, id=380, 939.51pt x 614.295pt>
+<../figures/Counter_bySubSection_TS_highuse.pdf, id=411, 939.51pt x 614.295pt>
 File: ../figures/Counter_bySubSection_TS_highuse.pdf Graphic file (type pdf)
 <use ../figures/Counter_bySubSection_TS_highuse.pdf>
-Package pdftex.def Info: ../figures/Counter_bySubSection_TS_highuse.pdf  used on input line 257.
+Package pdftex.def Info: ../figures/Counter_bySubSection_TS_highuse.pdf  used on input line 310.
 (pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
-<../figures/Counter_bySubsection_TS_lowuse.pdf, id=381, 939.51pt x 614.295pt>
+<../figures/Counter_bySubsection_TS_lowuse.pdf, id=412, 939.51pt x 614.295pt>
 File: ../figures/Counter_bySubsection_TS_lowuse.pdf Graphic file (type pdf)
 <use ../figures/Counter_bySubsection_TS_lowuse.pdf>
-Package pdftex.def Info: ../figures/Counter_bySubsection_TS_lowuse.pdf  used on input line 266.
+Package pdftex.def Info: ../figures/Counter_bySubsection_TS_lowuse.pdf  used on input line 319.
 (pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
 [12 <../figures/Counter_bySubSection_TS_highuse.pdf>] [13 <../figures/Counter_bySubsection_TS_lowuse.pdf>]
-Overfull \hbox (28.91628pt too wide) in paragraph at lines 284--329
+Overfull \hbox (26.07082pt too wide) in paragraph at lines 337--382
  [][] 
  []
 
 
-LaTeX Warning: Float too large for page by 59.11024pt on input line 329.
+LaTeX Warning: Float too large for page by 35.11024pt on input line 382.
 
 [14]
-LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 339.
+LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 392.
 (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-<../figures/hourly_bydayofweek_highuse.pdf, id=412, 939.51pt x 614.295pt>
+<../figures/hourly_bydayofweek_highuse.pdf, id=445, 939.51pt x 614.295pt>
 File: ../figures/hourly_bydayofweek_highuse.pdf Graphic file (type pdf)
 <use ../figures/hourly_bydayofweek_highuse.pdf>
-Package pdftex.def Info: ../figures/hourly_bydayofweek_highuse.pdf  used on input line 366.
+Package pdftex.def Info: ../figures/hourly_bydayofweek_highuse.pdf  used on input line 438.
 (pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
-<../figures/hourly_bydayofweek_lowuse.pdf, id=413, 939.51pt x 614.295pt>
+<../figures/hourly_bydayofweek_lowuse.pdf, id=446, 939.51pt x 614.295pt>
 File: ../figures/hourly_bydayofweek_lowuse.pdf Graphic file (type pdf)
 <use ../figures/hourly_bydayofweek_lowuse.pdf>
-Package pdftex.def Info: ../figures/hourly_bydayofweek_lowuse.pdf  used on input line 375.
+Package pdftex.def Info: ../figures/hourly_bydayofweek_lowuse.pdf  used on input line 447.
 (pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
 [15
 
 
- <../figures/hourly_bydayofweek_highuse.pdf>] [16 <../figures/hourly_bydayofweek_lowuse.pdf>]
-<../figures/Strava_day_TS_bytrip_high.pdf, id=448, 939.51pt x 614.295pt>
+] [16 <../figures/hourly_bydayofweek_highuse.pdf>] [17 <../figures/hourly_bydayofweek_lowuse.pdf>] [18]
+<../figures/Strava_day_TS_bytrip_high.pdf, id=491, 939.51pt x 614.295pt>
 File: ../figures/Strava_day_TS_bytrip_high.pdf Graphic file (type pdf)
 <use ../figures/Strava_day_TS_bytrip_high.pdf>
-Package pdftex.def Info: ../figures/Strava_day_TS_bytrip_high.pdf  used on input line 464.
+Package pdftex.def Info: ../figures/Strava_day_TS_bytrip_high.pdf  used on input line 572.
 (pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
-<../figures/Strava_day_TS_bytrip_low.pdf, id=449, 939.51pt x 614.295pt>
+<../figures/Strava_day_TS_bytrip_low.pdf, id=492, 939.51pt x 614.295pt>
 File: ../figures/Strava_day_TS_bytrip_low.pdf Graphic file (type pdf)
 <use ../figures/Strava_day_TS_bytrip_low.pdf>
-Package pdftex.def Info: ../figures/Strava_day_TS_bytrip_low.pdf  used on input line 473.
+Package pdftex.def Info: ../figures/Strava_day_TS_bytrip_low.pdf  used on input line 581.
 (pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
-[17] [18 <../figures/Strava_day_TS_bytrip_high.pdf>] [19 <../figures/Strava_day_TS_bytrip_low.pdf>]
-<../figures/allTrails_search_TS_high.pdf, id=486, 939.51pt x 614.295pt>
+[19 <../figures/Strava_day_TS_bytrip_high.pdf>] [20 <../figures/Strava_day_TS_bytrip_low.pdf>]
+<../figures/allTrails_search_TS_high.pdf, id=523, 939.51pt x 614.295pt>
 File: ../figures/allTrails_search_TS_high.pdf Graphic file (type pdf)
 <use ../figures/allTrails_search_TS_high.pdf>
-Package pdftex.def Info: ../figures/allTrails_search_TS_high.pdf  used on input line 493.
+Package pdftex.def Info: ../figures/allTrails_search_TS_high.pdf  used on input line 601.
 (pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
-<../figures/allTrails_search_TS_low.pdf, id=487, 939.51pt x 614.295pt>
+<../figures/allTrails_search_TS_low.pdf, id=524, 939.51pt x 614.295pt>
 File: ../figures/allTrails_search_TS_low.pdf Graphic file (type pdf)
 <use ../figures/allTrails_search_TS_low.pdf>
-Package pdftex.def Info: ../figures/allTrails_search_TS_low.pdf  used on input line 502.
+Package pdftex.def Info: ../figures/allTrails_search_TS_low.pdf  used on input line 610.
 (pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
-<../figures/weatherplots.pdf, id=489, 939.51pt x 614.295pt>
+<../figures/weatherplots.pdf, id=526, 939.51pt x 614.295pt>
 File: ../figures/weatherplots.pdf Graphic file (type pdf)
 <use ../figures/weatherplots.pdf>
-Package pdftex.def Info: ../figures/weatherplots.pdf  used on input line 538.
+Package pdftex.def Info: ../figures/weatherplots.pdf  used on input line 646.
 (pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
-[20 <../figures/allTrails_search_TS_high.pdf>] [21 <../figures/allTrails_search_TS_low.pdf>] [22 <../figures/weatherplots.pdf>] [23]
-Overfull \hbox (28.58905pt too wide) in paragraph at lines 586--639
- [][] 
- []
+[21 <../figures/allTrails_search_TS_high.pdf>] [22 <../figures/allTrails_search_TS_low.pdf>] [23 <../figures/weatherplots.pdf>] [24] [25] [26
 
 
-LaTeX Warning: Float too large for page by 88.11024pt on input line 639.
 
-[24]
+]
 Section 4.
-[25
-
-
-
-] [26]
+[27] [28]
 LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10> not available
-(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 826.
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 937.
 
 LaTeX Font Warning: Font shape `T1/lmtt/bx/it' in size <10> not available
-(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 826.
+(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 937.
 
-<../figures/HGAM.png, id=575, 301.125pt x 404.59155pt>
+<../figures/HGAM.png, id=618, 301.125pt x 404.59155pt>
 File: ../figures/HGAM.png Graphic file (type png)
 <use ../figures/HGAM.png>
-Package pdftex.def Info: ../figures/HGAM.png  used on input line 861.
+Package pdftex.def Info: ../figures/HGAM.png  used on input line 973.
 (pdftex.def)             Requested size: 301.14262pt x 404.61525pt.
-[27] [28 <../figures/HGAM.png>] [29] [30
+[29]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[30 <../figures/HGAM.png>] [31] [32
 
 ]
 Section 5.
-<../figures/MiddleCottonwood_TS.pdf, id=609, 939.51pt x 614.295pt>
+<../figures/MiddleCottonwood_TS.pdf, id=652, 939.51pt x 614.295pt>
 File: ../figures/MiddleCottonwood_TS.pdf Graphic file (type pdf)
 <use ../figures/MiddleCottonwood_TS.pdf>
-Package pdftex.def Info: ../figures/MiddleCottonwood_TS.pdf  used on input line 927.
+Package pdftex.def Info: ../figures/MiddleCottonwood_TS.pdf  used on input line 1039.
 (pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/covariates-1.pdf, id=611, 461.725pt x 320.19624pt>
-File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/covariates-1.pdf Graphic file (type pdf)
-<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/covariates-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/covariates-1.pdf  used on input line 938.
-(pdftex.def)             Requested size: 461.73091pt x 320.20033pt.
-[31] [32 <../figures/MiddleCottonwood_TS.pdf>]
-LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 975.
+<../figures/MiddleCottonwood_Covariates.png, id=654, 939.51pt x 686.565pt>
+File: ../figures/MiddleCottonwood_Covariates.png Graphic file (type png)
+<use ../figures/MiddleCottonwood_Covariates.png>
+Package pdftex.def Info: ../figures/MiddleCottonwood_Covariates.png  used on input line 1050.
+(pdftex.def)             Requested size: 472.03323pt x 344.94736pt.
+[33] [34 <../figures/MiddleCottonwood_TS.pdf>] [35 <../figures/MiddleCottonwood_Covariates.png>]
+LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 1087.
 (/Users/mlbartley/Library/TinyTeX/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-) [33 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/covariates-1.pdf>] [34] [35] [36] [37]
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/MCdraw-1.pdf, id=709, 455.7025pt x 305.14pt>
+) [36] [37] [38] [39]
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/MCdraw-1.pdf, id=746, 455.7025pt x 305.14pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/MCdraw-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/MCdraw-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/MCdraw-1.pdf  used on input line 1213.
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/MCdraw-1.pdf  used on input line 1325.
 (pdftex.def)             Requested size: 455.70831pt x 305.14389pt.
-[38] [39 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/MCdraw-1.pdf>]
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/unnamed-chunk-8-1.pdf, id=737, 442.65375pt x 293.095pt>
-File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/unnamed-chunk-8-1.pdf Graphic file (type pdf)
-<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/unnamed-chunk-8-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/unnamed-chunk-8-1.pdf  used on input line 1242.
-(pdftex.def)             Requested size: 442.65265pt x 293.09427pt.
-[40 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/unnamed-chunk-8-1.pdf>]
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/unnamed-chunk-9-1.pdf, id=752, 454.69875pt x 302.12875pt>
+[40] [41 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/MCdraw-1.pdf>]
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/unnamed-chunk-9-1.pdf, id=774, 442.65375pt x 293.095pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/unnamed-chunk-9-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/unnamed-chunk-9-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/unnamed-chunk-9-1.pdf  used on input line 1296.
-(pdftex.def)             Requested size: 454.69763pt x 302.128pt.
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/unnamed-chunk-9-1.pdf  used on input line 1354.
+(pdftex.def)             Requested size: 442.65265pt x 293.09427pt.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[41]
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/tsDiagGAMM-1.pdf, id=760, 448.67625pt x 300.12125pt>
+[42] [43 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/unnamed-chunk-9-1.pdf>]
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/unnamed-chunk-10-1.pdf, id=796, 454.69875pt x 302.12875pt>
+File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/unnamed-chunk-10-1.pdf Graphic file (type pdf)
+<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/unnamed-chunk-10-1.pdf>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/unnamed-chunk-10-1.pdf  used on input line 1408.
+(pdftex.def)             Requested size: 454.69763pt x 302.128pt.
+[44 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/unnamed-chunk-10-1.pdf>]
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/tsDiagGAMM-1.pdf, id=812, 448.67625pt x 300.12125pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/tsDiagGAMM-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/tsDiagGAMM-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/tsDiagGAMM-1.pdf  used on input line 1317.
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/tsDiagGAMM-1.pdf  used on input line 1429.
 (pdftex.def)             Requested size: 448.68884pt x 300.12967pt.
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[42 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/unnamed-chunk-9-1.pdf>]
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/rootogram-1.pdf, id=775, 459.7175pt x 315.1775pt>
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/rootogram-1.pdf, id=813, 459.7175pt x 315.1775pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/rootogram-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/rootogram-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/rootogram-1.pdf  used on input line 1331.
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/rootogram-1.pdf  used on input line 1443.
 (pdftex.def)             Requested size: 459.74442pt x 315.19595pt.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[43 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/tsDiagGAMM-1.pdf>]
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/gamm diagnostics-1.pdf, id=792, 436.63126pt x 290.08376pt>
+[45 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/tsDiagGAMM-1.pdf>]
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/gamm diagnostics-1.pdf, id=829, 436.63126pt x 290.08376pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/gamm diagnostics-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/gamm diagnostics-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/gamm diagnostics-1.pdf  used on input line 1366.
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/gamm diagnostics-1.pdf  used on input line 1478.
 (pdftex.def)             Requested size: 436.63019pt x 290.08304pt.
-[44 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/rootogram-1.pdf>] [45 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/gamm diagnostics-1.pdf>]
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/MidCot-predict-compare-1.pdf, id=822, 452.69125pt x 315.1775pt>
+[46 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/rootogram-1.pdf>] [47 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/gamm diagnostics-1.pdf>]
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/MidCot-predict-compare-1.pdf, id=860, 452.69125pt x 315.1775pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/MidCot-predict-compare-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/MidCot-predict-compare-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/MidCot-predict-compare-1.pdf  used on input line 1418.
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/MidCot-predict-compare-1.pdf  used on input line 1530.
 (pdftex.def)             Requested size: 452.69014pt x 315.17673pt.
-[46] [47 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/MidCot-predict-compare-1.pdf>] [48
+[48] [49 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/MidCot-predict-compare-1.pdf>] [50
 
 ]
 Section 6.
-[49] [50] [51]
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-TSdiag1-1.pdf, id=905, 448.67625pt x 300.12125pt>
+[51] [52] [53]
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-TSdiag1-1.pdf, id=944, 449.68pt x 300.12125pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-TSdiag1-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-TSdiag1-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-TSdiag1-1.pdf  used on input line 1613.
-(pdftex.def)             Requested size: 448.70938pt x 300.1434pt.
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-TSdiag2-1.pdf, id=906, 436.63126pt x 290.08376pt>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-TSdiag1-1.pdf  used on input line 1729.
+(pdftex.def)             Requested size: 449.7132pt x 300.1434pt.
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-TSdiag2-1.pdf, id=945, 436.63126pt x 290.08376pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-TSdiag2-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-TSdiag2-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-TSdiag2-1.pdf  used on input line 1622.
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-TSdiag2-1.pdf  used on input line 1738.
 (pdftex.def)             Requested size: 436.65683pt x 290.10074pt.
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-draw-1.pdf, id=908, 455.7025pt x 305.14pt>
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-draw-1.pdf, id=947, 456.70625pt x 305.14pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-draw-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-draw-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-draw-1.pdf  used on input line 1639.
-(pdftex.def)             Requested size: 455.70831pt x 305.14389pt.
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-rootogram-1.pdf, id=910, 464.73625pt x 315.1775pt>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-draw-1.pdf  used on input line 1755.
+(pdftex.def)             Requested size: 456.71906pt x 305.14854pt.
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-rootogram-1.pdf, id=949, 464.73625pt x 315.1775pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-rootogram-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-rootogram-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-rootogram-1.pdf  used on input line 1654.
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-rootogram-1.pdf  used on input line 1770.
 (pdftex.def)             Requested size: 464.74928pt x 315.18634pt.
-<../figures/high_pred_modG.pdf, id=914, 939.51pt x 614.295pt>
+<../figures/high_pred_modG.pdf, id=953, 939.51pt x 614.295pt>
 File: ../figures/high_pred_modG.pdf Graphic file (type pdf)
 <use ../figures/high_pred_modG.pdf>
-Package pdftex.def Info: ../figures/high_pred_modG.pdf  used on input line 1665.
+Package pdftex.def Info: ../figures/high_pred_modG.pdf  used on input line 1781.
 (pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
-<../figures/low_pred_modG.pdf, id=915, 939.51pt x 614.295pt>
+<../figures/low_pred_modG.pdf, id=954, 939.51pt x 614.295pt>
 File: ../figures/low_pred_modG.pdf Graphic file (type pdf)
 <use ../figures/low_pred_modG.pdf>
-Package pdftex.def Info: ../figures/low_pred_modG.pdf  used on input line 1674.
+Package pdftex.def Info: ../figures/low_pred_modG.pdf  used on input line 1790.
 (pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
-[52] [53 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-TSdiag1-1.pdf> <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-TSdiag2-1.pdf>] [54 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-draw-1.pdf>] [55 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-rootogram-1.pdf>] [56 <../figures/high_pred_modG.pdf>] [57 <../figures/low_pred_modG.pdf>]
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-pred-observed-1.pdf, id=1002, 459.7175pt x 313.17pt>
+[54] [55 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-TSdiag1-1.pdf> <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-TSdiag2-1.pdf>] [56 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-draw-1.pdf>] [57 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-rootogram-1.pdf>] [58 <../figures/high_pred_modG.pdf>] [59 <../figures/low_pred_modG.pdf>]
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-pred-observed-1.pdf, id=1040, 712.6625pt x 925.4575pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-pred-observed-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-pred-observed-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-pred-observed-1.pdf  used on input line 1702.
-(pdftex.def)             Requested size: 459.7304pt x 313.17877pt.
-[58 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-pred-observed-1.pdf>]
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-tsDiag-1.pdf, id=1020, 448.67625pt x 300.12125pt>
-File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-tsDiag-1.pdf Graphic file (type pdf)
-<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-tsDiag-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-tsDiag-1.pdf  used on input line 1747.
-(pdftex.def)             Requested size: 448.68884pt x 300.12967pt.
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-tsDiag-2.pdf, id=1021, 469.755pt x 290.08376pt>
-File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-tsDiag-2.pdf Graphic file (type pdf)
-<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-tsDiag-2.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-tsDiag-2.pdf  used on input line 1747.
-(pdftex.def)             Requested size: 469.75386pt x 290.08304pt.
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-pred-observed-1.pdf  used on input line 1819.
+(pdftex.def)             Requested size: 472.03336pt x 612.97853pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 1747--1748
-[][]
- []
+LaTeX Warning: Float too large for page by 18.27231pt on input line 1824.
 
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[59]
-Underfull \vbox (badness 5245) has occurred while \output is active []
-
-[60 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-tsDiag-1.pdf> <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-tsDiag-2.pdf>]
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGS-draw-1.pdf, id=1052, 423.5825pt x 201.75375pt>
+[60] [61 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modG-pred-observed-1.pdf>]
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-tsDiag1-1.pdf, id=1064, 448.67625pt x 300.12125pt>
+File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-tsDiag1-1.pdf Graphic file (type pdf)
+<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-tsDiag1-1.pdf>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-tsDiag1-1.pdf  used on input line 1865.
+(pdftex.def)             Requested size: 448.70938pt x 300.1434pt.
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-tsDiag2-1.pdf, id=1065, 436.63126pt x 290.08376pt>
+File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-tsDiag2-1.pdf Graphic file (type pdf)
+<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-tsDiag2-1.pdf>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-tsDiag2-1.pdf  used on input line 1874.
+(pdftex.def)             Requested size: 436.65683pt x 290.10074pt.
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGS-draw-1.pdf, id=1069, 449.68pt x 305.14pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGS-draw-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGS-draw-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGS-draw-1.pdf  used on input line 1752.
-(pdftex.def)             Requested size: 423.58792pt x 201.75632pt.
-<../figures/high_pred_modGS.pdf, id=1053, 939.51pt x 614.295pt>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGS-draw-1.pdf  used on input line 1885.
+(pdftex.def)             Requested size: 449.69948pt x 305.1532pt.
+<../figures/high_pred_modGS.pdf, id=1070, 939.51pt x 614.295pt>
 File: ../figures/high_pred_modGS.pdf Graphic file (type pdf)
 <use ../figures/high_pred_modGS.pdf>
-Package pdftex.def Info: ../figures/high_pred_modGS.pdf  used on input line 1757.
+Package pdftex.def Info: ../figures/high_pred_modGS.pdf  used on input line 1894.
 (pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
-<../figures/low_pred_modGS.pdf, id=1054, 939.51pt x 614.295pt>
+<../figures/low_pred_modGS.pdf, id=1071, 939.51pt x 614.295pt>
 File: ../figures/low_pred_modGS.pdf Graphic file (type pdf)
 <use ../figures/low_pred_modGS.pdf>
-Package pdftex.def Info: ../figures/low_pred_modGS.pdf  used on input line 1766.
+Package pdftex.def Info: ../figures/low_pred_modGS.pdf  used on input line 1903.
 (pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-pred-observed-1.pdf, id=1055, 459.7175pt x 313.17pt>
+[62 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-tsDiag1-1.pdf>]
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-pred-observed-1.pdf, id=1088, 712.6625pt x 925.4575pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-pred-observed-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-pred-observed-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-pred-observed-1.pdf  used on input line 1792.
-(pdftex.def)             Requested size: 459.7304pt x 313.17877pt.
-[61 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGS-draw-1.pdf>] [62 <../figures/high_pred_modGS.pdf>] [63 <../figures/low_pred_modGS.pdf>] [64 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-pred-observed-1.pdf>] [65]
-Overfull \hbox (5.71738pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ##                                                             edf Ref.df        F  p-value[] 
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-pred-observed-1.pdf  used on input line 1930.
+(pdftex.def)             Requested size: 472.03336pt x 612.97853pt.
+
+LaTeX Warning: Float too large for page by 6.27231pt on input line 1935.
+
+[63 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-tsDiag2-1.pdf>] [64 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGS-draw-1.pdf>] [65 <../figures/high_pred_modGS.pdf>] [66 <../figures/low_pred_modGS.pdf>] [67 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGS-pred-observed-1.pdf>] [68]
+Overfull \hbox (16.21735pt too wide) in paragraph at lines 2052--2052
+[]\T1/lmtt/m/n/10 ## s(yday)                                               6.179e+00  8.000  67.359  <2e-16 ***[] 
  []
 
 
-Overfull \hbox (26.71732pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday)                                               7.127e+00  8.000  994.511  < 2e-16 ***[] 
+Overfull \hbox (5.71738pt too wide) in paragraph at lines 2052--2052
+[]\T1/lmtt/m/n/10 ## s(yday):subsectionFCarroll Creek                      1.374e+00  6.000   4.994  0.0839 .[] 
  []
 
 
-Overfull \hbox (26.71732pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFBaldy to Bridger                   6.162e+00  8.000 1195.664  < 2e-16 ***[] 
+Overfull \hbox (5.71738pt too wide) in paragraph at lines 2052--2052
+[]\T1/lmtt/m/n/10 ## s(yday):subsectionFCollege M to Sypes                 1.503e+00  5.000  10.626  0.0621 .[] 
  []
 
 
-Overfull \hbox (16.21735pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFBenchmark Rd                       2.175e+00  5.000  358.320 0.049930 *[] 
+Overfull \hbox (5.71738pt too wide) in paragraph at lines 2052--2052
+[]\T1/lmtt/m/n/10 ## s(yday):subsectionFFairy Creek                        1.672e+00  5.000  12.764  0.0517 .[] 
  []
 
 
-Overfull \hbox (5.71738pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFCarroll Creek                      1.416e+00  5.000    3.342 0.787660[] 
+Overfull \hbox (5.71738pt too wide) in paragraph at lines 2052--2052
+[]\T1/lmtt/m/n/10 ## s(yday):subsectionFLower                              1.861e+00  5.000 137.280  0.0393 *[] 
  []
 
 
-Overfull \hbox (26.71732pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFCollege M                          3.800e+00  5.000 1078.270 1.86e-05 ***[] 
+Overfull \hbox (16.21735pt too wide) in paragraph at lines 2052--2052
+[]\T1/lmtt/m/n/10 ## s(yday):subsectionFLower Shafthouse                   2.291e+00  7.000 163.110  <2e-16 ***[] 
  []
 
 
-Overfull \hbox (26.71732pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFCollege M to Sypes                 3.563e+00  5.000  537.253 7.88e-07 ***[] 
+Overfull \hbox (10.96736pt too wide) in paragraph at lines 2052--2052
+[]\T1/lmtt/m/n/10 ## s(yday):subsectionFRoss Pass                          2.341e+00  6.000 454.205  0.0035 **[] 
  []
 
 
-Overfull \hbox (26.71732pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFCorbly Gulch                       7.504e+00  8.000 1062.789  < 2e-16 ***[] 
+Overfull \hbox (16.21735pt too wide) in paragraph at lines 2052--2052
+[]\T1/lmtt/m/n/10 ## s(yday):subsectionFSacagawea Pass                     7.882e+00  8.000 709.841  <2e-16 ***[] 
  []
 
 
-Overfull \hbox (5.71738pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFEast Bridger North                 1.237e-04  6.000    0.000 0.416870[] 
+Overfull \hbox (16.21735pt too wide) in paragraph at lines 2052--2052
+[]\T1/lmtt/m/n/10 ## s(yday):subsectionFUpper                              6.079e+00  8.000 136.676  <2e-16 ***[] 
  []
 
 
-Overfull \hbox (26.71732pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFEast Bridger South                 3.047e+00  6.000  872.823 6.56e-05 ***[] 
+Overfull \hbox (16.21735pt too wide) in paragraph at lines 2052--2052
+[]\T1/lmtt/m/n/10 ## s(yday):subsectionFBridger Ridge - All                5.678e+00  8.000  57.735  <2e-16 ***[] 
  []
 
 
-Overfull \hbox (26.71732pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFFairy Creek                        3.310e+00  5.000 1191.535 0.000547 ***[] 
+Overfull \hbox (16.21735pt too wide) in paragraph at lines 2052--2052
+[]\T1/lmtt/m/n/10 ## s(subsectionF)                                        1.053e+01 22.000   9.278  <2e-16 ***[] 
  []
 
 
-Overfull \hbox (5.71738pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFHorsethief Mountain                8.804e-05  6.000    0.000 0.454800[] 
+Overfull \hbox (16.21735pt too wide) in paragraph at lines 2052--2052
+[]\T1/lmtt/m/n/10 ## s(month)                                              4.391e+00  5.000  75.444  <2e-16 ***[] 
  []
 
 
-Overfull \hbox (21.46733pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFJohnson Canyon Jeep Trail          2.233e+00  5.000  418.336 0.005384 **[] 
+Overfull \hbox (16.21735pt too wide) in paragraph at lines 2052--2052
+[]\T1/lmtt/m/n/10 ## s(wday)                                               4.975e+00  5.000 607.048  <2e-16 ***[] 
  []
 
 
-Overfull \hbox (21.46733pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFLower Shafthouse                   2.883e+00  7.000  185.441 0.001892 **[] 
+Overfull \hbox (16.21735pt too wide) in paragraph at lines 2052--2052
+[]\T1/lmtt/m/n/10 ## s(daily_aqi_value)                                    8.800e+00  8.800  94.991  <2e-16 ***[] 
  []
 
 
-Overfull \hbox (26.71732pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFMiddle Cottonwood                  4.154e+00  5.000 2127.067 5.46e-05 ***[] 
+Overfull \hbox (16.21735pt too wide) in paragraph at lines 2052--2052
+[]\T1/lmtt/m/n/10 ## s(temp_max_f)                                         6.330e+00  6.330  73.069  <2e-16 ***[] 
  []
 
 
-Overfull \hbox (21.46733pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFNorth Cottonwood Access            4.338e+00  5.000 1498.815 0.001054 **[] 
+Overfull \hbox (16.21735pt too wide) in paragraph at lines 2052--2052
+[]\T1/lmtt/m/n/10 ## s(precipitation_in)                                   3.641e+00  3.641  28.530  <2e-16 ***[] 
  []
 
-
-Overfull \hbox (26.71732pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFNorth Cottonwood to Johnson Canyon 4.663e+00  6.000 1049.535 3.97e-06 ***[] 
- []
-
-
-Overfull \hbox (16.21735pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFRaptor View                        1.281e+00  5.000  160.742 0.053252 .[] 
- []
-
-
-Overfull \hbox (26.71732pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFRoss Pass                          1.198e+00  4.000  211.833 4.21e-05 ***[] 
- []
-
-
-Overfull \hbox (26.71732pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFSacagawea Pass                     7.971e+00  8.000 3361.353  < 2e-16 ***[] 
- []
-
-
-Overfull \hbox (21.46733pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFSteep Way                          4.624e+00  5.000  122.084 0.004566 **[] 
- []
-
-
-Overfull \hbox (5.71738pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFSypes Canyon                       1.308e-05  5.000    0.000 0.391803[] 
- []
-
-
-Overfull \hbox (21.46733pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(yday):subsectionFTruman Gulch                       3.688e+00  5.000  651.198 0.009058 **[] 
- []
-
-
-Overfull \hbox (26.71732pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(subsectionF)                                        4.968e+00 19.000    4.635  < 2e-16 ***[] 
- []
-
-
-Overfull \hbox (26.71732pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(month)                                              3.623e+00  5.000   11.556  < 2e-16 ***[] 
- []
-
-
-Overfull \hbox (26.71732pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(wday)                                               4.976e+00  5.000  461.824  < 2e-16 ***[] 
- []
-
-
-Overfull \hbox (26.71732pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(daily_aqi_value)                                    8.912e+00  8.912  170.707  < 2e-16 ***[] 
- []
-
-
-Overfull \hbox (26.71732pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(temp_max_f)                                         8.724e+00  8.724 1039.786  < 2e-16 ***[] 
- []
-
-
-Overfull \hbox (26.71732pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(precipitation_in)                                   3.744e+00  3.744  103.796  < 2e-16 ***[] 
- []
-
-
-Overfull \hbox (26.71732pt too wide) in paragraph at lines 1912--1912
-[]\T1/lmtt/m/n/10 ## s(totallength_miles)                                  1.000e+00  1.000   39.097  < 2e-16 ***[] 
- []
-
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-draw-1.pdf, id=1121, 459.7175pt x 305.14pt>
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-draw-1.pdf, id=1167, 449.68pt x 305.14pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-draw-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-draw-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-draw-1.pdf  used on input line 1918.
-(pdftex.def)             Requested size: 459.73741pt x 305.1532pt.
-
-LaTeX Warning: Reference `fig:modelGI-rootogram' on page 66 undefined on input line 1925.
-
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-tsDiag1-1.pdf, id=1125, 448.67625pt x 300.12125pt>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-draw-1.pdf  used on input line 2058.
+(pdftex.def)             Requested size: 449.69948pt x 305.1532pt.
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-tsDiag1-1.pdf, id=1172, 448.67625pt x 300.12125pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-tsDiag1-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-tsDiag1-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-tsDiag1-1.pdf  used on input line 1929.
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-tsDiag1-1.pdf  used on input line 2069.
 (pdftex.def)             Requested size: 448.70938pt x 300.1434pt.
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-tsDiag2-1.pdf, id=1126, 436.63126pt x 290.08376pt>
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-tsDiag2-1.pdf, id=1173, 436.63126pt x 290.08376pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-tsDiag2-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-tsDiag2-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-tsDiag2-1.pdf  used on input line 1938.
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-tsDiag2-1.pdf  used on input line 2078.
 (pdftex.def)             Requested size: 436.63019pt x 290.08304pt.
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGI-rootogram-1.pdf, id=1127, 464.73625pt x 315.1775pt>
-File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGI-rootogram-1.pdf Graphic file (type pdf)
-<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGI-rootogram-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGI-rootogram-1.pdf  used on input line 1954.
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GIrootogram-1.pdf, id=1174, 464.73625pt x 315.1775pt>
+File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GIrootogram-1.pdf Graphic file (type pdf)
+<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GIrootogram-1.pdf>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GIrootogram-1.pdf  used on input line 2094.
 (pdftex.def)             Requested size: 464.76346pt x 315.19595pt.
-[66] [67 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-draw-1.pdf>] [68 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-tsDiag1-1.pdf> <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-tsDiag2-1.pdf>] [69 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGI-rootogram-1.pdf>]
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGI-pred-observed-1.pdf, id=1184, 459.7175pt x 313.17pt>
+[69] [70 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-draw-1.pdf>] [71 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-tsDiag1-1.pdf> <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelGI-tsDiag2-1.pdf>] [72 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GIrootogram-1.pdf>]
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGI-pred-observed-1.pdf, id=1231, 712.6625pt x 925.4575pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGI-pred-observed-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGI-pred-observed-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGI-pred-observed-1.pdf  used on input line 1980.
-(pdftex.def)             Requested size: 459.7304pt x 313.17877pt.
-<../figures/high_pred_modGI.pdf, id=1187, 939.51pt x 614.295pt>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGI-pred-observed-1.pdf  used on input line 2121.
+(pdftex.def)             Requested size: 472.03336pt x 612.97853pt.
+
+LaTeX Warning: Float too large for page by 6.27231pt on input line 2123.
+
+<../figures/high_pred_modGI.pdf, id=1234, 939.51pt x 614.295pt>
 File: ../figures/high_pred_modGI.pdf Graphic file (type pdf)
 <use ../figures/high_pred_modGI.pdf>
-Package pdftex.def Info: ../figures/high_pred_modGI.pdf  used on input line 1987.
+Package pdftex.def Info: ../figures/high_pred_modGI.pdf  used on input line 2128.
 (pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
-<../figures/low_pred_modGI.pdf, id=1188, 939.51pt x 614.295pt>
+<../figures/low_pred_modGI.pdf, id=1235, 939.51pt x 614.295pt>
 File: ../figures/low_pred_modGI.pdf Graphic file (type pdf)
 <use ../figures/low_pred_modGI.pdf>
-Package pdftex.def Info: ../figures/low_pred_modGI.pdf  used on input line 1991.
+Package pdftex.def Info: ../figures/low_pred_modGI.pdf  used on input line 2132.
 (pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
-
-LaTeX Warning: Reference `fig:low-compare-pred' on page 70 undefined on input line 1999.
-
-[70 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGI-pred-observed-1.pdf>] [71 <../figures/high_pred_modGI.pdf>] [72 <../figures/low_pred_modGI.pdf>]
-<../figures/high_pred_compare.pdf, id=1235, 939.51pt x 614.295pt>
-File: ../figures/high_pred_compare.pdf Graphic file (type pdf)
-<use ../figures/high_pred_compare.pdf>
-Package pdftex.def Info: ../figures/high_pred_compare.pdf  used on input line 2003.
+<../figures/high_pred_compare.png, id=1239, 939.51pt x 614.295pt>
+File: ../figures/high_pred_compare.png Graphic file (type png)
+<use ../figures/high_pred_compare.png>
+Package pdftex.def Info: ../figures/high_pred_compare.png  used on input line 2147.
 (pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
-<../figures/low_pred_compare.pdf, id=1236, 939.51pt x 614.295pt>
-File: ../figures/low_pred_compare.pdf Graphic file (type pdf)
-<use ../figures/low_pred_compare.pdf>
-Package pdftex.def Info: ../figures/low_pred_compare.pdf  used on input line 2012.
+<../figures/low_pred_compare.png, id=1240, 939.51pt x 614.295pt>
+File: ../figures/low_pred_compare.png Graphic file (type png)
+<use ../figures/low_pred_compare.png>
+Package pdftex.def Info: ../figures/low_pred_compare.png  used on input line 2156.
 (pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/predict-newtrails-1.pdf, id=1238, 453.695pt x 315.1775pt>
-File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/predict-newtrails-1.pdf Graphic file (type pdf)
-<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/predict-newtrails-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/predict-newtrails-1.pdf  used on input line 2025.
-(pdftex.def)             Requested size: 453.72157pt x 315.19595pt.
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[73 <../figures/high_pred_compare.pdf>] [74 <../figures/low_pred_compare.pdf>] [75 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/predict-newtrails-1.pdf>] [76] [77] [78]
+<../figures/MC_data_used.png, id=1243, 939.51pt x 614.295pt>
+File: ../figures/MC_data_used.png Graphic file (type png)
+<use ../figures/MC_data_used.png>
+Package pdftex.def Info: ../figures/MC_data_used.png  used on input line 2170.
+(pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
+<../figures/NewTrails_compare.png, id=1245, 939.51pt x 614.295pt>
+File: ../figures/NewTrails_compare.png Graphic file (type png)
+<use ../figures/NewTrails_compare.png>
+Package pdftex.def Info: ../figures/NewTrails_compare.png  used on input line 2184.
+(pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
+[73] [74 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modGI-pred-observed-1.pdf>] [75 <../figures/high_pred_modGI.pdf>] [76 <../figures/low_pred_modGI.pdf>] [77 <../figures/high_pred_compare.png>] [78 <../figures/low_pred_compare.png>] [79 <../figures/MC_data_used.png>] [80 <../figures/NewTrails_compare.png>]
+<../figures/NWG_pred_compare.png, id=1322, 939.51pt x 614.295pt>
+File: ../figures/NWG_pred_compare.png Graphic file (type png)
+<use ../figures/NWG_pred_compare.png>
+Package pdftex.def Info: ../figures/NWG_pred_compare.png  used on input line 2198.
+(pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
+[81 <../figures/NWG_pred_compare.png>] [82] [83] [84]
 Section 7.
 
 Underfull \vbox (badness 1803) has occurred while \output is active []
 
-[79
+[85
 
-] [80]
+]
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GS-globaldeviations-1.pdf, id=1366, 449.68pt x 305.14pt>
+File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GS-globaldeviations-1.pdf Graphic file (type pdf)
+<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GS-globaldeviations-1.pdf>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GS-globaldeviations-1.pdf  used on input line 2356.
+(pdftex.def)             Requested size: 449.69948pt x 305.1532pt.
+[86]
+Overfull \hbox (227.08742pt too wide) has occurred while \output is active
+\T1/lmr/m/sl/10 7.4.  CAN WE IDENTIFY TRAILS THAT ARE ``CLOSEST'' TO GLOBAL SMOOTH TREND AS IDEAL CANDIDATES FOR YEAR-ROUND CAMERAS? \T1/lmr/m/n/10 87
+ []
+
+[87 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GS-globaldeviations-1.pdf>]
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations1-1.pdf, id=1395, 702.625pt x 919.435pt>
+File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations1-1.pdf Graphic file (type pdf)
+<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations1-1.pdf>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations1-1.pdf  used on input line 2397.
+(pdftex.def)             Requested size: 472.04285pt x 617.70178pt.
+
+LaTeX Warning: Float too large for page by 10.99556pt on input line 2402.
+
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations2-1.pdf, id=1396, 702.625pt x 919.435pt>
+File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations2-1.pdf Graphic file (type pdf)
+<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations2-1.pdf>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations2-1.pdf  used on input line 2406.
+(pdftex.def)             Requested size: 472.04285pt x 617.70178pt.
+
+LaTeX Warning: Float too large for page by 10.99556pt on input line 2411.
+
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations3-1.pdf, id=1397, 702.625pt x 919.435pt>
+File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations3-1.pdf Graphic file (type pdf)
+<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations3-1.pdf>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations3-1.pdf  used on input line 2415.
+(pdftex.def)             Requested size: 472.04285pt x 617.70178pt.
+
+LaTeX Warning: Float too large for page by 10.99556pt on input line 2420.
+
+[88]
+Overfull \hbox (227.08742pt too wide) has occurred while \output is active
+\T1/lmr/m/sl/10 7.4.  CAN WE IDENTIFY TRAILS THAT ARE ``CLOSEST'' TO GLOBAL SMOOTH TREND AS IDEAL CANDIDATES FOR YEAR-ROUND CAMERAS? \T1/lmr/m/n/10 89
+ []
+
+[89 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations1-1.pdf>] [90 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations2-1.pdf>]
+Overfull \hbox (227.08742pt too wide) has occurred while \output is active
+\T1/lmr/m/sl/10 7.4.  CAN WE IDENTIFY TRAILS THAT ARE ``CLOSEST'' TO GLOBAL SMOOTH TREND AS IDEAL CANDIDATES FOR YEAR-ROUND CAMERAS? \T1/lmr/m/n/10 91
+ []
+
+[91 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations3-1.pdf>] [92
+
+]
 Appendix A.
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/AT-vis-views-1.pdf, id=1327, 466.74374pt x 310.15875pt>
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/AT-vis-views-1.pdf, id=1453, 465.74pt x 310.15875pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/AT-vis-views-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/AT-vis-views-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/AT-vis-views-1.pdf  used on input line 2251.
-(pdftex.def)             Requested size: 466.7426pt x 310.15799pt.
-
-Underfull \hbox (badness 10000) in paragraph at lines 2251--2253
-[][]
- []
-
-
-Underfull \vbox (badness 8056) has occurred while \output is active []
-
-[81
-
-
-]
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/AT-vis-moving7-1.pdf, id=1346, 466.74374pt x 310.15875pt>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/AT-vis-views-1.pdf  used on input line 2465.
+(pdftex.def)             Requested size: 465.73886pt x 310.15799pt.
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/AT-vis-moving7-1.pdf, id=1455, 465.74pt x 310.15875pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/AT-vis-moving7-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/AT-vis-moving7-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/AT-vis-moving7-1.pdf  used on input line 2256.
-(pdftex.def)             Requested size: 466.7426pt x 310.15799pt.
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/AT-vis-moving7-1.pdf  used on input line 2476.
+(pdftex.def)             Requested size: 465.73886pt x 310.15799pt.
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/cumulative3-1.pdf, id=1457, 451.6875pt x 315.1775pt>
+File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/cumulative3-1.pdf Graphic file (type pdf)
+<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/cumulative3-1.pdf>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/cumulative3-1.pdf  used on input line 2487.
+(pdftex.def)             Requested size: 451.71394pt x 315.19595pt.
+[93
 
-LaTeX Warning: Reference `fig:sumcum3' on page 82 undefined on input line 2260.
+] [94 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/AT-vis-views-1.pdf>] [95 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/AT-vis-moving7-1.pdf>]
+Overfull \hbox (10.96736pt too wide) in paragraph at lines 2528--2528
+[]\T1/lmtt/m/n/10 ##                                   Model df       AIC       BIC    logLik   Test   L.Ratio[] 
+ []
 
-
-Underfull \vbox (badness 1377) has occurred while \output is active []
-
-[82 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/AT-vis-views-1.pdf>] [83 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/AT-vis-moving7-1.pdf>]
-Overfull \hbox (37.21729pt too wide) in paragraph at lines 2292--2292
-[]\T1/lmtt/m/n/10 ##                                   Model df      AIC      BIC    logLik   Test  L.Ratio p-value[] 
+[96 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/cumulative3-1.pdf>]
+Overfull \hbox (10.96736pt too wide) in paragraph at lines 2528--2528
+[]\T1/lmtt/m/n/10 ## gamm_modGI_AR1_Both_MA3$lme           2 28    7844.2    7965.9   -3894.1 1 vs 2   12532.3[] 
  []
 
 
-Overfull \hbox (37.21729pt too wide) in paragraph at lines 2292--2292
-[]\T1/lmtt/m/n/10 ## gamm_modGI_AR1_Both_MA3$lme           2 27  13059.8  13175.9   -6502.9 1 vs 2   7354.6  <.0001[] 
+Overfull \hbox (10.96736pt too wide) in paragraph at lines 2528--2528
+[]\T1/lmtt/m/n/10 ## gamm_modGI_AR1_StravaOnly$lme         3 27 1157492.0 1157609.4 -578719.0 2 vs 3 1149649.8[] 
  []
 
-
-Overfull \hbox (37.21729pt too wide) in paragraph at lines 2292--2292
-[]\T1/lmtt/m/n/10 ## gamm_modGI_AR1_StravaOnly$lme         3 26 761319.9 761431.6 -380633.9 2 vs 3 748262.0  <.0001[] 
- []
-
-<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/ATplot-compare-1.pdf, id=1384, 452.69125pt x 315.1775pt>
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/ATplot-compare-1.pdf, id=1528, 454.69875pt x 315.1775pt>
 File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/ATplot-compare-1.pdf Graphic file (type pdf)
 <use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/ATplot-compare-1.pdf>
-Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/ATplot-compare-1.pdf  used on input line 2324.
-(pdftex.def)             Requested size: 452.71776pt x 315.19595pt.
-[84] [85 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/ATplot-compare-1.pdf>] [86
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/ATplot-compare-1.pdf  used on input line 2561.
+(pdftex.def)             Requested size: 454.72537pt x 315.19595pt.
+[97] [98 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/ATplot-compare-1.pdf>]
+Appendix B.
+[99
+
+] [100]
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/tsDiag-1.pdf, id=1571, 448.67625pt x 300.12125pt>
+File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/tsDiag-1.pdf Graphic file (type pdf)
+<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/tsDiag-1.pdf>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/tsDiag-1.pdf  used on input line 2678.
+(pdftex.def)             Requested size: 448.70938pt x 300.1434pt.
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/mod-acfpacf-1.pdf, id=1572, 436.63126pt x 290.08376pt>
+File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/mod-acfpacf-1.pdf Graphic file (type pdf)
+<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/mod-acfpacf-1.pdf>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/mod-acfpacf-1.pdf  used on input line 2687.
+(pdftex.def)             Requested size: 436.65683pt x 290.10074pt.
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/mod-draw-1.pdf, id=1573, 449.68pt x 305.14pt>
+File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/mod-draw-1.pdf Graphic file (type pdf)
+<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/mod-draw-1.pdf>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/mod-draw-1.pdf  used on input line 2698.
+(pdftex.def)             Requested size: 449.69948pt x 305.1532pt.
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/mod-rootogram-1.pdf, id=1574, 464.73625pt x 315.1775pt>
+File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/mod-rootogram-1.pdf Graphic file (type pdf)
+<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/mod-rootogram-1.pdf>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/mod-rootogram-1.pdf  used on input line 2707.
+(pdftex.def)             Requested size: 464.76346pt x 315.19595pt.
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/mod-predictions-1.pdf, id=1575, 459.7175pt x 313.17pt>
+File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/mod-predictions-1.pdf Graphic file (type pdf)
+<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/mod-predictions-1.pdf>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/mod-predictions-1.pdf  used on input line 2716.
+(pdftex.def)             Requested size: 459.7304pt x 313.17877pt.
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelG-predict-spatial-1.pdf, id=1576, 464.73625pt x 310.15875pt>
+File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelG-predict-spatial-1.pdf Graphic file (type pdf)
+<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelG-predict-spatial-1.pdf>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelG-predict-spatial-1.pdf  used on input line 2725.
+(pdftex.def)             Requested size: 464.7351pt x 310.15799pt.
+<Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelG-predict-spatial-2.pdf, id=1577, 468.75125pt x 310.15875pt>
+File: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelG-predict-spatial-2.pdf Graphic file (type pdf)
+<use Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelG-predict-spatial-2.pdf>
+Package pdftex.def Info: Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelG-predict-spatial-2.pdf  used on input line 2733.
+(pdftex.def)             Requested size: 468.75009pt x 310.15799pt.
+[101] [102 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/tsDiag-1.pdf> <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/mod-acfpacf-1.pdf>] [103 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/mod-draw-1.pdf>] [104 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/mod-rootogram-1.pdf>] [105 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/mod-predictions-1.pdf>] [106 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelG-predict-spatial-1.pdf>] [107 <./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/modelG-predict-spatial-2.pdf>] [108
 
 ]
-Appendix B.
+Appendix C.
 
-Overfull \hbox (94.96712pt too wide) in paragraph at lines 2349--2349
+Overfull \hbox (94.96712pt too wide) in paragraph at lines 2760--2760
 []\T1/lmtt/m/n/10 ##   `/Users/mlbartley/Documents/Consulting/Headwaters Economics/HE-TrailUse-R/data/raw/bridger_trails_elev'[] 
  []
 
-[87]
+<../figures/NWG_insample_pred_compare.png, id=1686, 939.51pt x 614.295pt>
+File: ../figures/NWG_insample_pred_compare.png Graphic file (type png)
+<use ../figures/NWG_insample_pred_compare.png>
+Package pdftex.def Info: ../figures/NWG_insample_pred_compare.png  used on input line 2764.
+(pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
+File: ../figures/NWG_pred_compare.png Graphic file (type png)
+<use ../figures/NWG_pred_compare.png>
+Package pdftex.def Info: ../figures/NWG_pred_compare.png  used on input line 2773.
+(pdftex.def)             Requested size: 472.03323pt x 308.6371pt.
+(./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains.bbl [109] [110 <../figures/NWG_insample_pred_compare.png>] [111] [112
 
-LaTeX Warning: Reference `fig:mod-diagnoses' on page 88 undefined on input line 2377.
-
-
-LaTeX Warning: Reference `fig:mod-acfpacf' on page 88 undefined on input line 2377.
-
-(./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains.bbl [88] [89
-
-]) [90] (./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains.aux)
-
-LaTeX Warning: There were undefined references.
-
+] [113]) [114] (./Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains.aux)
 Package rerunfilecheck Info: File `Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains.out' has not changed.
-(rerunfilecheck)             Checksum: E5F105303174BAFA77BFEDB72AE0E6BC;5924.
+(rerunfilecheck)             Checksum: E9367C1A6DAD92A78EA300D2B6F60D92;7462.
  ) 
 Here is how much of TeX's memory you used:
- 16306 strings out of 477035
- 285041 string characters out of 5827219
- 630858 words of memory out of 5000000
- 36780 multiletter control sequences out of 15000+600000
+ 16556 strings out of 477035
+ 299393 string characters out of 5827218
+ 635022 words of memory out of 5000000
+ 36950 multiletter control sequences out of 15000+600000
  563675 words of font info for 99 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 72i,10n,79p,1677b,588s stack positions out of 10000i,1000n,20000p,200000b,200000s
-{/Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}</Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmro10.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtko10.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtti10.pfb>
-Output written on Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains.pdf (90 pages, 4075989 bytes).
+ 72i,10n,79p,1677b,590s stack positions out of 10000i,1000n,20000p,200000b,200000s
+{/Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}</Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmro10.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtko10.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></Users/mlbartley/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtti10.pfb>
+Output written on Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains.pdf (114 pages, 18940106 bytes).
 PDF statistics:
- 1601 PDF objects out of 1728 (max. 8388607)
- 1310 compressed objects within 14 object streams
- 343 named destinations out of 1000 (max. 500000)
- 516 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1897 PDF objects out of 2073 (max. 8388607)
+ 1543 compressed objects within 16 object streams
+ 408 named destinations out of 1000 (max. 500000)
+ 623 words of extra memory for PDF output out of 10000 (max. 10000000)
 

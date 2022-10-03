@@ -1,5 +1,5 @@
 ---
-title: "Statistical Analysis: Predicting Trail Use "
+title: "Statistical Analysis: Predicting Trail Use in the Bridger Mountains"
 author: "Dr. Meridith L. Bartley"
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
@@ -40,4 +40,8 @@ We provide the following recommendations for future observations periods and ana
 2. Subsections within a trail seem to capture similar data. Cameras spread across more trails may provide more information than multiple camera counters deployed along a single trail. 
 3. Multiple years of data would provide valuable information about annual trends and be helpful in forecasting trail use into the future. 
 4. If spatiotemporal correlation structure is available for future analysis then it would be helpful to consider the spatial network node/edge designations in tandem with camera placement. 
+
+## Future Work
+
+This statistical analysis has provided a way to understand recreational trail use in the Bridger Mountains for 2021. We've outlined how additional temporal coverage of trail use via deployed trail counter cameras will allow for improved model predictions for both out-of-sample trails and in-sample trails at new temporal ranges (including forecasting predictions). One remaining question to be explored during future work is how to leverage additional covariate data (e.g. Strava Metro trip data) that is available beyond the temporal coverage of camera trail counter deployment periods. With a model fit in hand we are able to extrapolate and produce prediction values (and associated uncertainty) at any point in time that we have covariate data. The challenge is determining how well the predictions reflect reality during that time and without any available camera counter data to compare as our "truth", it's not recommended to use extrapolated model predictions as reliable information. In other words, we don't currently have enough information about long term trends to know whether observed trail use data from 2021 (and especially concentrated in summer months) is representative of trail use in years past. If we do explore the use of previous years of covariates, namely the Strava Metro provided trip data, we should focus on summer months and in-sample trails as these covariate spaces most closely resemble the space covered by our available data. 
 

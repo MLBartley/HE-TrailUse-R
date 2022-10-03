@@ -11,7 +11,7 @@
 # # devtools::install_github('thomasp85/ggraph') # need dev version of ggraph 
 # library(ggraph) # network plots
 # # devtools::install_github('nspope/corMLPE', configure.args = "--with-proj-lib=/usr/local/lib/")
-# library(corMLPE) # network correlation structure for undirected networks
+library(corMLPE) # network correlation structure for undirected networks
 # # library(ggmap) # for geocoding, but not used by default (see below)
 # library(ggspatial) # scale bar for maps
 # library(maps) # country outlines for maps

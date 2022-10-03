@@ -100,7 +100,7 @@ knitr::include_graphics(path = here("output/figures/MiddleCottonwood_TS.png"))
 
 We also examine the relationship between our response variable (max.camera, or the number of trips counted on a trail section per day) and several explanatory variables (Figure \@ref(fig:covariates)). 
 
-```{r covariates, eval = T, fig.align='center',  out.width = "100%", fig.cap = "Relationship of select covariates to trail use for Middle Cottonwood."}
+```{r covariates-prep, eval = T}
 p1 <- ggplot(singleTrail, aes(yday, max.camera)) +
   geom_point()+
     guides(fill = 'none') +
@@ -208,9 +208,23 @@ plot <- ggpubr::ggarrange(p1, p2,
           ncol = 2, nrow = 4
             )
 
-ggpubr::annotate_figure(plot, top = ggpubr::text_grob("Middle Cottonwood Trail Traffic", 
-                size = 20))
+plot2 <- ggpubr::annotate_figure(plot, 
+                        top = ggpubr::text_grob("Middle Cottonwood Trail Traffic", 
+                size = 18))
+
+ggsave(
+  filename = here::here("output/figures/MiddleCottonwood_Covariates.png"),
+  plot = plot2, 
+  height = 9.5, 
+  width = 13,
+  dpi = 700)
 ```
+```{r covariates, eval = T, , fig.align='center',  out.width = "100%", fig.cap = "Relationship of select covariates to trail use for Middle Cottonwood."}
+
+knitr::include_graphics(here::here("output/figures/MiddleCottonwood_Covariates.png"))
+
+```
+
 
 ## Model Options
 

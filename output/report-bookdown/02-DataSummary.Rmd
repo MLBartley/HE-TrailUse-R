@@ -92,7 +92,7 @@ trail_table <- trail_count %>%
 
 ## Need to update "Included in Analysis" info
 
-trail_table[which(trail_table$trailname %in% "Bridger Ridge" & trail_table %notin% c("M to Baldy", "Steep Way")), "Included in Analysis"] <- "Combined"
+trail_table[which(trail_table$trailname %in% "Bridger Ridge" & trail_table$subsectionname %notin% c("M to Baldy", "Steep Way")), "Included in Analysis"] <- "Combined"
 
 ```
 
@@ -212,7 +212,7 @@ for each counters are different (see Table \@ref(tab:counter-summary))
 the time series plots show very similar patterns of use of time
 indicating non-independent counts.
 
-```{r counter-byid-high, eval = T, fig.align = "center", out.width = "100%", fig.cap= "Timeseries plots of daily trail camera counts over time in the Bridger Mountains along high use trails. The following trails are not included in the analysis due to low deployment time:  Fairy Lakeshore. The following trails are combined in the analysis due to non-independent observations along a single trail: M to Baldy, Ross Pass to Sacagawea Peak, Bridger, and Bridger to Ross Pass."}
+```{r counter-byid-high, eval = T, fig.align = "center", out.width = "100%", fig.cap= "Timeseries plots of daily trail camera counts over time in the Bridger Mountains along high use trails. The following trails are not included in the analysis due to low deployment time:  Fairy Lakeshore. The following trails are combined in the analysis due to non-independent observations along a single trail:Baldy to Bridger, Ross Pass to Sacagawea Peak, Bridger, and Bridger to Ross Pass."}
 
 knitr::include_graphics(path = here(paste0("output/figures/Counter_bySubsection_TS_highuse.", image_out_format)))
 
@@ -269,13 +269,11 @@ combined for this analysis:
 
 -   #7 - Bridger to Ross Pass
 
--   #8 - M to Baldy
-
 -   #9 and 10 - Ross Pass to Sacagawea Peak
 
-Note: The "Steep Way" subsection of Bridger Ridge is not included in
-this combination of subsections. It has a very distinct trail use that
-differs from the rest of the ridge.
+Note: The "Steep Way" and "M to Baldy" subsections of Bridger Ridge are
+not included in this combination of subsections. These have a very
+distinct trail use that differs from the rest of the ridge.
 
 #### Hourly Data
 

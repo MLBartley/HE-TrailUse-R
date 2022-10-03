@@ -125,14 +125,14 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same} % disable monospaced font for URLs
 \hypersetup{
-  pdftitle={Statistical Analysis: Predicting Trail Use},
+  pdftitle={Statistical Analysis: Predicting Trail Use in the Bridger Mountains},
   pdfauthor={Dr.~Meridith L. Bartley},
   hidelinks,
   pdfcreator={LaTeX via pandoc}}
 
-\title{Statistical Analysis: Predicting Trail Use}
+\title{Statistical Analysis: Predicting Trail Use in the Bridger Mountains}
 \author{Dr.~Meridith L. Bartley}
-\date{2022-09-29}
+\date{2022-10-03}
 
 \begin{document}
 \maketitle
@@ -190,6 +190,11 @@ We provide the following recommendations for future observations periods and ana
 \item
   If spatiotemporal correlation structure is available for future analysis then it would be helpful to consider the spatial network node/edge designations in tandem with camera placement.
 \end{enumerate}
+
+\hypertarget{future-work}{%
+\section{Future Work}\label{future-work}}
+
+This statistical analysis has provided a way to understand recreational trail use in the Bridger Mountains for 2021. We've outlined how additional temporal coverage of trail use via deployed trail counter cameras will allow for improved model predictions for both out-of-sample trails and in-sample trails at new temporal ranges (including forecasting predictions). One remaining question to be explored during future work is how to leverage additional covariate data (e.g.~Strava Metro trip data) that is available beyond the temporal coverage of camera trail counter deployment periods. With a model fit in hand we are able to extrapolate and produce prediction values (and associated uncertainty) at any point in time that we have covariate data. The challenge is determining how well the predictions reflect reality during that time and without any available camera counter data to compare as our ``truth'', it's not recommended to use extrapolated model predictions as reliable information. In other words, we don't currently have enough information about long term trends to know whether observed trail use data from 2021 (and especially concentrated in summer months) is representative of trail use in years past. If we do explore the use of previous years of covariates, namely the Strava Metro provided trip data, we should focus on summer months and in-sample trails as these covariate spaces most closely resemble the space covered by our available data.
 
 \hypertarget{introduction}{%
 \chapter{Introduction}\label{introduction}}
@@ -306,7 +311,7 @@ indicating non-independent counts.
 
 }
 
-\caption{Timeseries plots of daily trail camera counts over time in the Bridger Mountains along high use trails. The following trails are not included in the analysis due to low deployment time:  Fairy Lakeshore. The following trails are combined in the analysis due to non-independent observations along a single trail: M to Baldy, Ross Pass to Sacagawea Peak, Bridger, and Bridger to Ross Pass.}\label{fig:counter-byid-high}
+\caption{Timeseries plots of daily trail camera counts over time in the Bridger Mountains along high use trails. The following trails are not included in the analysis due to low deployment time:  Fairy Lakeshore. The following trails are combined in the analysis due to non-independent observations along a single trail:Baldy to Bridger, Ross Pass to Sacagawea Peak, Bridger, and Bridger to Ross Pass.}\label{fig:counter-byid-high}
 \end{figure}
 
 \begin{figure}
@@ -341,11 +346,11 @@ ID & Trail & Subsection & Count & Start & End & Deployment & Mean Count Per Day 
 \addlinespace
 6 & Bridger Ridge & Bridger & 1689 & 07-06 & 12-31 & 179 days & 9.44 & Combined\\
 7 & Bridger Ridge & Bridger to Ross Pass & 1582 & 07-06 & 12-31 & 179 days & 8.84 & Combined\\
-8 & Bridger Ridge & M to Baldy & 2635 & 08-07 & 09-12 & 37 days & 71.22 & Combined\\
+8 & Bridger Ridge & M to Baldy & 2635 & 08-07 & 09-12 & 37 days & 71.22 & Yes\\
 9 & Bridger Ridge & Ross Pass to Sacagawea Peak & 1508 & 07-06 & 12-31 & 179 days & 8.42 & Combined\\
 10 & Bridger Ridge & Ross Pass to Sacagawea Peak & 310 & 07-12 & 12-31 & 173 days & 1.79 & Combined\\
 \addlinespace
-11 & Bridger Ridge & Steep Way & 10122 & 08-27 & 09-26 & 31 days & 326.52 & Combined\\
+11 & Bridger Ridge & Steep Way & 10122 & 08-27 & 09-26 & 31 days & 326.52 & Yes\\
 12 & Sacagawea Pass & Sacagawea Pass & 5192 & 08-05 & 09-09 & 36 days & 144.22 & Yes\\
 13 & Sacagawea Pass & Sacagawea Pass & 9485 & 07-12 & 12-31 & 173 days & 54.83 & Yes\\
 14 & Horsethief Mountain & Horsethief Mountain & 628 & 07-13 & 09-09 & 59 days & 10.64 & Yes\\
@@ -363,8 +368,8 @@ ID & Trail & Subsection & Count & Start & End & Deployment & Mean Count Per Day 
 24 & Shafthouse Hill & Upper Shafthouse & 303 & 07-03 & 07-05 & 3 days & 101.00 & No\\
 25 & South Fork Flathead Creek & South Fork Flathead Creek & 91 & 07-03 & 07-03 & 1 days & 91.00 & No\\
 \addlinespace
-26 & Corbly Gulch & Corbly Gulch & 1766 & 06-27 & 07-26 & 30 days & 58.87 & Yes\\
-27 & Corbly Gulch & Corbly Gulch & 165 & 07-13 & 12-31 & 172 days & 0.96 & Yes\\
+26 & Corbly Gulch & Lower & 1766 & 06-27 & 07-26 & 30 days & 58.87 & Yes\\
+27 & Corbly Gulch & Upper & 165 & 07-13 & 12-31 & 172 days & 0.96 & Yes\\
 28 & North Cottonwood & North Cottonwood to Johnson Canyon & 662 & 07-28 & 09-10 & 45 days & 14.71 & Yes\\
 29 & North Cottonwood Access & North Cottonwood Access & 2124 & 08-13 & 09-08 & 27 days & 78.67 & Yes\\
 30 & Ross Pass & Ross Pass & 1246 & 07-13 & 08-09 & 28 days & 44.50 & Yes\\
@@ -405,14 +410,12 @@ combined for this analysis:
 \item
   \#7 - Bridger to Ross Pass
 \item
-  \#8 - M to Baldy
-\item
   \#9 and 10 - Ross Pass to Sacagawea Peak
 \end{itemize}
 
-Note: The ``Steep Way'' subsection of Bridger Ridge is not included in
-this combination of subsections. It has a very distinct trail use that
-differs from the rest of the ridge.
+Note: The ``Steep Way'' and ``M to Baldy'' subsections of Bridger Ridge are
+not included in this combination of subsections. These have a very
+distinct trail use that differs from the rest of the ridge.
 
 \hypertarget{hourly-data}{%
 \subsubsection{Hourly Data}\label{hourly-data}}
@@ -1044,7 +1047,7 @@ We also examine the relationship between our response variable (max.camera, or t
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/covariates-1} 
+{\centering \includegraphics[width=1\linewidth]{../figures/MiddleCottonwood_Covariates} 
 
 }
 
@@ -1358,12 +1361,12 @@ This is an approximate test. Always visualize your results too, and compare the 
 ## indicate that k is too low, especially if edf is close to k'.
 ## 
 ##                       k'  edf k-index p-value
-## s(yday)             8.00 5.96    1.14    0.78
-## s(month)            2.00 1.00    1.14    0.82
-## s(wday)             5.00 4.62    0.87    0.18
-## s(daily_aqi_value)  9.00 5.84    1.18    0.89
-## s(temp_max_f)       9.00 6.49    1.16    0.85
-## s(precipitation_in) 8.00 6.19    1.22    0.92
+## s(yday)             8.00 5.96    1.14    0.83
+## s(month)            2.00 1.00    1.14    0.78
+## s(wday)             5.00 4.62    0.87    0.15
+## s(daily_aqi_value)  9.00 5.84    1.18    0.88
+## s(temp_max_f)       9.00 6.49    1.16    0.83
+## s(precipitation_in) 8.00 6.19    1.22    0.90
 \end{verbatim}
 
 \begin{Shaded}
@@ -1547,7 +1550,7 @@ This joint analysis covers the following Bridger Mountain subtrails:
 \item
   College M
 \item
-  Bridger Ridge (combination of Bridger, Baldy to Bridger, Bridger to Ross Pass, M to Baldy, Ross Pass to Sacagawea Peak)
+  Bridger Ridge (combination of Bridger, Baldy to Bridger, Bridger to Ross Pass, Ross Pass to Sacagawea Peak)
 \item
   Steep Way
 \item
@@ -1569,7 +1572,9 @@ This joint analysis covers the following Bridger Mountain subtrails:
 \item
   Lower Shafthouse
 \item
-  Corbly Gulch
+  Corbly Gulch - Lower
+\item
+  Corbly Gulch - Upper
 \item
   North Cottonwood to Johnson Canyon
 \item
@@ -1584,6 +1589,8 @@ This joint analysis covers the following Bridger Mountain subtrails:
   Benchmark Road
 \item
   Horsethief Mountain
+\item
+  M to Baldy
 \end{enumerate}
 
 \hypertarget{fitting-a-generalized-additive-mixture-model}{%
@@ -1643,7 +1650,7 @@ In R we can write our model as:
 \end{Highlighting}
 \end{Shaded}
 
-The arguments to the s() terms are smoothed. For each we explicitly specify the type of smoother to be used with the bs argument, and the maximum number of basis functions with k. The default type of smoother is the TPRS smoother (``tp'') and the default value for k (for TPRS) is 10. We use a cyclic cubic spline (``cc'') for day of week (wday) and set k=7 as we have seven unique values in this variable. We also set k=7 for month for the same reason; the data spans seven months of the year. If camera counters are deployed year-round in the future we would use bs=``cc'' and k=12 for this variable. The random effect smoother (bs=``re'') that we used for the subsectionF factor always has a k value equal to the number of levels in the grouping variable (here, 21). We restrict the number of knots for \texttt{precipitation\_in} (k=5) to curb some weird behavior likely due to very few non-zero values.
+The arguments to the s() terms are smoothed. For each we explicitly specify the type of smoother to be used with the bs argument, and the maximum number of basis functions with k. The default type of smoother is the TPRS smoother (``tp'') and the default value for k (for TPRS) is 10. We use a cyclic cubic spline (``cc'') for day of week (wday) and set k=7 as we have seven unique values in this variable. We also set k=7 for month for the same reason; the data spans seven months of the year. If camera counters are deployed year-round in the future we would use bs=``cc'' and k=12 for this variable. The random effect smoother (bs=``re'') that we used for the subsectionF factor always has a k value equal to the number of levels in the grouping variable (here, 23). We restrict the number of knots for \texttt{precipitation\_in} (k=5) to curb some weird behavior likely due to very few non-zero values.
 
 For each model (G, GS, GI) we will use the \textbf{forecast} package to determine the optimum values of \(p\) and \(q\) in the ARMA correlation structure, but, for brevity, won't always report this outcome.
 
@@ -1658,20 +1665,20 @@ For each model (G, GS, GI) we will use the \textbf{forecast} package to determin
 \end{Shaded}
 
 \begin{verbatim}
-##        ar1        ma1        ma2 
-##  0.9328458 -0.6709214 -0.1173204
+##         ar1         ma1         ma2 
+##  0.86508722 -0.69644735 -0.09078537
 \end{verbatim}
 
 The summary and various diagnostic plots will only be shown for the ``best'' model (between the different correlation structures) as determined by anova. For model G, we will present the model with the ARMA correlation structure only.
 
 \begin{verbatim}
-##                    Model df      AIC      BIC    logLik   Test   L.Ratio p-value
-## gamm_modG$lme          1 15 30149.72 30224.27 -15059.86                         
-## gamm_modG_AR1$lme      2 16 27937.95 28017.47 -13952.98 1 vs 2 2213.7707  <.0001
-## gamm_modG_ARMA$lme     3 19 27502.40 27596.83 -13732.20 2 vs 3  441.5458  <.0001
+##                    Model df      AIC      BIC    logLik   Test  L.Ratio p-value
+## gamm_modG$lme          1 15 26200.95 26276.18 -13085.48                        
+## gamm_modG_AR1$lme      2 16 25535.22 25615.46 -12751.61 1 vs 2 667.7298  <.0001
+## gamm_modG_ARMA$lme     3 19 25518.03 25613.31 -12740.02 2 vs 3  23.1923  <.0001
 \end{verbatim}
 
-The summary output indicates that all of our included parametric (linear) coefficients and smooth terms are (approximately) significant. The effective degree of freedom (edf) values represents the complexity of the smooth. We can see in this output that the highest smooth complexity is for \texttt{subsectionF}. The adjusted R-sq value (which should not be employed as an absolute measure of model performance) is 0.805 for this model.
+The summary output indicates that all of our included parametric (linear) coefficients and smooth terms are (approximately) significant. The effective degree of freedom (edf) values represents the complexity of the smooth. We can see in this output that the highest smooth complexity is for \texttt{subsectionF}. The adjusted R-sq value (which should not be employed as an absolute measure of model performance) is 0.813 for this model.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1691,28 +1698,28 @@ The summary output indicates that all of our included parametric (linear) coeffi
 ##     total_traveltime + max.count
 ## 
 ## Parametric coefficients:
-##                    Estimate Std. Error t value Pr(>|t|)    
-## (Intercept)       3.3522822  0.3485163   9.619  < 2e-16 ***
-## total_traveltime -0.0234643  0.0089957  -2.608  0.00923 ** 
-## max.count         0.0119338  0.0004636  25.743  < 2e-16 ***
+##                   Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)       3.331836   0.428926   7.768 1.89e-14 ***
+## total_traveltime -0.023770   0.011698  -2.032   0.0424 *  
+## max.count         0.013918   0.000596  23.354  < 2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## Approximate significance of smooth terms:
 ##                         edf Ref.df        F p-value    
-## s(yday)               7.973  8.000  693.089 < 2e-16 ***
-## s(subsectionF)       16.489 19.000  190.571 < 2e-16 ***
-## s(month)              5.683  5.683   57.794 < 2e-16 ***
-## s(wday)               4.986  5.000  674.556 < 2e-16 ***
-## s(daily_aqi_value)    8.886  8.886  120.148 < 2e-16 ***
-## s(temp_max_f)         8.835  8.835 1438.876 < 2e-16 ***
-## s(precipitation_in)   3.910  3.910   43.386 < 2e-16 ***
-## s(totallength_miles)  2.378  2.378    6.453 0.00139 ** 
+## s(yday)               7.969  8.000  678.899  <2e-16 ***
+## s(subsectionF)       17.529 21.000 1228.631  <2e-16 ***
+## s(month)              5.801  5.801   38.475  <2e-16 ***
+## s(wday)               4.982  5.000  585.932  <2e-16 ***
+## s(daily_aqi_value)    8.900  8.900  167.047  <2e-16 ***
+## s(temp_max_f)         8.868  8.868 2326.358  <2e-16 ***
+## s(precipitation_in)   3.871  3.871   38.115  <2e-16 ***
+## s(totallength_miles)  2.027  2.027    4.027  0.0171 *  
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
-## R-sq.(adj) =  0.805   
-##   Scale est. = 1         n = 1064
+## R-sq.(adj) =  0.813   
+##   Scale est. = 1         n = 1113
 \end{verbatim}
 
 In figures \ref{fig:modG-TSdiag1} and \ref{fig:modG-TSdiag2}, we examine several diagnostic plots for a time series GAMM fit. A more detailed explanation of all of these plots and how to interpret them is available in Section \ref{Diag}. We are not looking for a perfect fit with this model, rather including these diagnostic plots so that they may be compared to those from fitting the data to models GS and GI.
@@ -1978,8 +1985,8 @@ Here, we present the summary and diagnostic plots for model GI with an AR1 tempo
 
 \begin{verbatim}
 ##                    Model df      AIC      BIC    logLik   Test  L.Ratio p-value
-## gamm_modGI$lme         1 36 104252.5 104431.4 -52090.27                        
-## gamm_modGI_AR1$lme     2 37 112831.7 113015.6 -56378.84 1 vs 2 8577.134  <.0001
+## gamm_modGI$lme         1 38 111380.7 111571.3 -55652.37                        
+## gamm_modGI_AR1$lme     2 39 126052.5 126248.1 -62987.26 1 vs 2 14669.79  <.0001
 \end{verbatim}
 
 The summary now includes all the different day of year (\texttt{yday}) by trail subsection (\texttt{subsectionF}) parameters.
@@ -1998,51 +2005,53 @@ The summary now includes all the different day of year (\texttt{yday}) by trail 
 ## 
 ## Parametric coefficients:
 ##                    Estimate Std. Error t value Pr(>|t|)    
-## (Intercept)       1.9791505  1.2482628   1.586    0.113    
-## total_traveltime -0.0281281  0.0279179  -1.008    0.314    
-## max.count         0.0121083  0.0003239  37.386   <2e-16 ***
+## (Intercept)       1.4985959  1.0977050   1.365    0.172    
+## total_traveltime -0.0357824  0.0237040  -1.510    0.131    
+## max.count         0.0137133  0.0003169  43.269   <2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## Approximate significance of smooth terms:
-##                                                             edf Ref.df        F  p-value    
-## s(yday)                                               5.992e+00  8.000   28.881  < 2e-16 ***
-## s(yday):subsectionFBenchmark Rd                       1.308e+00  4.000   10.055 0.526662    
-## s(yday):subsectionFCarroll Creek                      1.376e+00  5.000    5.605 0.124068    
-## s(yday):subsectionFCollege M                          3.960e+00  5.000  396.986 0.185462    
-## s(yday):subsectionFCollege M to Sypes                 1.686e+00  5.000   17.602 0.085970 .  
-## s(yday):subsectionFCorbly Gulch                       7.407e+00  8.000  602.027  < 2e-16 ***
-## s(yday):subsectionFEast Bridger North                 7.473e-06  6.000    0.000 0.585365    
-## s(yday):subsectionFEast Bridger South                 2.245e+00  6.000   90.350 0.069140 .  
-## s(yday):subsectionFFairy Creek                        1.577e+00  5.000   12.666 0.020901 *  
-## s(yday):subsectionFHorsethief Mountain                5.582e-01  6.000    0.251 0.154810    
-## s(yday):subsectionFJohnson Canyon Jeep Trail          1.255e+00  5.000    4.196 0.168560    
-## s(yday):subsectionFLower Shafthouse                   3.691e+00  7.000 1395.365 0.000319 ***
-## s(yday):subsectionFMiddle Cottonwood                  2.324e+00  6.000  110.611  < 2e-16 ***
-## s(yday):subsectionFNorth Cottonwood Access            4.238e+00  5.000  289.163 0.253023    
-## s(yday):subsectionFNorth Cottonwood to Johnson Canyon 3.985e+00  6.000   48.517 0.267015    
-## s(yday):subsectionFRaptor View                        3.886e+00  6.000   15.541 0.845171    
-## s(yday):subsectionFRoss Pass                          2.427e+00  6.000  610.903 0.003528 ** 
-## s(yday):subsectionFSacagawea Pass                     7.897e+00  8.000 1501.159  < 2e-16 ***
-## s(yday):subsectionFSteep Way                          4.838e+00  5.000   73.023 0.131604    
-## s(yday):subsectionFSypes Canyon                       1.217e-05  5.000    0.000 0.472541    
-## s(yday):subsectionFTruman Gulch                       3.956e+00  5.000  464.666 0.343191    
-## s(yday):subsectionFBridger Ridge - All                4.381e+00  8.000   10.902 1.17e-06 ***
-## s(subsectionF)                                        1.002e+01 20.000   15.380  < 2e-16 ***
-## s(month)                                              4.373e+00  5.000   71.173  < 2e-16 ***
-## s(wday)                                               4.976e+00  5.000  640.355  < 2e-16 ***
-## s(daily_aqi_value)                                    8.811e+00  8.811   95.782  < 2e-16 ***
-## s(temp_max_f)                                         6.319e+00  6.319   76.676  < 2e-16 ***
-## s(precipitation_in)                                   3.756e+00  3.756   26.773  < 2e-16 ***
-## s(totallength_miles)                                  1.000e+00  1.000    0.133 0.715645    
+##                                                             edf Ref.df       F p-value    
+## s(yday)                                               6.179e+00  8.000  67.359  <2e-16 ***
+## s(yday):subsectionFBenchmark Rd                       1.249e+00  5.000   8.228  0.4373    
+## s(yday):subsectionFCarroll Creek                      1.374e+00  6.000   4.994  0.0839 .  
+## s(yday):subsectionFCollege M                          3.965e+00  6.000 224.823  0.2238    
+## s(yday):subsectionFCollege M to Sypes                 1.503e+00  5.000  10.626  0.0621 .  
+## s(yday):subsectionFEast Bridger North                 7.933e-07  6.000   0.000  0.2510    
+## s(yday):subsectionFEast Bridger South                 2.187e+00  6.000  41.294  0.1806    
+## s(yday):subsectionFFairy Creek                        1.672e+00  5.000  12.764  0.0517 .  
+## s(yday):subsectionFHorsethief Mountain                6.294e-01  6.000   0.312  0.1431    
+## s(yday):subsectionFJohnson Canyon Jeep Trail          1.254e+00  5.000   4.180  0.1794    
+## s(yday):subsectionFLower                              1.861e+00  5.000 137.280  0.0393 *  
+## s(yday):subsectionFLower Shafthouse                   2.291e+00  7.000 163.110  <2e-16 ***
+## s(yday):subsectionFM to Baldy                         4.578e+00  5.000  29.481  0.1707    
+## s(yday):subsectionFMiddle Cottonwood                  3.273e+00  6.000  81.202  0.1582    
+## s(yday):subsectionFNorth Cottonwood Access            4.256e+00  5.000 179.657  0.3088    
+## s(yday):subsectionFNorth Cottonwood to Johnson Canyon 4.035e+00  6.000  70.151  0.1647    
+## s(yday):subsectionFRaptor View                        3.888e+00  6.000  72.587  0.6296    
+## s(yday):subsectionFRoss Pass                          2.341e+00  6.000 454.205  0.0035 ** 
+## s(yday):subsectionFSacagawea Pass                     7.882e+00  8.000 709.841  <2e-16 ***
+## s(yday):subsectionFSteep Way                          4.832e+00  5.000  25.315  0.2857    
+## s(yday):subsectionFSypes Canyon                       4.675e-08  8.000   0.000  0.6773    
+## s(yday):subsectionFTruman Gulch                       3.955e+00  5.000 232.282  0.4381    
+## s(yday):subsectionFUpper                              6.079e+00  8.000 136.676  <2e-16 ***
+## s(yday):subsectionFBridger Ridge - All                5.678e+00  8.000  57.735  <2e-16 ***
+## s(subsectionF)                                        1.053e+01 22.000   9.278  <2e-16 ***
+## s(month)                                              4.391e+00  5.000  75.444  <2e-16 ***
+## s(wday)                                               4.975e+00  5.000 607.048  <2e-16 ***
+## s(daily_aqi_value)                                    8.800e+00  8.800  94.991  <2e-16 ***
+## s(temp_max_f)                                         6.330e+00  6.330  73.069  <2e-16 ***
+## s(precipitation_in)                                   3.641e+00  3.641  28.530  <2e-16 ***
+## s(totallength_miles)                                  1.000e+00  1.000   0.733  0.3922    
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
-## R-sq.(adj) =  0.854   
-##   Scale est. = 1         n = 1064
+## R-sq.(adj) =  0.851   
+##   Scale est. = 1         n = 1113
 \end{verbatim}
 
-Figure \ref{fig:modelGI-draw} shows a subsample of the group-specific smoothers from this model. Some trail subsections (e.g., East Bridger South) have very similar shapes to the global smoother. Others do differ from this trend with lower trail use earlier in the year and higher in later times (e.g., College M) or a mix of variations from the global trend (e.g., Corbly Gulch, Sacagawea Pass, Steep Way).
+Figure \ref{fig:modelGI-draw} shows a subsample of the group-specific smoothers from this model. Some trail subsections (e.g., East Bridger South) have very similar shapes to the global smoother. Others do differ from this trend with lower trail use earlier in the year and higher in later times (e.g., College M) or a mix of variations from the global trend (e.g., Bridger Ridge - All, Sacagawea Pass, Steep Way).
 
 \begin{figure}
 
@@ -2131,7 +2140,7 @@ Up until this point we have looked at predictions for in-sample data. Effectivel
 \hypertarget{in-sample-trail-use-predictions}{%
 \subsection{In-Sample Trail Use Predictions}\label{in-sample-trail-use-predictions}}
 
-Figures \ref{fig:high-compare-pred} and \ref{fig:low-compare-pred} both show predicted trail use for the best model within each G, GS, and GI for the entire year of 2021. Observed trail use counts are plotted (colored by day of week). Both Models GS and GI show improvement over Model G, which is to be expected due to increase variability between trail subsections. Some trail subsections (e.g.~Steep Way) still show unreasonably high predictions (and large error ribbons), however trails with a longer duration of observations (e.g.~Baldy to Bridger) show improvement. Several model specification choices have improved these predictions over past iterations of models (not shown). For example, the use of cyclic cubic splines for time predictor variables (\texttt{bs=\ "cc"}) allows information from winter observations late in the year to inform predictions for early in the year. Also, restricting the number of knots for \texttt{precipitation\_in} (now \(k=5\) when before it was allowed to default to \(k=10\)) has removed some odd jumps in predictions on days with high precipitation. One notable difficulty for these models across all trails is the ability to predict higher than typical trail use days.
+Figures \ref{fig:high-compare-pred2} and \ref{fig:low-compare-pred2} both show predicted trail use for the best model within each G, GS, and GI for the entire year of 2021. Observed trail use counts are plotted (colored by day of week). Both Models GS and GI show improvement over Model G, which is to be expected due to increase variability between trail subsections. Some trail subsections (e.g.~Steep Way) still show unreasonably high predictions (and large error ribbons), however trails with a longer duration of observations (e.g.~Baldy to Bridger) show improvement. Several model specification choices have improved these predictions over past iterations of models (not shown). For example, the use of cyclic cubic splines for time predictor variables (\texttt{bs=\ "cc"}) allows information from winter observations late in the year to inform predictions for early in the year. Also, restricting the number of knots for \texttt{precipitation\_in} (now \(k=5\) when before it was allowed to default to \(k=10\)) has removed some odd jumps in predictions on days with high precipitation. One notable difficulty for these models across all trails is the ability to predict higher than typical trail use days.
 
 \begin{figure}
 
@@ -2139,7 +2148,7 @@ Figures \ref{fig:high-compare-pred} and \ref{fig:low-compare-pred} both show pre
 
 }
 
-\caption{Predicted trail use count values (lines) versus observed trail use (points) for each high-use trail subsection over an entire year, based on each model (\emph{G}, \emph{GS}, and \emph{GI}). Observed trip counts (data points) are colored by day of the week and show the higher use on weekends. }\label{fig:high-compare-pred}
+\caption{Predicted trail use count values (lines) versus observed trail use (points) for each high-use trail subsection over an entire year, based on each model (\emph{G}, \emph{GS}, and \emph{GI}). Observed trip counts (data points) are colored by day of the week and show the higher use on weekends. }\label{fig:high-compare-pred2}
 \end{figure}
 
 \begin{figure}
@@ -2148,7 +2157,7 @@ Figures \ref{fig:high-compare-pred} and \ref{fig:low-compare-pred} both show pre
 
 }
 
-\caption{Predicted trail use count values (lines) versus observed trail use (points) for each low-use trail subsection, based on each model (\emph{G}, \emph{GS}, and \emph{GI}).}\label{fig:low-compare-pred}
+\caption{Predicted trail use count values (lines) versus observed trail use (points) for each low-use trail subsection, based on each model (\emph{G}, \emph{GS}, and \emph{GI}).}\label{fig:low-compare-pred2}
 \end{figure}
 
 \hypertarget{single-trail-vs-all-trail-model-predictions}{%
@@ -2158,7 +2167,7 @@ In Section \ref{MidCot}, we conduced a GAM analysis using only the Middle Cotton
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/compareMC-1} 
+{\centering \includegraphics[width=1\linewidth]{../figures/MC_data_used} 
 
 }
 
@@ -2172,7 +2181,7 @@ Figure \ref{fig:predict-newtrails} shows predictions from the top model within e
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/predict-newtrails-1} 
+{\centering \includegraphics[width=1\linewidth]{../figures/NewTrails_compare} 
 
 }
 
@@ -2206,9 +2215,9 @@ Comparing models based on AIC is a robust approach to comparing the different mo
 \toprule
 Model & df & AIC & deltaAIC\\
 \midrule
-gamm\_modG\_ARMA\$lme & 19 & 27502 & 0\\
-gamm\_modGS\$lme & 16 & 101696 & 74194\\
-gamm\_modGI\$lme & 36 & 104253 & 76750\\
+gamm\_modG\_ARMA\$lme & 19 & 25518 & 0\\
+gamm\_modGS\$lme & 16 & 104589 & 79071\\
+gamm\_modGI\$lme & 38 & 111381 & 85863\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -2227,31 +2236,33 @@ Table \ref{tab:deviance-kable} shows that both models GS and GI are better at pr
 \cmidrule(l{3pt}r{3pt}){2-4}
 subsectionF & Intercept only & Model G & Model GS & Model GI\\
 \midrule
-Benchmark Rd & 287 & 218 & 108 & 126\\
-Carroll Creek & 852 & 576 & 509 & 551\\
-College M & 886 & 403 & 301 & 296\\
-College M to Sypes & 280 & 167 & 127 & 155\\
-Corbly Gulch & 6241 & 5034 & 743 & 740\\
+Benchmark Rd & 287 & 203 & 106 & 122\\
+Carroll Creek & 852 & 582 & 514 & 552\\
+College M & 886 & 442 & 322 & 314\\
+College M to Sypes & 280 & 165 & 126 & 155\\
+East Bridger North & 449 & 547 & 493 & 491\\
 \addlinespace
-East Bridger North & 449 & 481 & 432 & 432\\
-East Bridger South & 322 & 333 & 297 & 315\\
-Fairy Creek & 130 & 184 & 140 & 151\\
-Horsethief Mountain & 1161 & 1198 & 1121 & 1172\\
-Johnson Canyon Jeep Trail & 527 & 298 & 271 & 274\\
+East Bridger South & 322 & 340 & 300 & 318\\
+Fairy Creek & 130 & 188 & 139 & 150\\
+Horsethief Mountain & 1161 & 1187 & 1120 & 1165\\
+Johnson Canyon Jeep Trail & 527 & 300 & 273 & 275\\
+Lower & 382 & 345 & 308 & 318\\
 \addlinespace
-Lower Shafthouse & 600 & 679 & 472 & 474\\
-Middle Cottonwood & 1396 & 948 & 636 & 649\\
-North Cottonwood Access & 807 & 318 & 277 & 279\\
-North Cottonwood to Johnson Canyon & 615 & 624 & 379 & 381\\
-Raptor View & 232 & 249 & 163 & 159\\
+Lower Shafthouse & 600 & 716 & 475 & 483\\
+M to Baldy & 1674 & 239 & 168 & 164\\
+Middle Cottonwood & 1396 & 1090 & 651 & 664\\
+North Cottonwood Access & 807 & 324 & 284 & 284\\
+North Cottonwood to Johnson Canyon & 615 & 628 & 378 & 379\\
 \addlinespace
-Ross Pass & 535 & 287 & 208 & 209\\
-Sacagawea Pass & 29194 & 7825 & 4360 & 4355\\
-Steep Way & 748 & 686 & 661 & 672\\
-Sypes Canyon & 744 & 242 & 206 & 220\\
-Truman Gulch & 300 & 327 & 187 & 185\\
+Raptor View & 232 & 239 & 161 & 157\\
+Ross Pass & 535 & 282 & 212 & 212\\
+Sacagawea Pass & 29194 & 7143 & 4357 & 4353\\
+Steep Way & 748 & 675 & 628 & 640\\
+Sypes Canyon & 744 & 263 & 211 & 228\\
 \addlinespace
-Bridger Ridge - All & 8694 & 2328 & 1683 & 1680\\
+Truman Gulch & 300 & 325 & 188 & 186\\
+Upper & 520 & 384 & 302 & 307\\
+Bridger Ridge - All & 5931 & 2534 & 2004 & 2006\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -2278,6 +2289,8 @@ With this in mind, we provide the following recommendations for future observati
   If spatiotemporal correlation structure is available for future analysis then it would be helpful to consider the spatial network node/edge designations in tandem with camera placement.
 \end{enumerate}
 
+Predictions (including point estimate, standard error, and upper/lower confidence interval ranges) for models G, GS, and GI for all in-sample trail for the entire year of 2021 are available in a .csv file at \texttt{HE-TrailUse-R/output/predictions/predict\_ModelG\_GS\_GI.csv}. It is recommended that the results for model GI be used for the current analysis predictions.
+
 \hypertarget{TradeOff}{%
 \chapter{Trade-Offs in Prediction Accuracy}\label{TradeOff}}
 
@@ -2302,8 +2315,8 @@ We use deviance as our chosen metric for assessing predictive accuracy. We looke
 \cmidrule(l{3pt}r{3pt}){2-4}
 highlow & Intercept.only & Model.G & Model.GS & Model.GI\\
 \midrule
-high & 91.56 & 27.32 & 17.25 & 17.3\\
-low & 21.90 & 18.02 & 8.92 & 9.2\\
+high & 82.80 & 25.28 & 17.02 & 17.08\\
+low & 12.84 & 10.84 & 8.64 & 8.91\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -2313,9 +2326,6 @@ low & 21.90 & 18.02 & 8.92 & 9.2\\
 
 We also want to investigate how prediction accuracy differs in areas of varying trail use. Of primary concern is do motorized trails differ in important ways from non-motorized trails?. The concern is that the lack of Strava use by motorized trail recreational users would affect the predictive ability of our model(s), however this effect is hard to parse out from overall trail use.
 
-\hypertarget{motor-vehicle-use}{%
-\subsection{Motor Vehicle Use}\label{motor-vehicle-use}}
-
 \begin{table}
 \centering
 \begin{tabular}{lrrrr}
@@ -2324,9 +2334,9 @@ We also want to investigate how prediction accuracy differs in areas of varying 
 \cmidrule(l{3pt}r{3pt}){2-4}
 Motor Vehicle Use & Intercept Only & Model G & Model GS & Model GI\\
 \midrule
-Dirt Bikes (seasonal) & 30.81 & 23.99 & 6.45 & 6.48\\
-Non-Motorized & 66.47 & 23.08 & 15.57 & 15.74\\
-Wheeled OHV 50" or < & 15.48 & 11.01 & 8.87 & 9.50\\
+Dirt Bikes (seasonal) & 10.84 & 8.39 & 5.75 & 5.84\\
+Non-Motorized & 61.64 & 21.81 & 15.57 & 15.73\\
+Wheeled OHV 50" or < & 15.48 & 10.97 & 8.91 & 9.47\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -2350,7 +2360,7 @@ For both models GS and GI we are able to examine the trail-specific deviations f
 \caption{Group-specific deviations from the global function (s(yday,subsectionF)) for Model GS.}\label{fig:GS-globaldeviations}
 \end{figure}
 
-Figure \ref{fig:GI-globaldeviations} shows the group-specific smoothers from model GI. Note that these deviations are often most intense in temporal regions beyond the counter observation deployment period (see the ``rug'' tick marks at the bottom of each plot for data availability). This reinforces that increased data temporal coverage is needed to improve our understanding of inter-trail variability.
+Figures \ref{fig:GI-globaldeviations1}, \ref{fig:GI-globaldeviations2}, and \ref{fig:GI-globaldeviations3} show the group-specific smoothers from model GI. Note that these deviations are often most intense in temporal regions beyond the counter observation deployment period (see the ``rug'' tick marks at the bottom of each plot for data availability). This reinforces that increased data temporal coverage is needed to improve our understanding of inter-trail variability.
 
 The trail subsections that most align with the global smoother (differing only in intercept) are:
 
@@ -2384,27 +2394,29 @@ Some of these highly different trails are known to be high-use trails (e.g.~Coll
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations-1} 
+{\centering \includegraphics[width=1\linewidth]{Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations1-1} 
 
 }
 
-\caption{Functional relationships for the trail use data estimated for model GI. s(<single term>): the global smoothers; subsectionF: trail-specific random effect intercepts. The remaining plots are the trail-specific smoothers, indicating how the functional response of that trail differs from the global smoother.}\label{fig:GI-globaldeviations-1}
+\caption{Functional relationships for the trail use data estimated for model GI. s(yday): the global smoothers; subsectionF: trail-specific random effect intercepts. The remaining plots are the trail-specific smoothers, indicating how the functional response of that trail differs from the global smoother.}\label{fig:GI-globaldeviations1}
 \end{figure}
+
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations-2} 
+{\centering \includegraphics[width=1\linewidth]{Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations2-1} 
 
 }
 
-\caption{Functional relationships for the trail use data estimated for model GI. s(<single term>): the global smoothers; subsectionF: trail-specific random effect intercepts. The remaining plots are the trail-specific smoothers, indicating how the functional response of that trail differs from the global smoother.}\label{fig:GI-globaldeviations-2}
+\caption{Functional relationships for the trail use data estimated for model GI. s(yday): the global smoothers; subsectionF: trail-specific random effect intercepts. The remaining plots are the trail-specific smoothers, indicating how the functional response of that trail differs from the global smoother.}\label{fig:GI-globaldeviations2}
 \end{figure}
+
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations-3} 
+{\centering \includegraphics[width=1\linewidth]{Statistical-Analysis--Prediction-of-Trail-Use-in-Bridger-Mountains_files/figure-latex/GI-globaldeviations3-1} 
 
 }
 
-\caption{Functional relationships for the trail use data estimated for model GI. s(<single term>): the global smoothers; subsectionF: trail-specific random effect intercepts. The remaining plots are the trail-specific smoothers, indicating how the functional response of that trail differs from the global smoother.}\label{fig:GI-globaldeviations-3}
+\caption{Functional relationships for the trail use data estimated for model GI. s(yday): the global smoothers; subsectionF: trail-specific random effect intercepts. The remaining plots are the trail-specific smoothers, indicating how the functional response of that trail differs from the global smoother.}\label{fig:GI-globaldeviations3}
 \end{figure}
 
 \cleardoublepage
@@ -2505,10 +2517,14 @@ Another consideration is how to include AllTrails search data in our GAM framewo
 We compared models using \texttt{anova} and the model with both the AllTrails search view counts as a 3 day moving average and the Strava trip counts had the lowest AIC.
 
 \begin{verbatim}
-##                                   Model df       AIC       BIC    logLik   Test   L.Ratio p-value
-## gamm_modGI_AR1_searchOnly_raw$lme     1 27   20374.5   20491.9  -10160.3                         
-## gamm_modGI_AR1_Both_MA3$lme           2 28    7844.2    7965.9   -3894.1 1 vs 2   12532.3  <.0001
-## gamm_modGI_AR1_StravaOnly$lme         3 27 1157492.0 1157609.4 -578719.0 2 vs 3 1149649.8  <.0001
+##                                   Model df       AIC       BIC    logLik   Test   L.Ratio
+## gamm_modGI_AR1_searchOnly_raw$lme     1 27   20374.5   20491.9  -10160.3                 
+## gamm_modGI_AR1_Both_MA3$lme           2 28    7844.2    7965.9   -3894.1 1 vs 2   12532.3
+## gamm_modGI_AR1_StravaOnly$lme         3 27 1157492.0 1157609.4 -578719.0 2 vs 3 1149649.8
+##                                   p-value
+## gamm_modGI_AR1_searchOnly_raw$lme        
+## gamm_modGI_AR1_Both_MA3$lme        <.0001
+## gamm_modGI_AR1_StravaOnly$lme      <.0001
 \end{verbatim}
 
 A look at deviance in these model predictions (Table \ref{tab:ATdeviance-kable}) shows a lot of variation between trails for the lowest amount of deviance.
@@ -2524,14 +2540,14 @@ A look at deviance in these model predictions (Table \ref{tab:ATdeviance-kable})
 subsectionF & Model GI-AT-Raw & Model GI-Both-MA3 & Model GI-Strava\\
 \midrule
 College M & 210 & 254 & 303\\
-Corbly Gulch & 755 & 726 & 725\\
 Fairy Creek & 137 & 144 & 142\\
+M to Baldy & NA & NA & NA\\
 Middle Cottonwood & 629 & 535 & 598\\
 Raptor View & 197 & 158 & 150\\
 \addlinespace
 Ross Pass & 215 & 270 & 229\\
 Sacagawea Pass & 3487 & 3647 & 4317\\
-Steep Way & 981 & 642 & 603\\
+Steep Way & 981 & 694 & 603\\
 Sypes Canyon & 248 & 184 & 200\\
 Truman Gulch & 173 & 218 & 178\\
 \bottomrule
@@ -2633,26 +2649,26 @@ The summary output for this \texttt{gamm} object shows an adjusted R-sq of 0.57.
 ## 
 ## Parametric coefficients:
 ##                    Estimate Std. Error t value Pr(>|t|)    
-## (Intercept)       3.2894629  0.0260725 126.166   <2e-16 ***
-## total_traveltime -0.0059534  0.0006829  -8.718   <2e-16 ***
-## max.count         0.0144813  0.0001973  73.386   <2e-16 ***
+## (Intercept)       3.6433249  0.0271549  134.17   <2e-16 ***
+## total_traveltime -0.0112558  0.0007418  -15.17   <2e-16 ***
+## max.count         0.0153111  0.0002075   73.77   <2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## Approximate significance of smooth terms:
 ##                        edf Ref.df       F p-value    
-## s(yday)              7.853  8.000  258.48  <2e-16 ***
-## s(month)             5.902  5.902   60.26  <2e-16 ***
-## s(wday)              4.984  5.000  846.90  <2e-16 ***
-## s(daily_aqi_value)   8.756  8.756  132.25  <2e-16 ***
-## s(temp_max_f)        8.202  8.202   93.62  <2e-16 ***
-## s(precipitation_in)  3.250  3.250   13.48  <2e-16 ***
-## s(totallength_miles) 8.961  8.961 1225.58  <2e-16 ***
+## s(yday)              7.806  8.000  218.91  <2e-16 ***
+## s(month)             5.893  5.893   48.57  <2e-16 ***
+## s(wday)              4.984  5.000  790.70  <2e-16 ***
+## s(daily_aqi_value)   8.785  8.785  120.00  <2e-16 ***
+## s(temp_max_f)        8.535  8.535   87.96  <2e-16 ***
+## s(precipitation_in)  3.709  3.709   12.53  <2e-16 ***
+## s(totallength_miles) 8.964  8.964 1071.36  <2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
-## R-sq.(adj) =   0.57   
-##   Scale est. = 1         n = 1727
+## R-sq.(adj) =  0.616   
+##   Scale est. = 1         n = 1369
 \end{verbatim}
 
 A look at plots (see Figures \ref{fig:tsDiag} and \ref{fig:mod-acfpacf}) that provide insight into the presence of temporal dependence remaining after the model is fit shows a high degree of temporal autocorrelation.

@@ -177,8 +177,6 @@ knitr::kable(test_summary_highlow,
 
 We also want to investigate how prediction accuracy differs in areas of varying trail use. Of primary concern is do motorized trails differ in important ways from non-motorized trails?. The concern is that the lack of Strava use by motorized trail recreational users would affect the predictive ability of our model(s), however this effect is hard to parse out from overall trail use. 
 
-### Motor Vehicle Use
-
 ```{r deviance_motorized, eval = T, echo=FALSE, message=FALSE}
 test_summary_motorized =  bind_cols(allTrail, mod0.pred,
                           modG.pred, modGS.pred, 
@@ -307,7 +305,6 @@ knitr::kable(test_summary_motorized,
 <!-- ``` -->
 
  
-
 ## An analysis of the change in predictive accuracy as the number of trail counters used changes.
 
 The GAMM model applied does not allow for multiple measures per unit time. In an ideal world trail counters would be deployed at as many different trails for as long as possible. Longer deployment times would help to model season and annual trends. It is possible that with more temporal data coverage we could use simpler models (i.e. a gam or gamm approach without the need for temporal autocorrelation structure) that would save on computation time).
@@ -324,7 +321,7 @@ load(file=here("output/models/allT_subsection_gamm_GS.rda"))
 gratia::draw(gamm_modGS, select = 2)
 
 ```
-Figure \@ref(fig:GI-globaldeviations) shows the group-specific smoothers from model GI. Note that these deviations are often most intense in temporal regions beyond the counter observation deployment period (see the "rug" tick marks at the bottom of each plot for data availability). This reinforces that increased data temporal coverage is needed to improve our understanding of inter-trail variability. 
+Figures \@ref(fig:GI-globaldeviations1), \@ref(fig:GI-globaldeviations2), and \@ref(fig:GI-globaldeviations3) show the group-specific smoothers from model GI. Note that these deviations are often most intense in temporal regions beyond the counter observation deployment period (see the "rug" tick marks at the bottom of each plot for data availability). This reinforces that increased data temporal coverage is needed to improve our understanding of inter-trail variability. 
 
 The trail subsections that most align with the global smoother (differing only in intercept) are:
 
@@ -342,15 +339,36 @@ The trail subsections that differ the most from the global smoother are:
 
 Some of these highly different trails are known to be high-use trails (e.g. College M, Sacagawea Pass, Steep Way). 
 
-```{r GI-globaldeviations, eval = T, fig.align='center', out.width="100%", fig.cap="Functional relationships for the trail use data estimated for model GI. s(<single term>): the global smoothers; subsectionF: trail-specific random effect intercepts. The remaining plots are the trail-specific smoothers, indicating how the functional response of that trail differs from the global smoother."}
+```{r GI-globaldeviations1, eval = T, fig.height = 13, fig.width= 10, fig.align='center', out.width="100%", fig.cap="Functional relationships for the trail use data estimated for model GI. s(yday): the global smoothers; subsectionF: trail-specific random effect intercepts. The remaining plots are the trail-specific smoothers, indicating how the functional response of that trail differs from the global smoother."}
 load(file=here("output/models/allT_subsection_gamm_GI.rda"))
   
-  gratia::draw(gamm_modGI, select = c(1:12))
-  gratia::draw(gamm_modGI, select = c(13:24))
-    gratia::draw(gamm_modGI, select = c(25:29))
+  gratia::draw(gamm_modGI, select = c(1:12), ncol = 3)
+  # gratia::draw(gamm_modGI, select = c(13:24), ncol = 3)
+    # gratia::draw(gamm_modGI, select = c(25:29), ncol = 3)
 
 
 
+
+```
+
+```{r GI-globaldeviations2, eval = T, fig.height = 13, fig.width= 10, fig.align='center', out.width="100%", fig.cap="Functional relationships for the trail use data estimated for model GI. s(yday): the global smoothers; subsectionF: trail-specific random effect intercepts. The remaining plots are the trail-specific smoothers, indicating how the functional response of that trail differs from the global smoother."}
+# load(file=here("output/models/allT_subsection_gamm_GI.rda"))
+  
+  # gratia::draw(gamm_modGI, select = c(1:12), ncol = 3)
+  gratia::draw(gamm_modGI, select = c(13:24), ncol = 3)
+    # gratia::draw(gamm_modGI, select = c(25:29), ncol = 3)
+
+
+
+
+```
+
+```{r GI-globaldeviations3, eval = T, fig.height = 13, fig.width= 10, fig.align='center', out.width="100%", fig.cap="Functional relationships for the trail use data estimated for model GI. s(yday): the global smoothers; subsectionF: trail-specific random effect intercepts. The remaining plots are the trail-specific smoothers, indicating how the functional response of that trail differs from the global smoother."}
+# load(file=here("output/models/allT_subsection_gamm_GI.rda"))
+  
+  # gratia::draw(gamm_modGI, select = c(1:12), ncol = 3)
+  # gratia::draw(gamm_modGI, select = c(13:24), ncol = 3)
+    gratia::draw(gamm_modGI, select = c(25:29), ncol = 3)
 
 ```
 

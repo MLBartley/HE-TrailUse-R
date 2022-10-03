@@ -180,6 +180,8 @@ compare_NWG <- ggplot(mapping = aes(x = yday, y = max.camera)) +
     scale_fill_OkabeIto(name = "Model") +
     # coord_cartesian(xlim = c(0, 365), ylim = c(0, 1000)) +
     labs(title = "New World Gulch",
+         y = "Trail Use Counts",
+         x = "Day of Year",
          subtitle = "How well do predictions compare with hold out data")
 
 ggsave(filename = here::here("output/figures/NWG_insample_pred_compare.png"),
