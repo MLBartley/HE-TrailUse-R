@@ -16,6 +16,7 @@
 ##   - Data updated (New World Gulch observations) on September 8, 2022
 ##   - Data updated (NWG trail characteristics) on September 22, 2022
 ##   - Data updated (Strava subsection delineation) on September 30, 2022
+##   - Code updated to allow for split Sypes Canyon subsectins on January 24th, 2023 (commented out)
 ## ---------------------------
 
 # load packages -----------------------------------------------------------
@@ -34,6 +35,7 @@ library(sf) #useful for spatial data
 
 # load strava data
 strava_day <- readxl::read_excel(here("data/raw/strava_day.xlsx"))
+# load(here("data/processed/strava_day_updated.Rdata"))
 strava_month <- readxl::read_excel(here("data/raw/strava_month.xlsx"))
 strava_year <- readxl::read_excel(here("data/raw/strava_year.xlsx"))
 
@@ -310,7 +312,7 @@ nrows <- dim(tmp)[1]
 
 names_repeated <- tmp[rep(1:nrows, 365), ]
 
-allStrava_fixzeros <- as.data.frame(cbind(rep(1:365, nrows), 
+allStrava_fixzeros <- as.data.frame(cbind(rep(1:365, each = nrows), 
                                       names_repeated))
 colnames(allStrava_fixzeros) <- c("yday", "subsectionname", 
                                   "trailname", "trailnumber")
@@ -356,7 +358,8 @@ allTrailChar <- trail_char %>%
   dplyr::left_join(trail_spatial_summary[, c("ID", 
                                              # "length_mi", #removing this so we don't have repeat entries, but might be useful later
                                              "totallength_miles")], 
-                   by = c("trailnumber" = "ID" ))
+                   by = c("trailnumber" = "ID" )) %>% 
+  distinct()
 
 allTrailChar[is.na(allTrailChar$subsectionname),
           'subsectionname' ] <- allTrailChar[is.na(allTrailChar$subsectionname), 
@@ -366,6 +369,13 @@ allTrailChar[is.na(allTrailChar$subsectionname),
 allTrailChar[nrow(allTrailChar) + 1, ] <- allTrailChar %>% filter(trailname == "Corbly Gulch")
 
 allTrailChar[which(allTrailChar$trailname == "Corbly Gulch"), "subsectionname"] <- c("Upper", "Lower")
+
+
+## duplicate "Sypes Canyon" for each subsection ("Lower", "Upper")
+# allTrailChar[nrow(allTrailChar) + 1, ] <- allTrailChar %>% filter(trailname == "Sypes Canyon")
+# 
+# allTrailChar[which(allTrailChar$trailname == "Sypes Canyon"), "subsectionname"] <- c("Upper Sypes", "Lower Sypes")
+
 
 #### Combine Camera Counts, Strava Counts, Weather, Trail Characteristics ####
 
@@ -827,4 +837,14 @@ write.csv(checkCountvsStrava,
           file = here("data/processed/checkCountvsStrava.csv"), 
           row.names = FALSE)
 
+#save dataframe of out-of-sample trail data
+save(predict.New, 
+     file = here("data/processed/predictNew.Rdata"))
 
+#save AllData as .Rdata
+save(allData,
+     file = here("data/processed/allData.Rdata"))
+
+# 
+# save(allData,
+# file = here("data/processed/allData_updated.Rdata"))
