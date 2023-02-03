@@ -32,7 +32,7 @@ library(tidyverse)
 newtrail_names <- readxl::read_excel(here("data/raw/follow-up/Missing_Trail_Segments.xlsx"))
 newtrail_spatial <- sf::st_read(dsn = here("data/raw/follow-up/Missing_Trails/"))
 
-##load other out-of-sample data frame
+##load other out-of-sample data frame 
 
 load(here("data/processed/predictNew.Rdata"))
 
@@ -60,10 +60,10 @@ newtrail_spatial$subsectionname[5] <- "Upper Sypes"
 
 # ## correct North Cottonwood Access nameing
 # newtrail_spatial$trailname[4] <- "North Cottonwood Access"
-# newtrail_spatial$subsectionname[4] <- "North Cottonwood Access"
+newtrail_spatial$subsectionname[4] <- "North Cottonwood to Ridge"
 
 ## remove North Cottonwood Access - already in original model
-newtrail_spatial <- newtrail_spatial[-4, ]
+# newtrail_spatial <- newtrail_spatial[-4, ]
 
 ## updated strava_data file to split Sypes Canyon into upper and lower
 ## edge_ids are copy/pasted from "raw/follow-up/Trailhead_Strava_Crosswalk.xlsx"
